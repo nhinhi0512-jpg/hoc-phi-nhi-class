@@ -2,125 +2,595 @@
 <html lang="vi">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Quản lý học phí</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>Quản lý học phí - Pastel Trầm</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.0.0/tabler-icons.min.css" />
 <style>
-*{box-sizing:border-box;margin:0;padding:0}
-:root{
-  --bg:#ffffff;--bg2:#f5f5f4;--bg3:#eeece8;
-  --text:#1a1a1a;--text2:#6b7280;--text3:#9ca3af;
-  --border:rgba(0,0,0,0.12);--border2:rgba(0,0,0,0.2);
-  --radius:8px;--radius-lg:12px;
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
-@media(prefers-color-scheme:dark){
-  :root{
-    --bg:#1c1c1b;--bg2:#252524;--bg3:#2e2e2c;
-    --text:#f0ede8;--text2:#a8a49e;--text3:#6b6760;
-    --border:rgba(255,255,255,0.1);--border2:rgba(255,255,255,0.2);
+
+:root {
+  --bg: #fff5f0;           /* nền trắng hồng nhẹ */
+  --bg2: #ffe6de;          /* hồng phấn đậm hơn */
+  --bg3: #fcd9cf;          /* nền bao ngoài trầm ấm */
+  --text: #3d2a24;         /* nâu đậm, tăng độ tương phản */
+  --text2: #8f5e4e;        /* nâu hồng trung bình */
+  --text3: #b2806c;
+  --border: rgba(173, 104, 82, 0.35);
+  --border2: rgba(150, 85, 65, 0.5);
+  --radius: 12px;
+  --radius-lg: 20px;
+  --accent: #d97a64;       /* hồng đất - đậm hơn */
+  --accent-dark: #bc5f48;
+  --accent-light: #f5bcae;
+  --paid-bg: #bddbcc;
+  --paid-text: #1f543b;
+  --paid-bg-dark: #2f6247;
+  --unpaid-bg: #f9cfc9;
+  --unpaid-text: #b14533;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #2e2420;
+    --bg2: #422f29;
+    --bg3: #241b17;
+    --text: #f5e2da;
+    --text2: #ccaa9c;
+    --text3: #a68474;
+    --border: rgba(205, 135, 110, 0.3);
+    --border2: rgba(215, 145, 120, 0.5);
+    --accent: #cf7a63;
+    --accent-dark: #b55d46;
+    --accent-light: #a75d48;
+    --paid-bg: #2d5641;
+    --paid-text: #c6f0df;
+    --unpaid-bg: #693d34;
+    --unpaid-text: #f3bcae;
   }
 }
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg3);color:var(--text);min-height:100vh;font-size:16px}
-.container{max-width:760px;margin:0 auto;padding:1.5rem 1rem}
-h1{font-size:26px;font-weight:500;margin-bottom:1.25rem}
-.section{background:var(--bg);border:0.5px solid var(--border);border-radius:var(--radius-lg);padding:1.25rem 1.5rem;margin-bottom:1rem}
-.sec-title{font-size:13px;font-weight:500;color:var(--text2);margin-bottom:14px;text-transform:uppercase;letter-spacing:.06em}
-.field{display:flex;flex-direction:column;gap:4px;margin-bottom:10px}
-.field label{font-size:14px;color:var(--text2)}
-input,select{width:100%;padding:7px 10px;font-size:16px;border:0.5px solid var(--border2);border-radius:var(--radius);background:var(--bg);color:var(--text);outline:none;transition:border-color .15s}
-input:focus{border-color:#378ADD;box-shadow:0 0 0 2px rgba(55,138,221,0.15)}
-button{padding:9px 16px;font-size:15px;border:0.5px solid var(--border2);border-radius:var(--radius);background:var(--bg);color:var(--text);cursor:pointer;transition:background .15s,transform .1s;display:inline-flex;align-items:center;gap:5px}
-button:hover{background:var(--bg2)}
-button:active{transform:scale(0.98)}
-.btn-primary{background:var(--text);color:var(--bg);border-color:transparent;width:100%;justify-content:center}
-.btn-primary:hover{opacity:.85;background:var(--text)}
-.days-row{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 10px}
-.day-btn{padding:6px 14px;font-size:14px;border-radius:20px;border:0.5px solid var(--border2);background:var(--bg);color:var(--text2);cursor:pointer;transition:all .15s}
-.day-btn.active{background:#378ADD;color:#fff;border-color:#378ADD}
-.fee-row{display:flex;align-items:flex-end;gap:6px;margin-bottom:10px}
-.fee-row input{width:150px}
-.fee-unit{font-size:15px;color:var(--text2);padding-bottom:10px}
+
+body {
+  font-family: 'Segoe UI', 'Quicksand', system-ui, 'Inter', sans-serif;
+  background: var(--bg3);
+  color: var(--text);
+  min-height: 100vh;
+  font-size: 16px;
+}
+
+/* MỞ RỘNG MÀN HÌNH NGANG */
+.container {
+  max-width: 1360px;
+  width: 94%;
+  margin: 0 auto;
+  padding: 1.5rem 1.2rem;
+}
+
+h1 {
+  font-size: 28px;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--accent-dark);
+  letter-spacing: -0.2px;
+}
+
+.section {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 1.6rem 2rem;
+  margin-bottom: 1.8rem;
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.03);
+}
+
+.sec-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--accent-dark);
+  margin-bottom: 18px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 18px;
+}
+
+.field label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text2);
+}
+
+input, select {
+  width: 100%;
+  padding: 10px 14px;
+  font-size: 15px;
+  font-weight: 500;
+  border: 1.5px solid var(--border2);
+  border-radius: var(--radius);
+  background: var(--bg);
+  color: var(--text);
+  outline: none;
+  transition: all 0.2s;
+}
+
+input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(217, 122, 100, 0.25);
+}
+
+button {
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  border: 1.5px solid var(--border2);
+  border-radius: 40px;
+  background: var(--bg2);
+  color: var(--text);
+  cursor: pointer;
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+button:hover {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: white;
+  transform: translateY(-2px);
+}
+
+button:active {
+  transform: scale(0.97);
+}
+
+.btn-primary {
+  background: var(--accent);
+  color: white;
+  border-color: transparent;
+  width: 100%;
+  justify-content: center;
+  font-weight: 700;
+}
+
+.btn-primary:hover {
+  background: var(--accent-dark);
+  opacity: 0.95;
+}
+
+.days-row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin: 8px 0 12px;
+}
+
+.day-btn {
+  padding: 7px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: 40px;
+  border: 1.5px solid var(--border2);
+  background: var(--bg);
+  color: var(--text2);
+  transition: 0.2s;
+}
+
+.day-btn.active {
+  background: var(--accent);
+  color: white;
+  border-color: var(--accent);
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.fee-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.fee-row input {
+  width: 180px;
+}
 
 /* Student list */
-.student-list{display:flex;flex-direction:column;gap:6px}
-.student-row{background:var(--bg2);border-radius:var(--radius);overflow:hidden}
-.student-main{display:flex;align-items:center;gap:8px;padding:9px 10px;cursor:pointer;user-select:none}
-.student-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
-.student-name{font-weight:500;font-size:15px;flex:1}
-.student-schedule{font-size:14px;color:var(--text2)}
-.student-actions{display:flex;gap:4px}
-.act-btn{background:none;border:0.5px solid var(--border2);border-radius:var(--radius);color:var(--text);cursor:pointer;padding:5px 10px;font-size:13px;transition:all .15s;display:inline-flex;align-items:center;gap:4px}
-.act-btn i{font-size:14px}
-.act-btn:hover{background:var(--bg3)}
-.act-btn.del:hover{background:#E24B4A20;border-color:#E24B4A;color:#E24B4A}
-.act-btn.edit:hover{background:#378ADD20;border-color:#378ADD;color:#378ADD}
-.act-btn:active{transform:scale(0.95)}
+.student-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
 
-/* Edit panel */
-.edit-panel{border-top:0.5px solid var(--border);padding:12px;background:var(--bg);display:none}
-.edit-panel.open{display:block}
-.edit-panel .field{margin-bottom:8px}
-.edit-panel .field label{font-size:13px}
-.edit-btns{display:flex;gap:6px;margin-top:10px}
-.edit-btns button{flex:1;justify-content:center}
-.btn-save{background:var(--text);color:var(--bg);border-color:transparent}
-.btn-save:hover{opacity:.85;background:var(--text)}
-.btn-cancel{color:var(--text2)}
+.student-row {
+  background: var(--bg2);
+  border-radius: 20px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+
+.student-main {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 14px;
+  padding: 14px 18px;
+}
+
+.student-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+
+.student-name {
+  font-weight: 700;
+  font-size: 17px;
+  flex: 1;
+  min-width: 130px;
+  color: var(--text);
+}
+
+.student-schedule {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--accent-dark);
+  background: var(--bg);
+  padding: 5px 14px;
+  border-radius: 30px;
+}
+
+/* Badge thanh toán */
+.payment-badge {
+  font-size: 13px;
+  font-weight: 700;
+  padding: 5px 14px;
+  border-radius: 50px;
+  background: var(--unpaid-bg);
+  color: var(--unpaid-text);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: 0.15s;
+  border: 1px solid rgba(0,0,0,0.05);
+}
+
+.payment-badge.paid {
+  background: var(--paid-bg);
+  color: var(--paid-text);
+  font-weight: 700;
+}
+
+.payment-badge:hover {
+  filter: brightness(0.92);
+  transform: scale(0.97);
+}
+
+.student-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.act-btn {
+  background: var(--bg);
+  border: 1px solid var(--border2);
+  border-radius: 30px;
+  padding: 5px 14px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.act-btn.edit:hover {
+  background: var(--accent);
+  color: white;
+  border-color: var(--accent);
+}
+
+.act-btn.del:hover {
+  background: #e48f7a;
+  border-color: #e48f7a;
+  color: white;
+}
+
+.edit-panel {
+  border-top: 1.5px solid var(--border);
+  padding: 18px;
+  background: var(--bg);
+  display: none;
+}
+
+.edit-panel.open {
+  display: block;
+}
+
+.edit-btns {
+  display: flex;
+  gap: 14px;
+  margin-top: 18px;
+}
+
+.btn-save {
+  background: var(--accent);
+  color: white;
+  border: none;
+  font-weight: bold;
+}
+
+.btn-cancel {
+  background: var(--bg2);
+}
 
 /* Tabs */
-.tab-row{display:flex;gap:6px;margin-bottom:1rem;flex-wrap:wrap}
-.tab{padding:8px 18px;font-size:15px;border-radius:20px;border:0.5px solid var(--border2);background:var(--bg);color:var(--text2);cursor:pointer;display:inline-flex;align-items:center;gap:6px}
-.tab.active{background:var(--text);color:var(--bg);border-color:transparent}
+.tab-row {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+  border-bottom: 2px solid var(--border);
+  padding-bottom: 8px;
+}
+
+.tab {
+  background: transparent;
+  border: none;
+  padding: 10px 24px;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text2);
+  border-radius: 40px;
+  transition: all 0.2s;
+}
+
+.tab.active {
+  background: var(--accent);
+  color: white;
+  box-shadow: 0 2px 8px rgba(217, 122, 100, 0.3);
+}
 
 /* Calendar */
-.cal-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px}
-.cal-nav-center{display:flex;align-items:center;gap:8px}
-.month-title{font-size:17px;font-weight:500}
-.search-wrap{display:flex;gap:6px}
-.search-wrap input{width:140px}
-.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);border-left:0.5px solid var(--border);border-top:0.5px solid var(--border);margin-bottom:.75rem}
-.dh{text-align:center;font-size:13px;font-weight:500;color:var(--text2);padding:6px 0;background:var(--bg2);border-right:0.5px solid var(--border);border-bottom:0.5px solid var(--border)}
-.dc{min-height:80px;border-right:0.5px solid var(--border);border-bottom:0.5px solid var(--border);padding:4px;background:var(--bg)}
-.dc.empty{background:var(--bg2)}
-.dc.today .dn{background:#E24B4A;color:#fff;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center}
-.dn{font-size:13px;font-weight:500;color:var(--text2);margin-bottom:2px;width:22px;height:22px;display:flex;align-items:center;justify-content:center}
-.sp{font-size:12px;font-weight:500;border-radius:8px;padding:1px 5px;margin-bottom:1px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.legend{display:flex;gap:12px;flex-wrap:wrap;padding-bottom:4px}
-.legend-item{display:flex;align-items:center;gap:5px;font-size:14px}
-.legend-dot{width:10px;height:10px;border-radius:50%}
+.cal-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
 
-/* Report */
-.student-report{background:var(--bg2);border-radius:var(--radius);padding:12px;margin-bottom:8px}
-.rep-header{display:flex;align-items:center;gap:8px;margin-bottom:10px}
-.stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:6px}
-.stat-box{background:var(--bg);border-radius:var(--radius);padding:8px;text-align:center}
-.stat-label{font-size:13px;color:var(--text2)}
-.stat-val{font-size:19px;font-weight:500}
-.rep-days{font-size:13px;color:var(--text2)}
-.total-row{border-top:0.5px solid var(--border);padding-top:10px;display:flex;justify-content:space-between;align-items:center}
-.empty-state{text-align:center;padding:2rem;color:var(--text2);font-size:15px}
+.month-title {
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--accent-dark);
+}
+
+.search-wrap {
+  display: flex;
+  gap: 10px;
+}
+
+.search-wrap input {
+  width: 220px;
+}
+
+.cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  border-left: 1px solid var(--border);
+  border-top: 1px solid var(--border);
+  border-radius: 20px;
+  overflow: hidden;
+  margin-bottom: 1.2rem;
+  background: var(--bg);
+}
+
+.dh {
+  text-align: center;
+  font-weight: 800;
+  font-size: 14px;
+  color: var(--accent-dark);
+  padding: 14px 4px;
+  background: var(--bg2);
+  border-right: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+
+.dc {
+  min-height: 100px;
+  border-right: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  padding: 8px;
+  background: var(--bg);
+}
+
+.dc.empty {
+  background: var(--bg3);
+}
+
+.dc.today {
+  background: #ffe8e2;
+}
+
+.dn {
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--text);
+  margin-bottom: 8px;
+  display: inline-block;
+  width: 30px;
+  height: 30px;
+  line-height: 30px;
+  text-align: center;
+  border-radius: 50%;
+}
+
+.dc.today .dn {
+  background: var(--accent);
+  color: white;
+}
+
+.sp {
+  font-size: 11px;
+  font-weight: 700;
+  border-radius: 24px;
+  padding: 3px 8px;
+  margin-bottom: 5px;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: pointer;
+  transition: 0.1s;
+}
+
+.legend {
+  display: flex;
+  gap: 22px;
+  flex-wrap: wrap;
+  padding: 12px 5px;
+}
+
+.legend-item {
+  font-weight: 600;
+  font-size: 13px;
+}
+
+/* Report card */
+.student-report {
+  background: var(--bg2);
+  border-radius: 24px;
+  padding: 18px;
+  margin-bottom: 20px;
+  border: 1px solid var(--border);
+}
+
+.rep-header {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-bottom: 16px;
+}
+
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  margin-bottom: 16px;
+}
+
+.stat-box {
+  background: var(--bg);
+  border-radius: 20px;
+  padding: 12px;
+  text-align: center;
+  border: 1px solid var(--border);
+}
+
+.stat-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text2);
+}
+
+.stat-val {
+  font-size: 22px;
+  font-weight: 800;
+  margin-top: 6px;
+  color: var(--accent-dark);
+}
+
+.rep-days {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text2);
+  margin: 8px 0 8px;
+}
+
+.pay-status-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 2px dashed var(--border);
+}
+
+.pay-status-btn {
+  font-size: 14px;
+  font-weight: 800;
+  padding: 8px 18px;
+  border-radius: 40px;
+  background: var(--unpaid-bg);
+  color: var(--unpaid-text);
+  border: none;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.pay-status-btn.paid {
+  background: var(--paid-bg);
+  color: var(--paid-text);
+}
+
+.pay-status-btn:hover {
+  filter: brightness(0.9);
+  transform: scale(0.97);
+}
+
+.total-row {
+  background: var(--bg);
+  border-radius: 24px;
+  padding: 16px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 12px;
+  font-weight: 800;
+  font-size: 16px;
+  border: 1px solid var(--accent-light);
+}
+
+.empty-state {
+  text-align: center;
+  padding: 2.5rem;
+  color: var(--text3);
+  font-weight: 500;
+}
 </style>
 </head>
 <body>
 <div class="container">
-  <h1><i class="ti ti-school" aria-hidden="true"></i> Quản lý học phí</h1>
+  <h1><i class="ti ti-flower" style="color: var(--accent);"></i> Quản lý học phí - Nhi's Class </h1>
 
   <div class="tab-row">
-    <button class="tab active" onclick="switchTab('students')"><i class="ti ti-users" aria-hidden="true"></i> Học sinh</button>
-    <button class="tab" onclick="switchTab('calendar')"><i class="ti ti-calendar" aria-hidden="true"></i> Lịch học</button>
-    <button class="tab" onclick="switchTab('report')"><i class="ti ti-chart-bar" aria-hidden="true"></i> Học phí</button>
+    <button class="tab active" onclick="switchTab('students')"><i class="ti ti-users"></i> Học sinh</button>
+    <button class="tab" onclick="switchTab('calendar')"><i class="ti ti-calendar"></i> Lịch học</button>
+    <button class="tab" onclick="switchTab('report')"><i class="ti ti-report-money"></i> Học phí & Nộp tiền</button>
   </div>
 
   <!-- TAB HỌC SINH -->
   <div id="tab-students">
     <div class="section">
-      <div class="sec-title">Thêm học sinh mới</div>
+      <div class="sec-title">🌸 Thêm học sinh mới</div>
       <div class="field"><label>Tên học sinh</label><input id="inp-name" type="text" placeholder="Ví dụ: Meomeo" /></div>
       <div class="fee-row">
-        <div class="field" style="margin:0"><label>Học phí/buổi</label><input id="inp-fee" type="number" value="125000" style="width:150px" /></div>
+        <div class="field" style="margin:0"><label>Học phí/buổi (đ)</label><input id="inp-fee" type="number" value="135000" /></div>
         <span class="fee-unit">đ</span>
       </div>
-      <div class="field" style="margin-bottom:0"><label>Ngày học trong tuần</label></div>
+      <div class="field" style="margin-bottom:0"><label>📅 Ngày học trong tuần</label></div>
       <div class="days-row" id="dayBtns">
         <button class="day-btn" data-d="1" onclick="toggleDay(this)">T2</button>
         <button class="day-btn" data-d="2" onclick="toggleDay(this)">T3</button>
@@ -131,12 +601,12 @@ button:active{transform:scale(0.98)}
         <button class="day-btn" data-d="0" onclick="toggleDay(this)">CN</button>
       </div>
       <div class="field"><label>Bắt đầu từ ngày</label><input id="inp-start" type="date" value="2026-06-08" /></div>
-      <button class="btn-primary" onclick="addStudent()"><i class="ti ti-plus" aria-hidden="true"></i> Thêm học sinh</button>
+      <button class="btn-primary" onclick="addStudent()"><i class="ti ti-plus"></i> Thêm học sinh</button>
     </div>
 
     <div class="section">
-      <div class="sec-title">Danh sách học sinh</div>
-      <div class="student-list" id="studentList"><div class="empty-state">Chưa có học sinh nào</div></div>
+      <div class="sec-title">📖 Danh sách học sinh</div>
+      <div class="student-list" id="studentList"><div class="empty-state">✨ Chưa có học sinh nào</div></div>
     </div>
   </div>
 
@@ -145,12 +615,12 @@ button:active{transform:scale(0.98)}
     <div class="section">
       <div class="cal-nav">
         <div class="cal-nav-center">
-          <button onclick="changeMonth(-1)"><i class="ti ti-chevron-left" aria-hidden="true"></i></button>
+          <button onclick="changeMonth(-1)"><i class="ti ti-chevron-left"></i></button>
           <span class="month-title" id="calTitle"></span>
-          <button onclick="changeMonth(1)"><i class="ti ti-chevron-right" aria-hidden="true"></i></button>
+          <button onclick="changeMonth(1)"><i class="ti ti-chevron-right"></i></button>
         </div>
         <div class="search-wrap">
-          <input id="calSearch" type="text" placeholder="Lọc theo tên..." oninput="renderCalendar()" />
+          <input id="calSearch" type="text" placeholder="🔎 Lọc tên học sinh..." oninput="renderCalendar()" />
         </div>
       </div>
       <div class="cal-grid" id="calGrid"></div>
@@ -158,12 +628,12 @@ button:active{transform:scale(0.98)}
     </div>
   </div>
 
-  <!-- TAB HỌC PHÍ -->
+  <!-- TAB HỌC PHÍ & NỘP TIỀN -->
   <div id="tab-report" style="display:none">
     <div class="section">
-      <div class="search-wrap" style="margin-bottom:12px">
+      <div class="search-wrap" style="margin-bottom:18px">
         <input id="repSearch" type="text" placeholder="Tìm học sinh..." oninput="renderReport()" />
-        <button onclick="document.getElementById('repSearch').value='';renderReport()"><i class="ti ti-x" aria-hidden="true"></i></button>
+        <button onclick="document.getElementById('repSearch').value='';renderReport()"><i class="ti ti-x"></i> Xóa</button>
       </div>
       <div id="reportContent"></div>
     </div>
@@ -171,201 +641,200 @@ button:active{transform:scale(0.98)}
 </div>
 
 <script>
-const COLORS=[
-  {bg:'#B5D4F4',text:'#0C447C',dot:'#378ADD'},
-  {bg:'#9FE1CB',text:'#085041',dot:'#1D9E75'},
-  {bg:'#FAC775',text:'#633806',dot:'#EF9F27'},
-  {bg:'#F4C0D1',text:'#72243E',dot:'#D4537E'},
-  {bg:'#AFA9EC',text:'#3C3489',dot:'#7F77DD'},
-  {bg:'#F0997B',text:'#712B13',dot:'#D85A30'},
-  {bg:'#C0DD97',text:'#27500A',dot:'#639922'},
-];
-const DAY_SHORT=['CN','T2','T3','T4','T5','T6','T7'];
-const MONTHS=['Tháng 1','Tháng 2','Tháng 3','Tháng 4','Tháng 5','Tháng 6','Tháng 7','Tháng 8','Tháng 9','Tháng 10','Tháng 11','Tháng 12'];
+const DAY_SHORT = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
+const MONTHS = ['Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5', 'Tháng 6', 'Tháng 7', 'Tháng 8', 'Tháng 9', 'Tháng 10', 'Tháng 11', 'Tháng 12'];
+let students = [];
+let curYear = new Date().getFullYear();
+let curMonth = new Date().getMonth();
 
-let students=JSON.parse(localStorage.getItem('hocphi_v2')||'[]');
-let curYear=new Date().getFullYear(), curMonth=new Date().getMonth();
-let selectedDays=[];
-
-function save(){localStorage.setItem('hocphi_v2',JSON.stringify(students));}
-
-function toggleDay(btn){
-  btn.classList.toggle('active');
-  const d=parseInt(btn.dataset.d);
-  selectedDays=selectedDays.includes(d)?selectedDays.filter(x=>x!==d):[...selectedDays,d];
+function getPastelColorDark(seed) {
+  const palette = [
+    {bg:'#F3C2B2', text:'#962D1C', dot:'#C35942'},
+    {bg:'#F5CFC1', text:'#A8432B', dot:'#D67C62'},
+    {bg:'#FAD7CA', text:'#AA4A32', dot:'#DE8C72'},
+    {bg:'#F8CFC4', text:'#9E3F2A', dot:'#CF6E55'},
+    {bg:'#FCDED2', text:'#B3533B', dot:'#E5967C'},
+  ];
+  return palette[Math.abs(seed % palette.length)];
 }
 
-function addStudent(){
-  const name=document.getElementById('inp-name').value.trim();
-  const fee=parseInt(document.getElementById('inp-fee').value)||125000;
-  const start=document.getElementById('inp-start').value;
-  if(!name){alert('Vui lòng nhập tên học sinh');return;}
-  if(!selectedDays.length){alert('Vui lòng chọn ít nhất 1 ngày học');return;}
-  students.push({id:Date.now(),name,fee,days:[...selectedDays],start,color:COLORS[students.length%COLORS.length]});
-  document.getElementById('inp-name').value='';
-  selectedDays=[];
+function loadData() {
+  const raw = localStorage.getItem('hocphi_pastel_deep');
+  if (raw) {
+    students = JSON.parse(raw);
+    students.forEach(s => {
+      if (!s.payments) s.payments = {};
+      if (!s.color) s.color = getPastelColorDark(s.id);
+    });
+  } else {
+    students = [];
+    const demo1 = { id: Date.now()+1, name: "Bảo Anh", fee: 140000, days: [2,4,6], start: "2026-06-01", payments: {}, color: getPastelColorDark(Date.now()+1) };
+    const demo2 = { id: Date.now()+2, name: "Minh Khang", fee: 155000, days: [1,3,5], start: "2026-06-01", payments: {"2026-06": true}, color: getPastelColorDark(Date.now()+2) };
+    students.push(demo1, demo2);
+  }
+  save();
+}
+function save() { localStorage.setItem('hocphi_pastel_deep', JSON.stringify(students)); }
+
+let selectedDays = [];
+function toggleDay(btn) { btn.classList.toggle('active'); const d = parseInt(btn.dataset.d); if (selectedDays.includes(d)) selectedDays = selectedDays.filter(x=>x!==d); else selectedDays.push(d); }
+
+function addStudent() {
+  const name = document.getElementById('inp-name').value.trim();
+  const fee = parseInt(document.getElementById('inp-fee').value) || 135000;
+  const start = document.getElementById('inp-start').value;
+  if (!name) { alert('Vui lòng nhập tên'); return; }
+  if (!selectedDays.length) { alert('Chọn ít nhất 1 ngày học'); return; }
+  const newId = Date.now();
+  students.push({ id: newId, name, fee, days: [...selectedDays], start, payments: {}, color: getPastelColorDark(newId) });
+  document.getElementById('inp-name').value = '';
+  selectedDays = [];
   document.querySelectorAll('#dayBtns .day-btn').forEach(b=>b.classList.remove('active'));
-  save();renderStudentList();renderCalendar();renderReport();
+  save(); renderStudentList(); renderCalendar(); renderReport();
 }
-
-function deleteStudent(id){
-  if(!confirm('Xóa học sinh này?')) return;
-  students=students.filter(s=>s.id!==id);
-  save();renderStudentList();renderCalendar();renderReport();
-}
-
-function toggleEdit(id){
-  const panel=document.getElementById('edit-'+id);
-  const isOpen=panel.classList.contains('open');
-  document.querySelectorAll('.edit-panel.open').forEach(p=>p.classList.remove('open'));
-  if(!isOpen) panel.classList.add('open');
-}
-
-function saveEdit(id){
-  const s=students.find(x=>x.id===id);
-  if(!s) return;
-  const name=document.getElementById('ename-'+id).value.trim();
-  const fee=parseInt(document.getElementById('efee-'+id).value)||s.fee;
-  const start=document.getElementById('estart-'+id).value;
-  const days=[];
-  document.querySelectorAll('#edays-'+id+' .day-btn.active').forEach(b=>days.push(parseInt(b.dataset.d)));
-  if(!name){alert('Tên không được để trống');return;}
-  if(!days.length){alert('Chọn ít nhất 1 ngày học');return;}
+function deleteStudent(id) { if(!confirm('Xóa học sinh?')) return; students = students.filter(s=>s.id!==id); save(); renderStudentList(); renderCalendar(); renderReport(); }
+function toggleEdit(id) { const panel = document.getElementById('edit-'+id); const open = panel.classList.contains('open'); document.querySelectorAll('.edit-panel.open').forEach(p=>p.classList.remove('open')); if(!open) panel.classList.add('open'); }
+function saveEdit(id) {
+  const s = students.find(x=>x.id===id); if(!s) return;
+  const name = document.getElementById('ename-'+id).value.trim();
+  const fee = parseInt(document.getElementById('efee-'+id).value) || s.fee;
+  const start = document.getElementById('estart-'+id).value;
+  const days = []; document.querySelectorAll('#edays-'+id+' .day-btn.active').forEach(b=>days.push(parseInt(b.dataset.d)));
+  if(!name){alert('Tên không được trống');return;}
+  if(!days.length){alert('Chọn ngày học');return;}
   s.name=name; s.fee=fee; s.start=start; s.days=days;
-  save();renderStudentList();renderCalendar();renderReport();
+  save(); renderStudentList(); renderCalendar(); renderReport();
+}
+function toggleEditDay(btn) { btn.classList.toggle('active'); }
+
+function getMonthKey(y,m){ return `${y}-${String(m+1).padStart(2,'0')}`; }
+function togglePaymentStatus(studentId, year, month) {
+  const student = students.find(s=>s.id===studentId);
+  if(!student) return;
+  const key = getMonthKey(year, month);
+  if(!student.payments) student.payments={};
+  student.payments[key] = !(student.payments[key]||false);
+  save();
+  renderReport();
+  renderCalendar();
+  renderStudentList();
+}
+function getPaymentStatus(student, year, month) { const key = getMonthKey(year, month); return !!(student.payments && student.payments[key]); }
+
+function parseLocalDate(str) { if(!str) return new Date(0); const [y,m,d]=str.split('-').map(Number); return new Date(y,m-1,d); }
+function getSessionsInMonth(student, year, month) {
+  const total = new Date(year, month+1, 0).getDate();
+  const startDate = parseLocalDate(student.start);
+  const sessions = [];
+  for(let d=1;d<=total;d++) {
+    const date = new Date(year, month, d);
+    if(date>=startDate && student.days.includes(date.getDay())) sessions.push(d);
+  }
+  return sessions;
 }
 
-function toggleEditDay(btn){
-  btn.classList.toggle('active');
-}
-
-function renderStudentList(){
-  const el=document.getElementById('studentList');
-  if(!students.length){el.innerHTML='<div class="empty-state">Chưa có học sinh nào</div>';return;}
-  el.innerHTML=students.map(s=>{
-    const dayStr=s.days.map(d=>DAY_SHORT[d]).join(', ');
-    const dayBtns=DAY_SHORT.map((lbl,i)=>`<button class="day-btn${s.days.includes(i)?' active':''}" data-d="${i}" onclick="toggleEditDay(this)">${lbl}</button>`).join('');
-    return`<div class="student-row">
+function renderStudentList() {
+  const el = document.getElementById('studentList');
+  if(!students.length){ el.innerHTML='<div class="empty-state">🌸 Chưa có học sinh</div>'; return; }
+  el.innerHTML = students.map(s=>{
+    const dayStr = s.days.map(d=>DAY_SHORT[d]).join(', ');
+    const dayBtns = DAY_SHORT.map((lbl,i)=>`<button class="day-btn${s.days.includes(i)?' active':''}" data-d="${i}" onclick="toggleEditDay(this)">${lbl}</button>`).join('');
+    const isPaid = getPaymentStatus(s, curYear, curMonth);
+    const statusLabel = isPaid ? '✅ Đã nộp' : '⏳ Chưa nộp';
+    return `<div class="student-row">
       <div class="student-main">
         <div class="student-dot" style="background:${s.color.dot}"></div>
         <div class="student-name">${s.name}</div>
         <div class="student-schedule">${dayStr} · ${s.fee.toLocaleString('vi-VN')}đ</div>
+        <div class="payment-badge ${isPaid?'paid':''}" onclick="switchTab('report'); setTimeout(()=>{document.getElementById('repSearch').value='${s.name}';renderReport();},50)">💰 ${statusLabel}</div>
         <div class="student-actions">
-          <button class="act-btn edit" onclick="toggleEdit(${s.id})" title="Chỉnh sửa">
-            <i class="ti ti-edit" style="font-size:14px"></i> Sửa
-          </button>
-          <button class="act-btn del" onclick="deleteStudent(${s.id})" title="Xóa">
-            <i class="ti ti-trash" style="font-size:14px"></i> Xóa
-          </button>
+          <button class="act-btn edit" onclick="toggleEdit(${s.id})"><i class="ti ti-edit"></i> Sửa</button>
+          <button class="act-btn del" onclick="deleteStudent(${s.id})"><i class="ti ti-trash"></i> Xóa</button>
         </div>
       </div>
       <div class="edit-panel" id="edit-${s.id}">
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-          <div class="field" style="margin:0"><label>Tên học sinh</label><input id="ename-${s.id}" type="text" value="${s.name}" /></div>
-          <div class="field" style="margin:0"><label>Học phí/buổi (đ)</label><input id="efee-${s.id}" type="number" value="${s.fee}" /></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <div class="field"><label>Tên</label><input id="ename-${s.id}" value="${s.name}"/></div>
+          <div class="field"><label>Học phí/buổi</label><input id="efee-${s.id}" type="number" value="${s.fee}"/></div>
         </div>
-        <div class="field" style="margin-top:8px;margin-bottom:0"><label>Ngày học</label></div>
-        <div class="days-row" id="edays-${s.id}" style="margin-bottom:8px">${dayBtns}</div>
-        <div class="field" style="margin:0"><label>Bắt đầu từ ngày</label><input id="estart-${s.id}" type="date" value="${s.start||''}" /></div>
-        <div class="edit-btns">
-          <button class="btn-save" onclick="saveEdit(${s.id})"><i class="ti ti-check" aria-hidden="true"></i> Lưu</button>
-          <button class="btn-cancel" onclick="toggleEdit(${s.id})"><i class="ti ti-x" aria-hidden="true"></i> Huỷ</button>
-        </div>
+        <div class="field">Ngày học</div><div class="days-row" id="edays-${s.id}">${dayBtns}</div>
+        <div class="field"><label>Bắt đầu từ</label><input id="estart-${s.id}" type="date" value="${s.start||''}"/></div>
+        <div class="edit-btns"><button class="btn-save" onclick="saveEdit(${s.id})"><i class="ti ti-check"></i> Lưu</button><button class="btn-cancel" onclick="toggleEdit(${s.id})"><i class="ti ti-x"></i> Huỷ</button></div>
       </div>
     </div>`;
   }).join('');
 }
 
-function getDaysInMonth(y,m){return new Date(y,m+1,0).getDate();}
-function getFirstDay(y,m){return new Date(y,m,1).getDay();}
-
-function parseLocalDate(str){
-  if(!str) return new Date(0);
-  const [y,m,d]=str.split('-').map(Number);
-  return new Date(y,m-1,d);
-}
-
-function getSessionsInMonth(s,y,m){
-  const total=getDaysInMonth(y,m);
-  const startDate=parseLocalDate(s.start);
-  const sessions=[];
-  for(let d=1;d<=total;d++){
-    const date=new Date(y,m,d);
-    if(date>=startDate&&s.days.includes(date.getDay())) sessions.push(d);
-  }
-  return sessions;
-}
-
-function renderCalendar(){
-  document.getElementById('calTitle').textContent=MONTHS[curMonth]+' · '+curYear;
-  const filter=document.getElementById('calSearch').value||'';
-  const visible=filter?students.filter(s=>s.name.toLowerCase().includes(filter.toLowerCase())):students;
-  const daysInMonth=getDaysInMonth(curYear,curMonth);
-  const offset=(getFirstDay(curYear,curMonth)+6)%7;
-  const today=new Date();
-  const isNow=today.getFullYear()===curYear&&today.getMonth()===curMonth;
-  let html='<div class="dh">T2</div><div class="dh">T3</div><div class="dh">T4</div><div class="dh">T5</div><div class="dh">T6</div><div class="dh">T7</div><div class="dh">CN</div>';
+function renderCalendar() {
+  document.getElementById('calTitle').innerText = MONTHS[curMonth]+' · '+curYear;
+  const filter = document.getElementById('calSearch')?.value || '';
+  const visible = filter ? students.filter(s=>s.name.toLowerCase().includes(filter.toLowerCase())) : students;
+  const daysInMonth = new Date(curYear, curMonth+1, 0).getDate();
+  const firstDay = new Date(curYear, curMonth, 1).getDay();
+  let offset = (firstDay + 6) % 7;
+  const today = new Date(); const isNow = (today.getFullYear()===curYear && today.getMonth()===curMonth);
+  let html = '<div class="dh">T2</div><div class="dh">T3</div><div class="dh">T4</div><div class="dh">T5</div><div class="dh">T6</div><div class="dh">T7</div><div class="dh">CN</div>';
   for(let i=0;i<offset;i++) html+='<div class="dc empty"></div>';
   for(let d=1;d<=daysInMonth;d++){
-    const date=new Date(curYear,curMonth,d);
-    let pills='';
+    const date = new Date(curYear, curMonth, d);
+    let pills = '';
     visible.forEach(s=>{
-      const sd=parseLocalDate(s.start);
-      if(date>=sd&&s.days.includes(date.getDay()))
-        pills+=`<span class="sp" style="background:${s.color.bg};color:${s.color.text}">${s.name}</span>`;
+      const sd = parseLocalDate(s.start);
+      if(date>=sd && s.days.includes(date.getDay())){
+        const paid = getPaymentStatus(s, curYear, curMonth);
+        const icon = paid ? ' 💚' : ' ⏳';
+        pills+=`<span class="sp" style="background:${s.color.bg};color:${s.color.text}; font-weight:bold;">${s.name}${icon}</span>`;
+      }
     });
-    html+=`<div class="dc${isNow&&d===today.getDate()?' today':''}"><div class="dn">${d}</div>${pills}</div>`;
+    const todayClass = (isNow && d===today.getDate()) ? ' today' : '';
+    html+=`<div class="dc${todayClass}"><div class="dn">${d}</div>${pills}</div>`;
   }
-  const rem=(7-((offset+daysInMonth)%7))%7;
+  const rem = (7-((offset+daysInMonth)%7))%7;
   for(let i=0;i<rem;i++) html+='<div class="dc empty"></div>';
-  document.getElementById('calGrid').innerHTML=html;
-  document.getElementById('calLegend').innerHTML=visible.map(s=>`<div class="legend-item"><div class="legend-dot" style="background:${s.color.dot}"></div>${s.name}</div>`).join('');
+  document.getElementById('calGrid').innerHTML = html;
+  document.getElementById('calLegend').innerHTML = visible.map(s=>`<div class="legend-item"><div style="background:${s.color.dot}; width:12px;height:12px;border-radius:50%;display:inline-block;margin-right:6px;"></div> ${s.name}</div>`).join('');
 }
 
-function renderReport(){
-  const filter=document.getElementById('repSearch').value||'';
-  const visible=filter?students.filter(s=>s.name.toLowerCase().includes(filter.toLowerCase())):students;
-  const el=document.getElementById('reportContent');
-  if(!students.length){el.innerHTML='<div class="empty-state">Chưa có học sinh nào.</div>';return;}
-  if(!visible.length){el.innerHTML='<div class="empty-state">Không tìm thấy học sinh nào</div>';return;}
-  let html='', total=0;
+function renderReport() {
+  const filter = document.getElementById('repSearch')?.value || '';
+  const visible = filter ? students.filter(s=>s.name.toLowerCase().includes(filter.toLowerCase())) : students;
+  const el = document.getElementById('reportContent');
+  if(!students.length){ el.innerHTML='<div class="empty-state">Chưa có dữ liệu</div>'; return; }
+  if(!visible.length){ el.innerHTML='<div class="empty-state">🔎 Không tìm thấy học sinh</div>'; return; }
+  let totalSum = 0;
+  let html='';
   visible.forEach(s=>{
-    const sessions=getSessionsInMonth(s,curYear,curMonth);
-    const fee=sessions.length*s.fee;
-    total+=fee;
+    const sessions = getSessionsInMonth(s, curYear, curMonth);
+    const feeTotal = sessions.length * s.fee;
+    totalSum += feeTotal;
+    const isPaid = getPaymentStatus(s, curYear, curMonth);
     html+=`<div class="student-report">
-      <div class="rep-header">
-        <div style="width:10px;height:10px;border-radius:50%;background:${s.color.dot}"></div>
-        <span style="font-weight:500;font-size:15px">${s.name}</span>
-        <span style="font-size:12px;color:var(--text2)">${s.days.map(d=>DAY_SHORT[d]).join(', ')}</span>
-      </div>
+      <div class="rep-header"><div style="width:14px;height:14px;border-radius:50%;background:${s.color.dot}"></div><span style="font-weight:800;font-size:17px;">${s.name}</span><span style="background:var(--bg);padding:3px 14px;border-radius:30px;font-size:12px;font-weight:600;">${s.days.map(d=>DAY_SHORT[d]).join(', ')}</span></div>
       <div class="stat-grid">
         <div class="stat-box"><div class="stat-label">Số buổi</div><div class="stat-val">${sessions.length}</div></div>
-        <div class="stat-box"><div class="stat-label">Đơn giá</div><div class="stat-val" style="font-size:13px">${s.fee.toLocaleString('vi-VN')}đ</div></div>
-        <div class="stat-box" style="background:${s.color.bg}"><div class="stat-label" style="color:${s.color.text}">Học phí</div><div class="stat-val" style="color:${s.color.text};font-size:15px">${fee.toLocaleString('vi-VN')}đ</div></div>
+        <div class="stat-box"><div class="stat-label">Đơn giá</div><div class="stat-val" style="font-size:15px;">${s.fee.toLocaleString('vi-VN')}đ</div></div>
+        <div class="stat-box" style="background:${s.color.bg};"><div class="stat-label" style="color:${s.color.text}">Học phí tháng</div><div class="stat-val" style="color:${s.color.text}">${feeTotal.toLocaleString('vi-VN')}đ</div></div>
       </div>
-      <div class="rep-days">Các ngày học: ${sessions.length?sessions.join(', '):'Không có buổi'}</div>
+      <div class="rep-days">📅 Ngày học: ${sessions.length?sessions.join(', '):'Không có buổi'}</div>
+      <div class="pay-status-row">
+        <button class="pay-status-btn ${isPaid?'paid':''}" onclick="togglePaymentStatus(${s.id}, ${curYear}, ${curMonth})"><i class="ti ti-${isPaid?'check':'circle-x'}"></i> ${isPaid?'✅ Đã nộp học phí':'⏳ Chưa nộp học phí'}</button>
+        <span style="font-size:13px; font-weight:500;">✏️ Nhấn để cập nhật trạng thái</span>
+      </div>
     </div>`;
   });
-  if(visible.length>1) html+=`<div class="total-row"><span style="font-size:14px;color:var(--text2)">Tổng ${visible.length} học sinh · ${MONTHS[curMonth]}</span><span style="font-size:18px;font-weight:500">${total.toLocaleString('vi-VN')}đ</span></div>`;
-  el.innerHTML=html;
+  if(visible.length) html+=`<div class="total-row"><span>📊 Tổng cộng (${MONTHS[curMonth]}) · ${visible.length} học sinh</span><span style="font-size:24px;font-weight:800;">${totalSum.toLocaleString('vi-VN')}đ</span></div>`;
+  el.innerHTML = html;
 }
 
-function changeMonth(dir){
-  curMonth+=dir;
-  if(curMonth>11){curMonth=0;curYear++;}
-  if(curMonth<0){curMonth=11;curYear--;}
-  renderCalendar();renderReport();
-}
-
-function switchTab(name){
-  ['students','calendar','report'].forEach(t=>document.getElementById('tab-'+t).style.display=t===name?'':'none');
+function changeMonth(dir) { curMonth+=dir; if(curMonth>11){curMonth=0;curYear++;} if(curMonth<0){curMonth=11;curYear--;} renderCalendar(); renderReport(); }
+function switchTab(name) {
+  ['students','calendar','report'].forEach(t=>document.getElementById('tab-'+t).style.display = t===name?'':'none');
   document.querySelectorAll('.tab').forEach((b,i)=>b.classList.toggle('active',['students','calendar','report'][i]===name));
   if(name==='calendar') renderCalendar();
   if(name==='report') renderReport();
 }
-
-renderStudentList();renderCalendar();renderReport();
+loadData();
+renderStudentList(); renderCalendar(); renderReport();
 </script>
 </body>
 </html>
