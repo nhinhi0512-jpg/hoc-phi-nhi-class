@@ -48,10 +48,12 @@ button:active{transform:scale(0.98)}
 .student-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
 .student-name{font-weight:500;font-size:15px;flex:1}
 .student-schedule{font-size:14px;color:var(--text2)}
-.student-actions{display:flex;gap:0}
-.act-btn{background:none;border:none;color:var(--text3);cursor:pointer;padding:4px 8px;font-size:15px;border-radius:0;transition:color .15s,background .15s}
-.act-btn:hover{color:var(--text);background:var(--border)}
-.act-btn.del:hover{color:#E24B4A}
+.student-actions{display:flex;gap:4px}
+.act-btn{background:none;border:0.5px solid var(--border2);border-radius:var(--radius);color:var(--text);cursor:pointer;padding:5px 10px;font-size:13px;transition:all .15s;display:inline-flex;align-items:center;gap:4px}
+.act-btn i{font-size:14px}
+.act-btn:hover{background:var(--bg3)}
+.act-btn.del:hover{background:#E24B4A20;border-color:#E24B4A;color:#E24B4A}
+.act-btn.edit:hover{background:#378ADD20;border-color:#378ADD;color:#378ADD}
 .act-btn:active{transform:scale(0.95)}
 
 /* Edit panel */
@@ -67,7 +69,7 @@ button:active{transform:scale(0.98)}
 
 /* Tabs */
 .tab-row{display:flex;gap:6px;margin-bottom:1rem;flex-wrap:wrap}
-.tab{padding:8px 18px;font-size:15px;border-radius:20px;border:0.5px solid var(--border2);background:var(--bg);color:var(--text2);cursor:pointer}
+.tab{padding:8px 18px;font-size:15px;border-radius:20px;border:0.5px solid var(--border2);background:var(--bg);color:var(--text2);cursor:pointer;display:inline-flex;align-items:center;gap:6px}
 .tab.active{background:var(--text);color:var(--bg);border-color:transparent}
 
 /* Calendar */
@@ -113,7 +115,7 @@ button:active{transform:scale(0.98)}
   <div id="tab-students">
     <div class="section">
       <div class="sec-title">Thêm học sinh mới</div>
-      <div class="field"><label>Tên học sinh</label><input id="inp-name" type="text" placeholder="Ví dụ: Quyền" /></div>
+      <div class="field"><label>Tên học sinh</label><input id="inp-name" type="text" placeholder="Ví dụ: <Meomeo>" /></div>
       <div class="fee-row">
         <div class="field" style="margin:0"><label>Học phí/buổi</label><input id="inp-fee" type="number" value="125000" style="width:150px" /></div>
         <span class="fee-unit">đ</span>
@@ -249,8 +251,12 @@ function renderStudentList(){
         <div class="student-name">${s.name}</div>
         <div class="student-schedule">${dayStr} · ${s.fee.toLocaleString('vi-VN')}đ</div>
         <div class="student-actions">
-          <button class="act-btn" onclick="toggleEdit(${s.id})" title="Chỉnh sửa" aria-label="Sửa ${s.name}"><i class="ti ti-edit" style="font-size:15px"></i></button>
-          <button class="act-btn del" onclick="deleteStudent(${s.id})" title="Xóa" aria-label="Xóa ${s.name}"><i class="ti ti-trash" style="font-size:15px"></i></button>
+          <button class="act-btn edit" onclick="toggleEdit(${s.id})" title="Chỉnh sửa">
+            <i class="ti ti-edit" style="font-size:14px"></i> Sửa
+          </button>
+          <button class="act-btn del" onclick="deleteStudent(${s.id})" title="Xóa">
+            <i class="ti ti-trash" style="font-size:14px"></i> Xóa
+          </button>
         </div>
       </div>
       <div class="edit-panel" id="edit-${s.id}">
