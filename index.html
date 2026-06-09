@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-<title>Quản lý học phí - Pastel Trầm</title>
+<title>Quản lý học phí</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.0.0/tabler-icons.min.css" />
 <style>
 * {
@@ -13,43 +13,43 @@
 }
 
 :root {
-  --bg: #fff5f0;           /* nền trắng hồng nhẹ */
-  --bg2: #ffe6de;          /* hồng phấn đậm hơn */
-  --bg3: #fcd9cf;          /* nền bao ngoài trầm ấm */
-  --text: #3d2a24;         /* nâu đậm, tăng độ tương phản */
-  --text2: #8f5e4e;        /* nâu hồng trung bình */
-  --text3: #b2806c;
-  --border: rgba(173, 104, 82, 0.35);
-  --border2: rgba(150, 85, 65, 0.5);
+  --bg: #F4F2EF;           /* nền chính: xám ấm rất nhẹ, dịu mắt */
+  --bg2: #EAE6E1;          /* nền phụ: be ấm */
+  --bg3: #DDD8D1;          /* nền bao ngoài: xám be trầm */
+  --text: #2C2A29;         /* gần đen, tương phản tốt nhưng mềm */
+  --text2: #6F6A64;        /* xám nâu nhẹ */
+  --text3: #928B82;
+  --border: rgba(120, 100, 85, 0.25);
+  --border2: rgba(100, 80, 65, 0.4);
   --radius: 12px;
   --radius-lg: 20px;
-  --accent: #d97a64;       /* hồng đất - đậm hơn */
-  --accent-dark: #bc5f48;
-  --accent-light: #f5bcae;
-  --paid-bg: #bddbcc;
-  --paid-text: #1f543b;
-  --paid-bg-dark: #2f6247;
-  --unpaid-bg: #f9cfc9;
-  --unpaid-text: #b14533;
+  --accent: #7B9E87;       /* xanh sage chính - dịu, tự nhiên */
+  --accent-dark: #5E7D68;
+  --accent-light: #C2D5C8;
+  --paid-bg: #BED3C3;
+  --paid-text: #2C5A3E;
+  --paid-bg-dark: #446D53;
+  --unpaid-bg: #F0D9CF;
+  --unpaid-text: #B16148;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: #2e2420;
-    --bg2: #422f29;
-    --bg3: #241b17;
-    --text: #f5e2da;
-    --text2: #ccaa9c;
-    --text3: #a68474;
-    --border: rgba(205, 135, 110, 0.3);
-    --border2: rgba(215, 145, 120, 0.5);
-    --accent: #cf7a63;
-    --accent-dark: #b55d46;
-    --accent-light: #a75d48;
-    --paid-bg: #2d5641;
-    --paid-text: #c6f0df;
-    --unpaid-bg: #693d34;
-    --unpaid-text: #f3bcae;
+    --bg: #2B2A28;
+    --bg2: #3B3936;
+    --bg3: #201F1D;
+    --text: #EFECE8;
+    --text2: #B6ADA3;
+    --text3: #938A80;
+    --border: rgba(160, 140, 120, 0.3);
+    --border2: rgba(180, 160, 140, 0.5);
+    --accent: #6C8F7A;
+    --accent-dark: #537561;
+    --accent-light: #8FAD9B;
+    --paid-bg: #2C5940;
+    --paid-text: #C6F0DF;
+    --unpaid-bg: #6E4D3F;
+    --unpaid-text: #F3C5B4;
   }
 }
 
@@ -61,7 +61,6 @@ body {
   font-size: 16px;
 }
 
-/* MỞ RỘNG MÀN HÌNH NGANG */
 .container {
   max-width: 1360px;
   width: 94%;
@@ -126,7 +125,7 @@ input, select {
 
 input:focus {
   border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(217, 122, 100, 0.25);
+  box-shadow: 0 0 0 3px rgba(107, 142, 115, 0.25);
 }
 
 button {
@@ -300,8 +299,8 @@ button:active {
 }
 
 .act-btn.del:hover {
-  background: #e48f7a;
-  border-color: #e48f7a;
+  background: #C28B77;
+  border-color: #C28B77;
   color: white;
 }
 
@@ -357,7 +356,7 @@ button:active {
 .tab.active {
   background: var(--accent);
   color: white;
-  box-shadow: 0 2px 8px rgba(217, 122, 100, 0.3);
+  box-shadow: 0 2px 8px rgba(91, 121, 99, 0.3);
 }
 
 /* Calendar */
@@ -420,7 +419,7 @@ button:active {
 }
 
 .dc.today {
-  background: #ffe8e2;
+  background: #E8EFE9;
 }
 
 .dn {
@@ -573,7 +572,7 @@ button:active {
 </head>
 <body>
 <div class="container">
-  <h1><i class="ti ti-flower" style="color: var(--accent);"></i> Quản lý học phí - Nhi's Class </h1>
+  <h1><i class="ti ti-leaf" style="color: var(--accent);"></i> Quản lý học phí - Nhi's Class </h1>
 
   <div class="tab-row">
     <button class="tab active" onclick="switchTab('students')"><i class="ti ti-users"></i> Học sinh</button>
@@ -584,7 +583,7 @@ button:active {
   <!-- TAB HỌC SINH -->
   <div id="tab-students">
     <div class="section">
-      <div class="sec-title">🌸 Thêm học sinh mới</div>
+      <div class="sec-title">🍃 Thêm học sinh mới</div>
       <div class="field"><label>Tên học sinh</label><input id="inp-name" type="text" placeholder="Ví dụ: Meomeo" /></div>
       <div class="fee-row">
         <div class="field" style="margin:0"><label>Học phí/buổi (đ)</label><input id="inp-fee" type="number" value="135000" /></div>
@@ -647,13 +646,15 @@ let students = [];
 let curYear = new Date().getFullYear();
 let curMonth = new Date().getMonth();
 
-function getPastelColorDark(seed) {
+// Bộ màu dịu, trung tính - tông xám nhạt, xanh sage, pastel ấm 
+function getPastelColorSoft(seed) {
   const palette = [
-    {bg:'#F3C2B2', text:'#962D1C', dot:'#C35942'},
-    {bg:'#F5CFC1', text:'#A8432B', dot:'#D67C62'},
-    {bg:'#FAD7CA', text:'#AA4A32', dot:'#DE8C72'},
-    {bg:'#F8CFC4', text:'#9E3F2A', dot:'#CF6E55'},
-    {bg:'#FCDED2', text:'#B3533B', dot:'#E5967C'},
+    {bg:'#DDE5DF', text:'#3A5C4F', dot:'#6A8E7C'},
+    {bg:'#E2E0DA', text:'#5C534A', dot:'#8B7E70'},
+    {bg:'#D8E0E6', text:'#3F5C6F', dot:'#708CA3'},
+    {bg:'#E6DFD6', text:'#886B57', dot:'#B3917A'},
+    {bg:'#DAE2D4', text:'#45765F', dot:'#6D9A81'},
+    {bg:'#E3E0D9', text:'#6C5C52', dot:'#9C8778'}
   ];
   return palette[Math.abs(seed % palette.length)];
 }
@@ -664,12 +665,12 @@ function loadData() {
     students = JSON.parse(raw);
     students.forEach(s => {
       if (!s.payments) s.payments = {};
-      if (!s.color) s.color = getPastelColorDark(s.id);
+      if (!s.color) s.color = getPastelColorSoft(s.id);
     });
   } else {
     students = [];
-    const demo1 = { id: Date.now()+1, name: "Bảo Anh", fee: 140000, days: [2,4,6], start: "2026-06-01", payments: {}, color: getPastelColorDark(Date.now()+1) };
-    const demo2 = { id: Date.now()+2, name: "Minh Khang", fee: 155000, days: [1,3,5], start: "2026-06-01", payments: {"2026-06": true}, color: getPastelColorDark(Date.now()+2) };
+    const demo1 = { id: Date.now()+1, name: "Bảo Anh", fee: 140000, days: [2,4,6], start: "2026-06-01", payments: {}, color: getPastelColorSoft(Date.now()+1) };
+    const demo2 = { id: Date.now()+2, name: "Minh Khang", fee: 155000, days: [1,3,5], start: "2026-06-01", payments: {"2026-06": true}, color: getPastelColorSoft(Date.now()+2) };
     students.push(demo1, demo2);
   }
   save();
@@ -686,7 +687,7 @@ function addStudent() {
   if (!name) { alert('Vui lòng nhập tên'); return; }
   if (!selectedDays.length) { alert('Chọn ít nhất 1 ngày học'); return; }
   const newId = Date.now();
-  students.push({ id: newId, name, fee, days: [...selectedDays], start, payments: {}, color: getPastelColorDark(newId) });
+  students.push({ id: newId, name, fee, days: [...selectedDays], start, payments: {}, color: getPastelColorSoft(newId) });
   document.getElementById('inp-name').value = '';
   selectedDays = [];
   document.querySelectorAll('#dayBtns .day-btn').forEach(b=>b.classList.remove('active'));
@@ -735,7 +736,7 @@ function getSessionsInMonth(student, year, month) {
 
 function renderStudentList() {
   const el = document.getElementById('studentList');
-  if(!students.length){ el.innerHTML='<div class="empty-state">🌸 Chưa có học sinh</div>'; return; }
+  if(!students.length){ el.innerHTML='<div class="empty-state">🍃 Chưa có học sinh</div>'; return; }
   el.innerHTML = students.map(s=>{
     const dayStr = s.days.map(d=>DAY_SHORT[d]).join(', ');
     const dayBtns = DAY_SHORT.map((lbl,i)=>`<button class="day-btn${s.days.includes(i)?' active':''}" data-d="${i}" onclick="toggleEditDay(this)">${lbl}</button>`).join('');
@@ -782,7 +783,7 @@ function renderCalendar() {
       const sd = parseLocalDate(s.start);
       if(date>=sd && s.days.includes(date.getDay())){
         const paid = getPaymentStatus(s, curYear, curMonth);
-        const icon = paid ? ' 💚' : ' ⏳';
+        const icon = paid ? ' ✓' : ' ⏳';
         pills+=`<span class="sp" style="background:${s.color.bg};color:${s.color.text}; font-weight:bold;">${s.name}${icon}</span>`;
       }
     });
@@ -818,7 +819,7 @@ function renderReport() {
       <div class="rep-days">📅 Ngày học: ${sessions.length?sessions.join(', '):'Không có buổi'}</div>
       <div class="pay-status-row">
         <button class="pay-status-btn ${isPaid?'paid':''}" onclick="togglePaymentStatus(${s.id}, ${curYear}, ${curMonth})"><i class="ti ti-${isPaid?'check':'circle-x'}"></i> ${isPaid?'✅ Đã nộp học phí':'⏳ Chưa nộp học phí'}</button>
-        <span style="font-size:13px; font-weight:500;">✏️ Nhấn để cập nhật trạng thái</span>
+        <span style="font-size:13px; font-weight:500;">✏️ Nhấn để cập nhật</span>
       </div>
     </div>`;
   });
