@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Quản lý học phí</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.0.0/tabler-icons.min.css" />
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --bg:#ffffff;--bg2:#f5f5f4;--bg3:#eeece8;
+    --text:#1a1a1a;--text2:#6b7280;--text3:#9ca3af;
+    --border:rgba(0,0,0,0.12);--border2:rgba(0,0,0,0.2);
+    --radius:8px;--radius-lg:12px;
+    --blue-bg:#E6F1FB;--blue-text:#0C447C;--blue-dot:#378ADD;
+    --green-bg:#E1F5EE;--green-text:#085041;--green-dot:#1D9E75;
+    --amber-bg:#FAEEDA;--amber-text:#633806;--amber-dot:#EF9F27;
+    --pink-bg:#FBEAF0;--pink-text:#72243E;--pink-dot:#D4537E;
+    --purple-bg:#EEEDFE;--purple-text:#3C3489;--purple-dot:#7F77DD;
+    --coral-bg:#FAECE7;--coral-text:#712B13;--coral-dot:#D85A30;
+    --teal-bg:#EAF3DE;--teal-text:#27500A;--teal-dot:#639922;
+  }
+  @media(prefers-color-scheme:dark){
+    :root{
+      --bg:#1c1c1b;--bg2:#252524;--bg3:#2e2e2c;
+      --text:#f0ede8;--text2:#a8a49e;--text3:#6b6760;
+      --border:rgba(255,255,255,0.1);--border2:rgba(255,255,255,0.2);
+      --blue-bg:#0c447c;--blue-text:#B5D4F4;--blue-dot:#378ADD;
+      --green-bg:#085041;--green-text:#9FE1CB;--green-dot:#1D9E75;
+      --amber-bg:#633806;--amber-text:#FAC775;--amber-dot:#EF9F27;
+      --pink-bg:#72243E;--pink-text:#F4C0D1;--pink-dot:#D4537E;
+      --purple-bg:#3C3489;--purple-text:#CECBF6;--purple-dot:#7F77DD;
+      --coral-bg:#712B13;--coral-text:#F5C4B3;--coral-dot:#D85A30;
+      --teal-bg:#27500A;--teal-text:#C0DD97;--teal-dot:#639922;
+    }
+  }
+  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg3);color:var(--text);min-height:100vh}
+  .container{max-width:720px;margin:0 auto;padding:1.5rem 1rem}
+  h1{font-size:20px;font-weight:500;margin-bottom:1.25rem;color:var(--text)}
+  .section{background:var(--bg);border:0.5px solid var(--border);border-radius:var(--radius-lg);padding:1rem 1.25rem;margin-bottom:1rem}
+  .sec-title{font-size:11px;font-weight:500;color:var(--text2);margin-bottom:12px;text-transform:uppercase;letter-spacing:.06em}
+  .row{display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap;margin-bottom:8px}
+  .field{display:flex;flex-direction:column;gap:4px;flex:1;min-width:120px}
+  .field label{font-size:12px;color:var(--text2)}
+  input,select{width:100%;padding:7px 10px;font-size:14px;border:0.5px solid var(--border2);border-radius:var(--radius);background:var(--bg);color:var(--text);outline:none;transition:border-color .15s}
+  input:focus,select:focus{border-color:#378ADD;box-shadow:0 0 0 2px rgba(55,138,221,0.15)}
+  button{padding:7px 14px;font-size:13px;border:0.5px solid var(--border2);border-radius:var(--radius);background:var(--bg);color:var(--text);cursor:pointer;transition:background .15s,transform .1s;display:inline-flex;align-items:center;gap:5px}
+  button:hover{background:var(--bg2)}
+  button:active{transform:scale(0.98)}
+  .btn-primary{background:var(--text);color:var(--bg);border-color:transparent}
+  .btn-primary:hover{opacity:.88;background:var(--text)}
+  .days-row{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}
+  .day-btn{padding:4px 10px;font-size:12px;border-radius:20px;border:0.5px solid var(--border2);background:var(--bg);color:var(--text2);cursor:pointer;transition:all .15s}
+  .day-btn.active{background:#378ADD;color:#fff;border-color:#378ADD}
+  .student-list{display:flex;flex-direction:column;gap:6px}
+  .student-row{display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--bg2);border-radius:var(--radius);font-size:13px}
+  .student-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+  .student-name{font-weight:500;color:var(--text);flex:1}
+  .student-schedule{color:var(--text2);font-size:12px}
+  .del-btn{background:none;border:none;color:var(--text3);cursor:pointer;font-size:16px;padding:0 2px;line-height:1}
+  .del-btn:hover{color:#E24B4A}
+  .tab-row{display:flex;gap:6px;margin-bottom:1rem;flex-wrap:wrap}
+  .tab{padding:6px 14px;font-size:13px;border-radius:20px;border:0.5px solid var(--border2);background:var(--bg);color:var(--text2);cursor:pointer}
+  .tab.active{background:var(--text);color:var(--bg);border-color:transparent}
+  .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);border-left:0.5px solid var(--border);border-top:0.5px solid var(--border);margin-bottom:.75rem}
+  .dh{text-align:center;font-size:11px;font-weight:500;color:var(--text2);padding:5px 0;background:var(--bg2);border-right:0.5px solid var(--border);border-bottom:0.5px solid var(--border)}
+  .dc{min-height:72px;border-right:0.5px solid var(--border);border-bottom:0.5px solid var(--border);padding:4px;background:var(--bg)}
+  .dc.empty{background:var(--bg2)}
+  .dc.today .dn{background:#E24B4A;color:#fff;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center}
+  .dn{font-size:11px;font-weight:500;color:var(--text2);margin-bottom:2px;width:20px;height:20px;display:flex;align-items:center;justify-content:center}
+  .sp{font-size:10px;font-weight:500;border-radius:8px;padding:1px 5px;margin-bottom:1px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .cal-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px}
+  .cal-nav-center{display:flex;align-items:center;gap:8px}
+  .month-title{font-size:15px;font-weight:500;color:var(--text)}
+  .search-wrap{display:flex;gap:6px}
+  .search-wrap input{flex:1}
+  .legend{display:flex;gap:12px;flex-wrap:wrap;padding-bottom:4px}
+  .legend-item{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--text)}
+  .legend-dot{width:10px;height:10px;border-radius:50%}
+  .stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:8px}
+  .stat-box{background:var(--bg);border-radius:var(--radius);padding:8px;text-align:center}
+  .stat-label{font-size:11px;color:var(--text2)}
+  .stat-val{font-size:17px;font-weight:500;color:var(--text)}
+  .student-report{background:var(--bg2);border-radius:var(--radius);padding:12px;margin-bottom:8px}
+  .rep-header{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+  .rep-days{margin-top:8px;font-size:11px;color:var(--text2)}
+  .total-row{border-top:0.5px solid var(--border);padding-top:10px;display:flex;justify-content:space-between;align-items:center}
+  .empty-state{text-align:center;padding:2rem;color:var(--text2);font-size:13px}
+  .fee-row{display:flex;align-items:flex-end;gap:6px}
+  .fee-row .field{flex:none;width:140px}
+  .fee-unit{font-size:13px;color:var(--text2);margin-bottom:8px}
+</style>
+</head>
+<body>
+<div class="container">
+  <h1><i class="ti ti-school" aria-hidden="true"></i> Quản lý học phí</h1>
+
+  <div class="tab-row" id="tabRow">
+    <button class="tab active" onclick="switchTab('students')"><i class="ti ti-users" aria-hidden="true"></i> Học sinh</button>
+    <button class="tab" onclick="switchTab('calendar')"><i class="ti ti-calendar" aria-hidden="true"></i> Lịch học</button>
+    <button class="tab" onclick="switchTab('report')"><i class="ti ti-chart-bar" aria-hidden="true"></i> Học phí</button>
+  </div>
+
+  <div id="tab-students">
+    <div class="section">
+      <div class="sec-title">Thêm học sinh mới</div>
+      <div class="row">
+        <div class="field"><label>Tên học sinh</label><input id="inp-name" type="text" placeholder="Ví dụ: Quyền" /></div>
+      </div>
+      <div class="fee-row" style="margin-bottom:8px">
+        <div class="field"><label>Học phí/buổi</label><input id="inp-fee" type="number" value="125000" style="width:140px" /></div>
+        <span class="fee-unit">đ</span>
+      </div>
+      <div class="field" style="margin-bottom:6px"><label>Ngày học trong tuần</label></div>
+      <div class="days-row" id="dayBtns">
+        <button class="day-btn" data-d="1" onclick="toggleDay(this)">T2</button>
+        <button class="day-btn" data-d="2" onclick="toggleDay(this)">T3</button>
+        <button class="day-btn" data-d="3" onclick="toggleDay(this)">T4</button>
+        <button class="day-btn" data-d="4" onclick="toggleDay(this)">T5</button>
+        <button class="day-btn" data-d="5" onclick="toggleDay(this)">T6</button>
+        <button class="day-btn" data-d="6" onclick="toggleDay(this)">T7</button>
+        <button class="day-btn" data-d="0" onclick="toggleDay(this)">CN</button>
+      </div>
+      <div class="row" style="margin-top:8px">
+        <div class="field"><label>Bắt đầu từ ngày</label><input id="inp-start" type="date" value="2026-06-08" /></div>
+      </div>
+      <div style="margin-top:10px">
+        <button class="btn-primary" onclick="addStudent()" style="width:100%;justify-content:center"><i class="ti ti-plus" aria-hidden="true"></i> Thêm học sinh</button>
+      </div>
+    </div>
+    <div class="section">
+      <div class="sec-title">Danh sách học sinh</div>
+      <div class="student-list" id="studentList"><div class="empty-state">Chưa có học sinh nào</div></div>
+    </div>
+  </div>
+
+  <div id="tab-calendar" style="display:none">
+    <div class="section">
+      <div class="cal-nav">
+        <div class="cal-nav-center">
+          <button onclick="changeMonth(-1)"><i class="ti ti-chevron-left" aria-hidden="true"></i></button>
+          <span class="month-title" id="calTitle"></span>
+          <button onclick="changeMonth(1)"><i class="ti ti-chevron-right" aria-hidden="true"></i></button>
+        </div>
+        <div class="search-wrap">
+          <input id="calSearch" type="text" placeholder="Lọc theo tên..." style="width:140px" oninput="renderCalendar()" />
+        </div>
+      </div>
+      <div class="cal-grid" id="calGrid"></div>
+      <div class="legend" id="calLegend"></div>
+    </div>
+  </div>
+
+  <div id="tab-report" style="display:none">
+    <div class="section">
+      <div class="search-wrap" style="margin-bottom:12px">
+        <input id="repSearch" type="text" placeholder="Tìm học sinh..." oninput="renderReport()" />
+        <button onclick="document.getElementById('repSearch').value='';renderReport()"><i class="ti ti-x" aria-hidden="true"></i></button>
+      </div>
+      <div id="reportContent"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const COLORS=[
+  {bg:'#B5D4F4',text:'#0C447C',dot:'#378ADD'},
+  {bg:'#9FE1CB',text:'#085041',dot:'#1D9E75'},
+  {bg:'#FAC775',text:'#633806',dot:'#EF9F27'},
+  {bg:'#F4C0D1',text:'#72243E',dot:'#D4537E'},
+  {bg:'#AFA9EC',text:'#3C3489',dot:'#7F77DD'},
+  {bg:'#F0997B',text:'#712B13',dot:'#D85A30'},
+  {bg:'#C0DD97',text:'#27500A',dot:'#639922'},
+];
+const DAY_SHORT=['CN','T2','T3','T4','T5','T6','T7'];
+const MONTHS=['Tháng 1','Tháng 2','Tháng 3','Tháng 4','Tháng 5','Tháng 6','Tháng 7','Tháng 8','Tháng 9','Tháng 10','Tháng 11','Tháng 12'];
+
+let students=JSON.parse(localStorage.getItem('hocphi_students')||'[]');
+let curYear=new Date().getFullYear(), curMonth=new Date().getMonth();
+let selectedDays=[];
+
+function save(){localStorage.setItem('hocphi_students',JSON.stringify(students));}
+
+function toggleDay(btn){
+  btn.classList.toggle('active');
+  const d=parseInt(btn.dataset.d);
+  if(selectedDays.includes(d)) selectedDays=selectedDays.filter(x=>x!==d);
+  else selectedDays.push(d);
+}
+
+function addStudent(){
+  const name=document.getElementById('inp-name').value.trim();
+  const fee=parseInt(document.getElementById('inp-fee').value)||125000;
+  const start=document.getElementById('inp-start').value;
+  if(!name){alert('Vui lòng nhập tên học sinh');return;}
+  if(selectedDays.length===0){alert('Vui lòng chọn ít nhất 1 ngày học');return;}
+  const color=COLORS[students.length%COLORS.length];
+  students.push({id:Date.now(),name,fee,days:[...selectedDays],start:start||'',color});
+  document.getElementById('inp-name').value='';
+  selectedDays=[];
+  document.querySelectorAll('.day-btn').forEach(b=>b.classList.remove('active'));
+  save();renderStudentList();renderCalendar();renderReport();
+}
+
+function deleteStudent(id){
+  if(!confirm('Xóa học sinh này?')) return;
+  students=students.filter(s=>s.id!==id);
+  save();renderStudentList();renderCalendar();renderReport();
+}
+
+function renderStudentList(){
+  const el=document.getElementById('studentList');
+  if(students.length===0){el.innerHTML='<div class="empty-state">Chưa có học sinh nào</div>';return;}
+  el.innerHTML=students.map(s=>{
+    const days=s.days.map(d=>DAY_SHORT[d]).join(', ');
+    return`<div class="student-row">
+      <div class="student-dot" style="background:${s.color.dot}"></div>
+      <div class="student-name">${s.name}</div>
+      <div class="student-schedule">${days} · ${s.fee.toLocaleString('vi-VN')}đ</div>
+      <button class="del-btn" onclick="deleteStudent(${s.id})" aria-label="Xóa"><i class="ti ti-trash" style="font-size:14px"></i></button>
+    </div>`;
+  }).join('');
+}
+
+function getDaysInMonth(y,m){return new Date(y,m+1,0).getDate();}
+function getFirstDay(y,m){return new Date(y,m,1).getDay();}
+
+function getSessionsInMonth(student,y,m){
+  const total=getDaysInMonth(y,m);
+  const startDate=student.start?new Date(student.start):new Date(0);
+  const sessions=[];
+  for(let d=1;d<=total;d++){
+    const date=new Date(y,m,d);
+    if(date<startDate) continue;
+    if(student.days.includes(date.getDay())) sessions.push(d);
+  }
+  return sessions;
+}
+
+function renderCalendar(){
+  document.getElementById('calTitle').textContent=MONTHS[curMonth]+' · '+curYear;
+  const filter=(document.getElementById('calSearch')||{}).value||'';
+  const visible=filter?students.filter(s=>s.name.toLowerCase().includes(filter.toLowerCase())):students;
+  const daysInMonth=getDaysInMonth(curYear,curMonth);
+  const firstDay=getFirstDay(curYear,curMonth);
+  const offset=(firstDay+6)%7;
+  const today=new Date();
+  const isCurrentMonth=today.getFullYear()===curYear&&today.getMonth()===curMonth;
+
+  let html='<div class="dh">T2</div><div class="dh">T3</div><div class="dh">T4</div><div class="dh">T5</div><div class="dh">T6</div><div class="dh">T7</div><div class="dh">CN</div>';
+  for(let i=0;i<offset;i++) html+='<div class="dc empty"></div>';
+  for(let d=1;d<=daysInMonth;d++){
+    const isToday=isCurrentMonth&&d===today.getDate();
+    const date=new Date(curYear,curMonth,d);
+    let pills='';
+    visible.forEach(s=>{
+      const startDate=s.start?new Date(s.start):new Date(0);
+      if(date>=startDate&&s.days.includes(date.getDay())){
+        pills+=`<span class="sp" style="background:${s.color.bg};color:${s.color.text}">${s.name}</span>`;
+      }
+    });
+    html+=`<div class="dc${isToday?' today':''}"><div class="dn">${d}</div>${pills}</div>`;
+  }
+  const rem=(7-((offset+daysInMonth)%7))%7;
+  for(let i=0;i<rem;i++) html+='<div class="dc empty"></div>';
+  document.getElementById('calGrid').innerHTML=html;
+  document.getElementById('calLegend').innerHTML=visible.map(s=>`<div class="legend-item"><div class="legend-dot" style="background:${s.color.dot}"></div>${s.name}</div>`).join('');
+}
+
+function renderReport(){
+  const filter=(document.getElementById('repSearch')||{}).value||'';
+  const visible=filter?students.filter(s=>s.name.toLowerCase().includes(filter.toLowerCase())):students;
+  const el=document.getElementById('reportContent');
+  if(students.length===0){el.innerHTML='<div class="empty-state">Chưa có học sinh nào. Thêm ở tab Học sinh.</div>';return;}
+  if(visible.length===0){el.innerHTML='<div class="empty-state">Không tìm thấy học sinh nào</div>';return;}
+  let html='';
+  let totalFee=0;
+  visible.forEach(s=>{
+    const sessions=getSessionsInMonth(s,curYear,curMonth);
+    const fee=sessions.length*s.fee;
+    totalFee+=fee;
+    html+=`<div class="student-report">
+      <div class="rep-header">
+        <div class="student-dot" style="background:${s.color.dot};width:10px;height:10px;border-radius:50%"></div>
+        <span style="font-weight:500;font-size:15px">${s.name}</span>
+        <span style="font-size:12px;color:var(--text2)">${s.days.map(d=>DAY_SHORT[d]).join(', ')}</span>
+      </div>
+      <div class="stat-grid">
+        <div class="stat-box"><div class="stat-label">Số buổi</div><div class="stat-val">${sessions.length}</div></div>
+        <div class="stat-box"><div class="stat-label">Đơn giá</div><div class="stat-val" style="font-size:13px">${s.fee.toLocaleString('vi-VN')}đ</div></div>
+        <div class="stat-box" style="background:${s.color.bg}"><div class="stat-label" style="color:${s.color.text}">Học phí</div><div class="stat-val" style="color:${s.color.text};font-size:15px">${fee.toLocaleString('vi-VN')}đ</div></div>
+      </div>
+      <div class="rep-days">Các ngày: ${sessions.length?sessions.join(', '):'Không có buổi học'}</div>
+    </div>`;
+  });
+  if(visible.length>1){
+    html+=`<div class="total-row"><span style="font-size:14px;color:var(--text2)">Tổng ${visible.length} học sinh · ${MONTHS[curMonth]}</span><span style="font-size:18px;font-weight:500">${totalFee.toLocaleString('vi-VN')}đ</span></div>`;
+  }
+  el.innerHTML=html;
+}
+
+function changeMonth(dir){
+  curMonth+=dir;
+  if(curMonth>11){curMonth=0;curYear++;}
+  if(curMonth<0){curMonth=11;curYear--;}
+  renderCalendar();renderReport();
+}
+
+function switchTab(name){
+  ['students','calendar','report'].forEach(t=>{
+    document.getElementById('tab-'+t).style.display=t===name?'':'none';
+  });
+  document.querySelectorAll('.tab').forEach((btn,i)=>{
+    btn.classList.toggle('active',['students','calendar','report'][i]===name);
+  });
+  if(name==='calendar') renderCalendar();
+  if(name==='report') renderReport();
+}
+
+renderStudentList();renderCalendar();renderReport();
+</script>
+</body>
+</html>
