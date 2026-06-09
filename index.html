@@ -273,9 +273,15 @@ function renderStudentList(){
 function getDaysInMonth(y,m){return new Date(y,m+1,0).getDate();}
 function getFirstDay(y,m){return new Date(y,m,1).getDay();}
 
+function parseLocalDate(str){
+  if(!str) return new Date(0);
+  const [y,m,d]=str.split('-').map(Number);
+  return new Date(y,m-1,d);
+}
+
 function getSessionsInMonth(s,y,m){
   const total=getDaysInMonth(y,m);
-  const startDate=s.start?new Date(s.start):new Date(0);
+  const startDate=parseLocalDate(s.start);
   const sessions=[];
   for(let d=1;d<=total;d++){
     const date=new Date(y,m,d);
@@ -298,7 +304,7 @@ function renderCalendar(){
     const date=new Date(curYear,curMonth,d);
     let pills='';
     visible.forEach(s=>{
-      const sd=s.start?new Date(s.start):new Date(0);
+      const sd=parseLocalDate(s.start);
       if(date>=sd&&s.days.includes(date.getDay()))
         pills+=`<span class="sp" style="background:${s.color.bg};color:${s.color.text}">${s.name}</span>`;
     });
