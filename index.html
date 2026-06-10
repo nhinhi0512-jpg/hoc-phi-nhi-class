@@ -369,6 +369,12 @@ button:active {
   gap: 16px;
 }
 
+.cal-nav-center {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
 .month-title {
   font-size: 22px;
   font-weight: 800;
@@ -446,12 +452,30 @@ button:active {
   border-radius: 24px;
   padding: 3px 8px;
   margin-bottom: 5px;
-  display: block;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   cursor: pointer;
-  transition: 0.1s;
+  transition: 0.15s;
+}
+
+.sp .btn-absent-del {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: rgba(0,0,0,0.15);
+  color: inherit;
+  font-size: 9px;
+  margin-left: 4px;
+  cursor: pointer;
+}
+
+.sp .btn-absent-del:hover {
+  background: #C28B77;
+  color: white;
 }
 
 .legend {
@@ -515,7 +539,7 @@ button:active {
   font-size: 13px;
   font-weight: 600;
   color: var(--text2);
-  margin: 8px 0 8px;
+  margin: 6px 0;
 }
 
 .pay-status-row {
@@ -580,7 +604,6 @@ button:active {
     <button class="tab" onclick="switchTab('report')"><i class="ti ti-report-money"></i> Học phí & Nộp tiền</button>
   </div>
 
-  <!-- TAB HỌC SINH -->
   <div id="tab-students">
     <div class="section">
       <div class="sec-title">🍃 Thêm học sinh mới</div>
@@ -609,7 +632,6 @@ button:active {
     </div>
   </div>
 
-  <!-- TAB LỊCH HỌC -->
   <div id="tab-calendar" style="display:none">
     <div class="section">
       <div class="cal-nav">
@@ -627,7 +649,6 @@ button:active {
     </div>
   </div>
 
-  <!-- TAB HỌC PHÍ & NỘP TIỀN -->
   <div id="tab-report" style="display:none">
     <div class="section">
       <div class="search-wrap" style="margin-bottom:18px">
@@ -646,7 +667,6 @@ let students = [];
 let curYear = new Date().getFullYear();
 let curMonth = new Date().getMonth();
 
-// Bộ màu dịu, trung tính - tông xám nhạt, xanh sage, pastel ấm 
 function getPastelColorSoft(seed) {
   const palette = [
     {bg:'#DDE5DF', text:'#3A5C4F', dot:'#6A8E7C'},
@@ -665,12 +685,13 @@ function loadData() {
     students = JSON.parse(raw);
     students.forEach(s => {
       if (!s.payments) s.payments = {};
+      if (!s.absents) s.absents = {}; 
       if (!s.color) s.color = getPastelColorSoft(s.id);
     });
   } else {
     students = [];
-    const demo1 = { id: Date.now()+1, name: "Bảo Anh", fee: 140000, days: [2,4,6], start: "2026-06-01", payments: {}, color: getPastelColorSoft(Date.now()+1) };
-    const demo2 = { id: Date.now()+2, name: "Minh Khang", fee: 155000, days: [1,3,5], start: "2026-06-01", payments: {"2026-06": true}, color: getPastelColorSoft(Date.now()+2) };
+    const demo1 = { id: Date.now()+1, name: "Bảo Anh", fee: 140000, days: [2,4,6], start: "2026-06-01", payments: {}, absents: {}, color: getPastelColorSoft(Date.now()+1) };
+    const demo2 = { id: Date.now()+2, name: "Minh Khang", fee: 155000, days: [1,3,5], start: "2026-06-01", payments: {"2026-06": true}, absents: {}, color: getPastelColorSoft(Date.now()+2) };
     students.push(demo1, demo2);
   }
   save();
@@ -687,7 +708,7 @@ function addStudent() {
   if (!name) { alert('Vui lòng nhập tên'); return; }
   if (!selectedDays.length) { alert('Chọn ít nhất 1 ngày học'); return; }
   const newId = Date.now();
-  students.push({ id: newId, name, fee, days: [...selectedDays], start, payments: {}, color: getPastelColorSoft(newId) });
+  students.push({ id: newId, name, fee, days: [...selectedDays], start, payments: {}, absents: {}, color: getPastelColorSoft(newId) });
   document.getElementById('inp-name').value = '';
   selectedDays = [];
   document.querySelectorAll('#dayBtns .day-btn').forEach(b=>b.classList.remove('active'));
@@ -709,27 +730,59 @@ function saveEdit(id) {
 function toggleEditDay(btn) { btn.classList.toggle('active'); }
 
 function getMonthKey(y,m){ return `${y}-${String(m+1).padStart(2,'0')}`; }
+
+// Tính toán tháng trước đó gối đầu
+function getPreviousMonthKey(y, m) {
+  let prevM = m - 1;
+  let prevY = y;
+  if (prevM < 0) {
+    prevM = 11;
+    prevY--;
+  }
+  return { year: prevY, month: prevM, key: getMonthKey(prevY, prevM) };
+}
+
 function togglePaymentStatus(studentId, year, month) {
   const student = students.find(s=>s.id===studentId);
   if(!student) return;
   const key = getMonthKey(year, month);
   if(!student.payments) student.payments={};
   student.payments[key] = !(student.payments[key]||false);
-  save();
-  renderReport();
-  renderCalendar();
-  renderStudentList();
+  save(); renderReport(); renderCalendar(); renderStudentList();
 }
 function getPaymentStatus(student, year, month) { const key = getMonthKey(year, month); return !!(student.payments && student.payments[key]); }
 
+function toggleAbsent(studentId, year, month, dateNum) {
+  const student = students.find(s=>s.id===studentId);
+  if(!student) return;
+  const key = getMonthKey(year, month);
+  if(!student.absents) student.absents = {};
+  if(!student.absents[key]) student.absents[key] = [];
+
+  if(student.absents[key].includes(dateNum)) {
+    student.absents[key] = student.absents[key].filter(d => d !== dateNum);
+  } else {
+    if(confirm(`Xác nhận học sinh ${student.name} nghỉ ngày ${dateNum}/${month+1}? (Buổi này sẽ được gối đầu trừ tiền vào tháng tiếp theo)`)) {
+      student.absents[key].push(dateNum);
+    } else {
+      return;
+    }
+  }
+  save(); renderCalendar(); renderReport();
+}
+
 function parseLocalDate(str) { if(!str) return new Date(0); const [y,m,d]=str.split('-').map(Number); return new Date(y,m-1,d); }
-function getSessionsInMonth(student, year, month) {
+
+// Hàm đếm số buổi học CỐ ĐỊNH / DỰ KIẾN theo lịch trong tuần (Thu đầu tháng luôn đếm đủ số buổi này)
+function getPlannedSessionsInMonth(student, year, month) {
   const total = new Date(year, month+1, 0).getDate();
   const startDate = parseLocalDate(student.start);
   const sessions = [];
-  for(let d=1;d<=total;d++) {
+  for(let d=1; d<=total; d++) {
     const date = new Date(year, month, d);
-    if(date>=startDate && student.days.includes(date.getDay())) sessions.push(d);
+    if(date >= startDate && student.days.includes(date.getDay())) {
+      sessions.push(d);
+    }
   }
   return sessions;
 }
@@ -776,15 +829,26 @@ function renderCalendar() {
   const today = new Date(); const isNow = (today.getFullYear()===curYear && today.getMonth()===curMonth);
   let html = '<div class="dh">T2</div><div class="dh">T3</div><div class="dh">T4</div><div class="dh">T5</div><div class="dh">T6</div><div class="dh">T7</div><div class="dh">CN</div>';
   for(let i=0;i<offset;i++) html+='<div class="dc empty"></div>';
+  
   for(let d=1;d<=daysInMonth;d++){
     const date = new Date(curYear, curMonth, d);
     let pills = '';
     visible.forEach(s=>{
       const sd = parseLocalDate(s.start);
       if(date>=sd && s.days.includes(date.getDay())){
-        const paid = getPaymentStatus(s, curYear, curMonth);
-        const icon = paid ? ' ✓' : ' ⏳';
-        pills+=`<span class="sp" style="background:${s.color.bg};color:${s.color.text}; font-weight:bold;">${s.name}${icon}</span>`;
+        const key = getMonthKey(curYear, curMonth);
+        const isAbsent = s.absents && s.absents[key] && s.absents[key].includes(d);
+        
+        if (isAbsent) {
+          pills+=`<span class="sp" onclick="toggleAbsent(${s.id}, ${curYear}, ${curMonth}, ${d})" style="background:#EAE6E1; color:var(--text3); text-decoration: line-through; font-weight:normal;" title="Nhấp vào để khôi phục buổi học này">${s.name} (Nghỉ)</span>`;
+        } else {
+          const paid = getPaymentStatus(s, curYear, curMonth);
+          const icon = paid ? ' ✓' : ' ⏳';
+          pills+=`<span class="sp" style="background:${s.color.bg};color:${s.color.text}; font-weight:bold;">
+            <span>${s.name}${icon}</span>
+            <span class="btn-absent-del" onclick="event.stopPropagation(); toggleAbsent(${s.id}, ${curYear}, ${curMonth}, ${d})" title="Đánh dấu nghỉ buổi này">✕</span>
+          </span>`;
+        }
       }
     });
     const todayClass = (isNow && d===today.getDate()) ? ' today' : '';
@@ -804,26 +868,62 @@ function renderReport() {
   if(!visible.length){ el.innerHTML='<div class="empty-state">🔎 Không tìm thấy học sinh</div>'; return; }
   let totalSum = 0;
   let html='';
+  
   visible.forEach(s=>{
-    const sessions = getSessionsInMonth(s, curYear, curMonth);
-    const feeTotal = sessions.length * s.fee;
-    totalSum += feeTotal;
+    // 1. Tính toán số buổi dự tính của tháng HIỆN TẠI (Đầu tháng thu đủ số này)
+    const currentPlannedSessions = getPlannedSessionsInMonth(s, curYear, curMonth);
+    const feePlanned = currentPlannedSessions.length * s.fee;
+    
+    // 2. Lấy thông tin số buổi nghỉ từ THÁNG TRƯỚC để trừ tiền gối đầu
+    const prev = getPreviousMonthKey(curYear, curMonth);
+    const prevAbsentDays = (s.absents && s.absents[prev.key]) ? s.absents[prev.key] : [];
+    const countPrevAbsents = prevAbsentDays.length;
+    const refundAmount = countPrevAbsents * s.fee;
+    
+    // 3. Tính số tiền thực thu của tháng này sau khi trừ đi tiền nghỉ tháng trước
+    const finalFeeTotal = Math.max(0, feePlanned - refundAmount);
+    totalSum += finalFeeTotal;
+    
     const isPaid = getPaymentStatus(s, curYear, curMonth);
+    const currentMonthKey = getMonthKey(curYear, curMonth);
+    const currentMonthAbsents = (s.absents && s.absents[currentMonthKey]) ? s.absents[currentMonthKey] : [];
+
     html+=`<div class="student-report">
-      <div class="rep-header"><div style="width:14px;height:14px;border-radius:50%;background:${s.color.dot}"></div><span style="font-weight:800;font-size:17px;">${s.name}</span><span style="background:var(--bg);padding:3px 14px;border-radius:30px;font-size:12px;font-weight:600;">${s.days.map(d=>DAY_SHORT[d]).join(', ')}</span></div>
-      <div class="stat-grid">
-        <div class="stat-box"><div class="stat-label">Số buổi</div><div class="stat-val">${sessions.length}</div></div>
-        <div class="stat-box"><div class="stat-label">Đơn giá</div><div class="stat-val" style="font-size:15px;">${s.fee.toLocaleString('vi-VN')}đ</div></div>
-        <div class="stat-box" style="background:${s.color.bg};"><div class="stat-label" style="color:${s.color.text}">Học phí tháng</div><div class="stat-val" style="color:${s.color.text}">${feeTotal.toLocaleString('vi-VN')}đ</div></div>
+      <div class="rep-header">
+        <div style="width:14px;height:14px;border-radius:50%;background:${s.color.dot}"></div>
+        <span style="font-weight:800;font-size:17px;">${s.name}</span>
+        <span style="background:var(--bg);padding:3px 14px;border-radius:30px;font-size:12px;font-weight:600;">${s.days.map(d=>DAY_SHORT[d]).join(', ')}</span>
       </div>
-      <div class="rep-days">📅 Ngày học: ${sessions.length?sessions.join(', '):'Không có buổi'}</div>
+      
+      <div class="stat-grid">
+        <div class="stat-box">
+          <div class="stat-label">Dự tính tháng này</div>
+          <div class="stat-val" style="font-size:16px; font-weight:700;">${currentPlannedSessions.length} buổi<br><span style="font-size:13px; color:var(--text2); font-weight:normal;">(${feePlanned.toLocaleString('vi-VN')}đ)</span></div>
+        </div>
+        <div class="stat-box" style="border-color: var(--unpaid-text);">
+          <div class="stat-label" style="color: var(--unpaid-text); font-weight:700;">Trừ tháng trước (${MONTHS[prev.month]})</div>
+          <div class="stat-val" style="font-size:16px; color: var(--unpaid-text); font-weight:700;">-${countPrevAbsents} buổi<br><span style="font-size:13px; font-weight:normal;">(-${refundAmount.toLocaleString('vi-VN')}đ)</span></div>
+        </div>
+        <div class="stat-box" style="background:${s.color.bg};">
+          <div class="stat-label" style="color:${s.color.text}; font-weight:700;">Thực thu tháng này</div>
+          <div class="stat-val" style="color:${s.color.text}; font-weight:800; font-size:20px;">${finalFeeTotal.toLocaleString('vi-VN')}đ</div>
+        </div>
+      </div>
+      
+      <div class="rep-days">📅 Lịch học tháng này: ${currentPlannedSessions.length ? currentPlannedSessions.join(', ') : 'Không có lịch'}</div>
+      <div class="rep-days" style="color: #A08060;">⚠️ Số buổi nghỉ tháng trước được trừ: ${countPrevAbsents > 0 ? prevAbsentDays.sort((a,b)=>a-b).map(d=>d+'/'+(prev.month+1)).join(', ') : 'Không có'}</div>
+      <div class="rep-days" style="color: var(--text3); font-style: italic; font-size:12px;">ℹ️ Trong tháng này bé đã nghỉ ${currentMonthAbsents.length} buổi (ngày ${currentMonthAbsents.join(', ')}), số buổi này sẽ tự động được gối đầu trừ vào học phí của tháng sau.</div>
+      
       <div class="pay-status-row">
-        <button class="pay-status-btn ${isPaid?'paid':''}" onclick="togglePaymentStatus(${s.id}, ${curYear}, ${curMonth})"><i class="ti ti-${isPaid?'check':'circle-x'}"></i> ${isPaid?'✅ Đã nộp học phí':'⏳ Chưa nộp học phí'}</button>
-        <span style="font-size:13px; font-weight:500;">✏️ Nhấn để cập nhật</span>
+        <button class="pay-status-btn ${isPaid?'paid':''}" onclick="togglePaymentStatus(${s.id}, ${curYear}, ${curMonth})">
+          <i class="ti ti-${isPaid?'check':'circle-x'}"></i> ${isPaid?'✅ Đã nộp học phí':'⏳ Chưa nộp học phí'}
+        </button>
+        <span style="font-size:13px; font-weight: 500;">✏️ Nhấp để cập nhật trạng thái đóng đầu tháng</span>
       </div>
     </div>`;
   });
-  if(visible.length) html+=`<div class="total-row"><span>📊 Tổng cộng (${MONTHS[curMonth]}) · ${visible.length} học sinh</span><span style="font-size:24px;font-weight:800;">${totalSum.toLocaleString('vi-VN')}đ</span></div>`;
+  
+  if(visible.length) html+=`<div class="total-row"><span>📊 Tổng thực thu (${MONTHS[curMonth]}) · ${visible.length} học sinh</span><span style="font-size:24px;font-weight:800;">${totalSum.toLocaleString('vi-VN')}đ</span></div>`;
   el.innerHTML = html;
 }
 
