@@ -16,17 +16,17 @@
 }
 
 :root {
-  --bg: #F4F2EF;           /* nền chính: xám ấm rất nhẹ, dịu mắt */
-  --bg2: #EAE6E1;          /* nền phụ: be ấm */
-  --bg3: #DDD8D1;          /* nền bao ngoài: xám be trầm */
-  --text: #2C2A29;         /* gần đen, tương phản tốt nhưng mềm */
-  --text2: #6F6A64;        /* xám nâu nhẹ */
+  --bg: #F4F2EF;
+  --bg2: #EAE6E1;
+  --bg3: #DDD8D1;
+  --text: #2C2A29;
+  --text2: #6F6A64;
   --text3: #928B82;
   --border: rgba(120, 100, 85, 0.25);
   --border2: rgba(100, 80, 65, 0.4);
   --radius: 12px;
   --radius-lg: 20px;
-  --accent: #7B9E87;       /* xanh sage chính - dịu, tự nhiên */
+  --accent: #7B9E87;
   --accent-dark: #5E7D68;
   --accent-light: #C2D5C8;
   --paid-bg: #BED3C3;
@@ -675,7 +675,7 @@ button:active {
 </div>
 
 <script>
-// ========== FIREBASE CONFIG CỦA BẠN ==========
+// ========== FIREBASE CONFIG ==========
 const firebaseConfig = {
   apiKey: "AIzaSyAGr5zM79FPI5X8cL0ePNSoHU8o8rhfvOI",
   authDomain: "hethong-tuvung.firebaseapp.com",
@@ -694,7 +694,8 @@ const studentsRef = database.ref('students');
 
 const DAY_SHORT = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
 const MONTHS = ['Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5', 'Tháng 6', 'Tháng 7', 'Tháng 8', 'Tháng 9', 'Tháng 10', 'Tháng 11', 'Tháng 12'];
-let students = [];
+let students = {}; // CHUYỂN SANG OBJECT
+let studentsArray = []; // Dùng cho render
 let curYear = new Date().getFullYear();
 let curMonth = new Date().getMonth();
 let selectedDays = [];
@@ -725,10 +726,13 @@ function updateSyncStatus(status) {
   }
 }
 
+// ========== CHỈNH SỬA HÀM LƯU ==========
 function saveToFirebase() {
   if (isSyncing) return;
   isSyncing = true;
   updateSyncStatus('💾 Đang lưu...');
+  
+  // Lưu trực tiếp object (không cần chuyển đổi)
   studentsRef.set(students).then(() => {
     updateSyncStatus('✅ Đã đồng bộ');
   }).catch((error) => {
@@ -739,22 +743,47 @@ function saveToFirebase() {
   });
 }
 
-// Load dữ liệu từ Firebase realtime
+// ========== CHỈNH SỬA HÀM ĐỌC DỮ LIỆU ==========
 studentsRef.on('value', (snapshot) => {
   const data = snapshot.val();
-  if (data && Array.isArray(data)) {
+  if (data && typeof data === 'object') {
+    // Dữ liệu là object, giữ nguyên
     students = data;
-    students.forEach(s => {
+    // Chuyển thành mảng để render
+    studentsArray = Object.keys(students).map(key => {
+      const s = students[key];
       if (!s.payments) s.payments = {};
       if (!s.absents) s.absents = {};
-      if (!s.color) s.color = getPastelColorSoft(s.id);
+      if (!s.color) s.color = getPastelColorSoft(s.id || parseInt(key));
+      return s;
     });
   } else {
     // Khởi tạo dữ liệu mẫu nếu chưa có
-    students = [];
-    const demo1 = { id: Date.now()+1, name: "Bảo Anh", fee: 140000, days: [2,4,6], start: "2026-06-01", payments: {}, absents: {}, color: getPastelColorSoft(Date.now()+1) };
-    const demo2 = { id: Date.now()+2, name: "Minh Khang", fee: 155000, days: [1,3,5], start: "2026-06-01", payments: {"2026-06": true}, absents: {}, color: getPastelColorSoft(Date.now()+2) };
-    students.push(demo1, demo2);
+    const demo1 = { 
+      id: Date.now()+1, 
+      name: "Bảo Anh", 
+      fee: 140000, 
+      days: [2,4,6], 
+      start: "2026-06-01", 
+      payments: {}, 
+      absents: {}, 
+      color: getPastelColorSoft(Date.now()+1) 
+    };
+    const demo2 = { 
+      id: Date.now()+2, 
+      name: "Minh Khang", 
+      fee: 155000, 
+      days: [1,3,5], 
+      start: "2026-06-01", 
+      payments: {"2026-06": true}, 
+      absents: {}, 
+      color: getPastelColorSoft(Date.now()+2) 
+    };
+    
+    students = {};
+    students[demo1.id] = demo1;
+    students[demo2.id] = demo2;
+    studentsArray = [demo1, demo2];
     saveToFirebase();
   }
   renderStudentList();
@@ -780,7 +809,7 @@ function addStudent() {
   if (!name) { alert('Vui lòng nhập tên'); return; }
   if (!selectedDays.length) { alert('Chọn ít nhất 1 ngày học'); return; }
   const newId = Date.now();
-  students.push({ 
+  const newStudent = { 
     id: newId, 
     name, 
     fee, 
@@ -789,7 +818,12 @@ function addStudent() {
     payments: {}, 
     absents: {}, 
     color: getPastelColorSoft(newId) 
-  });
+  };
+  
+  // Thêm vào object với key là id
+  students[newId] = newStudent;
+  studentsArray.push(newStudent);
+  
   document.getElementById('inp-name').value = '';
   selectedDays = [];
   document.querySelectorAll('#dayBtns .day-btn').forEach(b=>b.classList.remove('active'));
@@ -798,7 +832,8 @@ function addStudent() {
 
 function deleteStudent(id) { 
   if(!confirm('Xóa học sinh?')) return; 
-  students = students.filter(s=>s.id!==id); 
+  delete students[id];
+  studentsArray = studentsArray.filter(s => s.id !== id);
   saveToFirebase(); 
 }
 
@@ -810,7 +845,7 @@ function toggleEdit(id) {
 }
 
 function saveEdit(id) {
-  const s = students.find(x=>x.id===id); 
+  const s = students[id];
   if(!s) return;
   const name = document.getElementById('ename-'+id).value.trim();
   const fee = parseInt(document.getElementById('efee-'+id).value) || s.fee;
@@ -820,6 +855,13 @@ function saveEdit(id) {
   if(!name){alert('Tên không được trống');return;}
   if(!days.length){alert('Chọn ngày học');return;}
   s.name=name; s.fee=fee; s.start=start; s.days=days;
+  
+  // Cập nhật trong studentsArray
+  const idx = studentsArray.findIndex(x => x.id === id);
+  if (idx !== -1) {
+    studentsArray[idx] = s;
+  }
+  
   saveToFirebase();
 }
 
@@ -840,11 +882,18 @@ function getPreviousMonthKey(y, m) {
 }
 
 function togglePaymentStatus(studentId, year, month) {
-  const student = students.find(s=>s.id===studentId);
+  const student = students[studentId];
   if(!student) return;
   const key = getMonthKey(year, month);
   if(!student.payments) student.payments={};
   student.payments[key] = !(student.payments[key]||false);
+  
+  // Cập nhật trong studentsArray
+  const idx = studentsArray.findIndex(x => x.id === studentId);
+  if (idx !== -1) {
+    studentsArray[idx] = student;
+  }
+  
   saveToFirebase();
 }
 
@@ -854,7 +903,7 @@ function getPaymentStatus(student, year, month) {
 }
 
 function toggleAbsent(studentId, year, month, dateNum) {
-  const student = students.find(s=>s.id===studentId);
+  const student = students[studentId];
   if(!student) return;
   const key = getMonthKey(year, month);
   if(!student.absents) student.absents = {};
@@ -869,6 +918,13 @@ function toggleAbsent(studentId, year, month, dateNum) {
       return;
     }
   }
+  
+  // Cập nhật trong studentsArray
+  const idx = studentsArray.findIndex(x => x.id === studentId);
+  if (idx !== -1) {
+    studentsArray[idx] = student;
+  }
+  
   saveToFirebase();
 }
 
@@ -893,8 +949,8 @@ function getPlannedSessionsInMonth(student, year, month) {
 
 function renderStudentList() {
   const el = document.getElementById('studentList');
-  if(!students.length){ el.innerHTML='<div class="empty-state">🍃 Chưa có học sinh</div>'; return; }
-  el.innerHTML = students.map(s=>{
+  if(!studentsArray.length){ el.innerHTML='<div class="empty-state">🍃 Chưa có học sinh</div>'; return; }
+  el.innerHTML = studentsArray.map(s=>{
     const dayStr = s.days.map(d=>DAY_SHORT[d]).join(', ');
     const dayBtns = DAY_SHORT.map((lbl,i)=>`<button class="day-btn${s.days.includes(i)?' active':''}" data-d="${i}" onclick="toggleEditDay(this)">${lbl}</button>`).join('');
     const isPaid = getPaymentStatus(s, curYear, curMonth);
@@ -926,7 +982,7 @@ function renderStudentList() {
 function renderCalendar() {
   document.getElementById('calTitle').innerText = MONTHS[curMonth]+' · '+curYear;
   const filter = document.getElementById('calSearch')?.value || '';
-  const visible = filter ? students.filter(s=>s.name.toLowerCase().includes(filter.toLowerCase())) : students;
+  const visible = filter ? studentsArray.filter(s=>s.name.toLowerCase().includes(filter.toLowerCase())) : studentsArray;
   const daysInMonth = new Date(curYear, curMonth+1, 0).getDate();
   const firstDay = new Date(curYear, curMonth, 1).getDay();
   let offset = (firstDay + 6) % 7;
@@ -966,9 +1022,9 @@ function renderCalendar() {
 
 function renderReport() {
   const filter = document.getElementById('repSearch')?.value || '';
-  const visible = filter ? students.filter(s=>s.name.toLowerCase().includes(filter.toLowerCase())) : students;
+  const visible = filter ? studentsArray.filter(s=>s.name.toLowerCase().includes(filter.toLowerCase())) : studentsArray;
   const el = document.getElementById('reportContent');
-  if(!students.length){ el.innerHTML='<div class="empty-state">Chưa có dữ liệu</div>'; return; }
+  if(!studentsArray.length){ el.innerHTML='<div class="empty-state">Chưa có dữ liệu</div>'; return; }
   if(!visible.length){ el.innerHTML='<div class="empty-state">🔎 Không tìm thấy học sinh</div>'; return; }
   let totalSum = 0;
   let html='';
@@ -1013,7 +1069,7 @@ function renderReport() {
       
       <div class="rep-days">📅 Lịch học tháng này: ${currentPlannedSessions.length ? currentPlannedSessions.join(', ') : 'Không có lịch'}</div>
       <div class="rep-days" style="color: #A08060;">⚠️ Số buổi nghỉ tháng trước được trừ: ${countPrevAbsents > 0 ? prevAbsentDays.sort((a,b)=>a-b).map(d=>d+'/'+(prev.month+1)).join(', ') : 'Không có'}</div>
-      <div class="rep-days" style="color: var(--text3); font-style: italic; font-size:12px;">ℹ️ Trong tháng này học sinh đã nghỉ ${currentMonthAbsents.length} buổi (ngày ${currentMonthAbsents.join(', ')}), số buổi này sẽ tự động được trừ vào học phí của tháng sau.</div>
+      <div class="rep-days" style="color: var(--text3); font-style: italic; font-size:12px;">ℹ️ Trong tháng này bé đã nghỉ ${currentMonthAbsents.length} buổi (ngày ${currentMonthAbsents.join(', ')}), số buổi này sẽ tự động được gối đầu trừ vào học phí của tháng sau.</div>
       
       <div class="pay-status-row">
         <button class="pay-status-btn ${isPaid?'paid':''}" onclick="togglePaymentStatus(${s.id}, ${curYear}, ${curMonth})">
