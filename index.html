@@ -31,7 +31,7 @@
 }
 body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg3); color: var(--text); min-height: 100vh; font-size: 16px; }
 .container { max-width: 1360px; width: 94%; margin: 0 auto; padding: 1.5rem 1.2rem; }
-h1 { font-size: 28px; font-weight: 600; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 10px; color: var(--accent-dark); }
+h1 { font-size: 28px; font-weight: 600; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 10px; color: var(--accent-dark); flex-wrap: wrap; }
 .section { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 1.6rem 2rem; margin-bottom: 1.8rem; box-shadow: 0 6px 14px rgba(0,0,0,0.03); }
 .sec-title { font-size: 15px; font-weight: 700; color: var(--accent-dark); margin-bottom: 18px; text-transform: uppercase; letter-spacing: 0.05em; }
 .field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 18px; }
@@ -50,18 +50,19 @@ button:active { transform: scale(0.97); }
 .fee-row input { width: 180px; }
 .student-list { display: flex; flex-direction: column; gap: 14px; }
 .student-row { background: var(--bg2); border-radius: 20px; overflow: hidden; border: 1px solid var(--border); }
-.student-main { display: flex; align-items: center; flex-wrap: wrap; gap: 14px; padding: 14px 18px; }
-.student-dot { width: 14px; height: 14px; border-radius: 50%; flex-shrink: 0; box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
-.student-name { font-weight: 700; font-size: 17px; flex: 1; min-width: 130px; color: var(--text); }
-.student-schedule { font-size: 13px; font-weight: 600; color: var(--accent-dark); background: var(--bg); padding: 5px 14px; border-radius: 30px; }
-.payment-badge { font-size: 13px; font-weight: 700; padding: 5px 14px; border-radius: 50px; background: var(--unpaid-bg); color: var(--unpaid-text); display: inline-flex; align-items: center; gap: 6px; cursor: pointer; transition: 0.15s; border: 1px solid rgba(0,0,0,0.05); }
+.student-main { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; padding: 12px 16px; }
+.student-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
+.student-name { font-weight: 700; font-size: 16px; flex: 1; min-width: 100px; color: var(--text); }
+.student-schedule { font-size: 12px; font-weight: 600; color: var(--accent-dark); background: var(--bg); padding: 4px 12px; border-radius: 30px; }
+.payment-badge { font-size: 12px; font-weight: 700; padding: 4px 12px; border-radius: 50px; background: var(--unpaid-bg); color: var(--unpaid-text); display: inline-flex; align-items: center; gap: 6px; cursor: pointer; transition: 0.15s; border: 1px solid rgba(0,0,0,0.05); }
 .payment-badge.paid { background: var(--paid-bg); color: var(--paid-text); }
 .payment-badge:hover { filter: brightness(0.92); transform: scale(0.97); }
-.student-actions { display: flex; gap: 8px; }
-.act-btn { background: var(--bg); border: 1px solid var(--border2); border-radius: 30px; padding: 5px 14px; font-size: 13px; font-weight: 600; cursor: pointer; }
+.student-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+.act-btn { background: var(--bg); border: 1px solid var(--border2); border-radius: 30px; padding: 4px 12px; font-size: 12px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; }
+.act-btn i { font-size: 14px; }
 .act-btn.edit:hover { background: var(--accent); color: white; border-color: var(--accent); }
 .act-btn.del:hover { background: #C28B77; border-color: #C28B77; color: white; }
-.edit-panel { border-top: 1.5px solid var(--border); padding: 18px; background: var(--bg); display: none; }
+.edit-panel { border-top: 1.5px solid var(--border); padding: 16px 18px; background: var(--bg); display: none; }
 .edit-panel.open { display: block; }
 .edit-btns { display: flex; gap: 14px; margin-top: 18px; }
 .btn-save { background: var(--accent); color: white; border: none; font-weight: bold; }
@@ -93,13 +94,31 @@ button:active { transform: scale(0.97); }
 .stat-label { font-size: 12px; font-weight: 600; color: var(--text2); }
 .stat-val { font-size: 22px; font-weight: 800; margin-top: 6px; color: var(--accent-dark); }
 .rep-days { font-size: 13px; font-weight: 600; color: var(--text2); margin: 6px 0; }
-.pay-status-row { display: flex; justify-content: space-between; align-items: center; margin-top: 16px; padding-top: 14px; border-top: 2px dashed var(--border); }
+.pay-status-row { display: flex; justify-content: space-between; align-items: center; margin-top: 16px; padding-top: 14px; border-top: 2px dashed var(--border); flex-wrap: wrap; gap: 10px; }
 .pay-status-btn { font-size: 14px; font-weight: 800; padding: 8px 18px; border-radius: 40px; background: var(--unpaid-bg); color: var(--unpaid-text); border: none; cursor: pointer; transition: 0.2s; }
 .pay-status-btn.paid { background: var(--paid-bg); color: var(--paid-text); }
 .pay-status-btn:hover { filter: brightness(0.9); transform: scale(0.97); }
-.total-row { background: var(--bg); border-radius: 24px; padding: 16px 20px; display: flex; justify-content: space-between; align-items: center; margin-top: 12px; font-weight: 800; font-size: 16px; border: 1px solid var(--accent-light); }
+.total-row { background: var(--bg); border-radius: 24px; padding: 16px 20px; display: flex; justify-content: space-between; align-items: center; margin-top: 12px; font-weight: 800; font-size: 16px; border: 1px solid var(--accent-light); flex-wrap: wrap; gap: 10px; }
 .empty-state { text-align: center; padding: 2.5rem; color: var(--text3); font-weight: 500; }
 .sync-status { font-size: 12px; background: var(--bg2); padding: 4px 12px; border-radius: 40px; margin-left: 10px; color: var(--accent-dark); }
+
+/* Responsive */
+@media (max-width: 768px) {
+  .container { width: 98%; padding: 0.8rem; }
+  .section { padding: 1rem; }
+  .student-main { gap: 8px; padding: 10px 12px; }
+  .student-name { font-size: 14px; min-width: 80px; }
+  .stat-grid { grid-template-columns: 1fr; }
+  .cal-grid { font-size: 12px; }
+  .dc { min-height: 70px; padding: 4px; }
+  .dh { padding: 8px 2px; font-size: 11px; }
+  .sp { font-size: 10px; padding: 2px 6px; }
+  .fee-row { flex-wrap: wrap; }
+  .fee-row input { width: 100%; }
+  .search-wrap input { width: 150px; }
+  .tab { padding: 8px 16px; font-size: 14px; }
+  h1 { font-size: 20px; }
+}
 </style>
 </head>
 <body>
@@ -196,10 +215,12 @@ let curYear = new Date().getFullYear();
 let curMonth = new Date().getMonth();
 let selectedDays = [];
 let isSyncing = false;
+let isInitialLoad = true;
 
 function updateStudentsArray() {
   studentsArray = Object.keys(students).map(key => {
     const s = students[key];
+    // Đảm bảo id là number
     if (!s.id) s.id = parseInt(key);
     if (!s.payments) s.payments = {};
     if (!s.absents) s.absents = {};
@@ -293,6 +314,7 @@ studentsRef.on('value', (snapshot) => {
   renderCalendar();
   renderReport();
   updateSyncStatus('✅ Đã đồng bộ');
+  isInitialLoad = false;
 }, (error) => {
   console.error('❌ Lỗi đọc Firebase:', error);
   updateSyncStatus('❌ Không thể kết nối Firebase');
@@ -342,8 +364,15 @@ function addStudent() {
 }
 
 function deleteStudent(id) { 
-  if(!confirm('Xóa học sinh này?')) return; 
-  delete students[id];
+  // Chuyển đổi id sang string để so sánh với key trong object
+  const idStr = String(id);
+  if(!students[idStr]) {
+    console.error('❌ Không tìm thấy học sinh với ID:', id);
+    alert('Không tìm thấy học sinh!');
+    return;
+  }
+  if(!confirm(`Xóa học sinh "${students[idStr].name}"?`)) return; 
+  delete students[idStr];
   updateStudentsArray();
   saveToFirebase();
   renderStudentList();
@@ -360,7 +389,8 @@ function toggleEdit(id) {
 }
 
 function saveEdit(id) {
-  const s = students[id];
+  const idStr = String(id);
+  const s = students[idStr];
   if(!s) { alert('Không tìm thấy học sinh!'); return; }
   
   const name = document.getElementById('ename-'+id).value.trim();
@@ -398,16 +428,16 @@ function getPreviousMonthKey(y, m) {
   return { year: prevY, month: prevM, key: getMonthKey(prevY, prevM) };
 }
 
-// ===== SỬA LẠI HÀM TOGGLE PAYMENT =====
+// ===== SỬA LỖI TOGGLE PAYMENT =====
 function togglePaymentStatus(studentId, year, month) {
   console.log('💰 Toggle payment status - ID:', studentId, 'Year:', year, 'Month:', month);
   
-  // Chuyển đổi studentId sang number nếu cần
-  const id = typeof studentId === 'string' ? parseInt(studentId) : studentId;
-  const student = students[id];
+  // Chuyển đổi studentId sang string để so sánh với key trong object
+  const idStr = String(studentId);
+  const student = students[idStr];
   
   if(!student) { 
-    console.error('❌ Không tìm thấy học sinh với ID:', id);
+    console.error('❌ Không tìm thấy học sinh với ID:', studentId);
     console.log('📋 Danh sách students:', Object.keys(students));
     alert('Không tìm thấy học sinh! Vui lòng refresh trang và thử lại.'); 
     return; 
@@ -431,16 +461,16 @@ function getPaymentStatus(student, year, month) {
   return !!(student.payments && student.payments[key]); 
 }
 
-// ===== SỬA LẠI HÀM TOGGLE ABSENT =====
+// ===== SỬA LỖI TOGGLE ABSENT =====
 function toggleAbsent(studentId, year, month, dateNum) {
   console.log('📅 Toggle absent - ID:', studentId, 'Year:', year, 'Month:', month, 'Date:', dateNum);
   
-  // Chuyển đổi studentId sang number nếu cần
-  const id = typeof studentId === 'string' ? parseInt(studentId) : studentId;
-  const student = students[id];
+  // Chuyển đổi studentId sang string để so sánh với key trong object
+  const idStr = String(studentId);
+  const student = students[idStr];
   
   if(!student) { 
-    console.error('❌ Không tìm thấy học sinh với ID:', id);
+    console.error('❌ Không tìm thấy học sinh với ID:', studentId);
     console.log('📋 Danh sách students:', Object.keys(students));
     alert('Không tìm thấy học sinh! Vui lòng refresh trang và thử lại.'); 
     return; 
@@ -508,7 +538,7 @@ function renderStudentList() {
         <div class="payment-badge ${isPaid?'paid':''}" onclick="switchTab('report'); setTimeout(()=>{document.getElementById('repSearch').value='${s.name}';renderReport();},50)">💰 ${statusLabel}</div>
         <div class="student-actions">
           <button class="act-btn edit" onclick="toggleEdit(${s.id})"><i class="ti ti-edit"></i> Sửa</button>
-          <button class="act-btn del" onclick="deleteStudent(${s.id})"><i class="ti ti-trash"></i> Xóa</button>
+          <button class="act-btn del" onclick="deleteStudent(${s.id})"><i class="ti ti-trash"></i></button>
         </div>
       </div>
       <div class="edit-panel" id="edit-${s.id}">
@@ -544,7 +574,6 @@ function renderCalendar() {
         const key = getMonthKey(curYear, curMonth);
         const isAbsent = s.absents && s.absents[key] && s.absents[key].includes(d);
         
-        // QUAN TRỌNG: Sử dụng data attributes để truyền tham số
         if (isAbsent) {
           pills+=`<span class="sp" style="background:#EAE6E1; color:var(--text3); text-decoration: line-through; font-weight:normal; cursor:pointer;" 
             onclick="toggleAbsent('${s.id}', ${curYear}, ${curMonth}, ${d})" 
