@@ -187,6 +187,7 @@ button:active {
   background: var(--bg);
   color: var(--text2);
   transition: 0.2s;
+  cursor: pointer;
 }
 
 .day-btn.active {
@@ -293,6 +294,7 @@ button:active {
   padding: 5px 14px;
   font-size: 13px;
   font-weight: 600;
+  cursor: pointer;
 }
 
 .act-btn.edit:hover {
@@ -354,6 +356,7 @@ button:active {
   color: var(--text2);
   border-radius: 40px;
   transition: all 0.2s;
+  cursor: pointer;
 }
 
 .tab.active {
@@ -694,12 +697,16 @@ const studentsRef = database.ref('students');
 
 const DAY_SHORT = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
 const MONTHS = ['Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5', 'Tháng 6', 'Tháng 7', 'Tháng 8', 'Tháng 9', 'Tháng 10', 'Tháng 11', 'Tháng 12'];
-let students = {}; // CHUYỂN SANG OBJECT
-let studentsArray = []; // Dùng cho render
+let students = {};
+let studentsArray = [];
 let curYear = new Date().getFullYear();
 let curMonth = new Date().getMonth();
 let selectedDays = [];
 let isSyncing = false;
+
+function updateStudentsArray() {
+  studentsArray = Object.keys(students).map(key => students[key]);
+}
 
 function getPastelColorSoft(seed) {
   const palette = [
@@ -717,22 +724,14 @@ function updateSyncStatus(status) {
   const el = document.getElementById('syncStatus');
   if (el) {
     el.innerHTML = status;
-    if (status === '✅ Đã đồng bộ' || status === '💾 Đã lưu') {
-      setTimeout(() => {
-        if (el.innerHTML === '✅ Đã đồng bộ') el.innerHTML = '☁️ Đã lưu lên Firebase';
-        if (el.innerHTML === '💾 Đã lưu') el.innerHTML = '☁️ Đã lưu lên Firebase';
-      }, 1500);
-    }
   }
 }
 
-// ========== CHỈNH SỬA HÀM LƯU ==========
 function saveToFirebase() {
   if (isSyncing) return;
   isSyncing = true;
   updateSyncStatus('💾 Đang lưu...');
   
-  // Lưu trực tiếp object (không cần chuyển đổi)
   studentsRef.set(students).then(() => {
     updateSyncStatus('✅ Đã đồng bộ');
   }).catch((error) => {
@@ -743,22 +742,18 @@ function saveToFirebase() {
   });
 }
 
-// ========== CHỈNH SỬA HÀM ĐỌC DỮ LIỆU ==========
 studentsRef.on('value', (snapshot) => {
   const data = snapshot.val();
   if (data && typeof data === 'object') {
-    // Dữ liệu là object, giữ nguyên
     students = data;
-    // Chuyển thành mảng để render
-    studentsArray = Object.keys(students).map(key => {
+    Object.keys(students).forEach(key => {
       const s = students[key];
       if (!s.payments) s.payments = {};
       if (!s.absents) s.absents = {};
       if (!s.color) s.color = getPastelColorSoft(s.id || parseInt(key));
-      return s;
     });
+    updateStudentsArray();
   } else {
-    // Khởi tạo dữ liệu mẫu nếu chưa có
     const demo1 = { 
       id: Date.now()+1, 
       name: "Bảo Anh", 
@@ -783,7 +778,7 @@ studentsRef.on('value', (snapshot) => {
     students = {};
     students[demo1.id] = demo1;
     students[demo2.id] = demo2;
-    studentsArray = [demo1, demo2];
+    updateStudentsArray();
     saveToFirebase();
   }
   renderStudentList();
@@ -820,9 +815,8 @@ function addStudent() {
     color: getPastelColorSoft(newId) 
   };
   
-  // Thêm vào object với key là id
   students[newId] = newStudent;
-  studentsArray.push(newStudent);
+  updateStudentsArray();
   
   document.getElementById('inp-name').value = '';
   selectedDays = [];
@@ -831,9 +825,9 @@ function addStudent() {
 }
 
 function deleteStudent(id) { 
-  if(!confirm('Xóa học sinh?')) return; 
+  if(!confirm('Xóa học sinh này?')) return; 
   delete students[id];
-  studentsArray = studentsArray.filter(s => s.id !== id);
+  updateStudentsArray();
   saveToFirebase(); 
 }
 
@@ -854,14 +848,13 @@ function saveEdit(id) {
   document.querySelectorAll('#edays-'+id+' .day-btn.active').forEach(b=>days.push(parseInt(b.dataset.d)));
   if(!name){alert('Tên không được trống');return;}
   if(!days.length){alert('Chọn ngày học');return;}
-  s.name=name; s.fee=fee; s.start=start; s.days=days;
+  s.name=name; 
+  s.fee=fee; 
+  s.start=start; 
+  s.days=days;
   
-  // Cập nhật trong studentsArray
-  const idx = studentsArray.findIndex(x => x.id === id);
-  if (idx !== -1) {
-    studentsArray[idx] = s;
-  }
-  
+  updateStudentsArray();
+  document.getElementById('edit-'+id).classList.remove('open');
   saveToFirebase();
 }
 
@@ -888,12 +881,7 @@ function togglePaymentStatus(studentId, year, month) {
   if(!student.payments) student.payments={};
   student.payments[key] = !(student.payments[key]||false);
   
-  // Cập nhật trong studentsArray
-  const idx = studentsArray.findIndex(x => x.id === studentId);
-  if (idx !== -1) {
-    studentsArray[idx] = student;
-  }
-  
+  updateStudentsArray();
   saveToFirebase();
 }
 
@@ -919,12 +907,7 @@ function toggleAbsent(studentId, year, month, dateNum) {
     }
   }
   
-  // Cập nhật trong studentsArray
-  const idx = studentsArray.findIndex(x => x.id === studentId);
-  if (idx !== -1) {
-    studentsArray[idx] = student;
-  }
-  
+  updateStudentsArray();
   saveToFirebase();
 }
 
