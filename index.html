@@ -57,11 +57,41 @@ button:active { transform: scale(0.97); }
 .payment-badge { font-size: 12px; font-weight: 700; padding: 4px 12px; border-radius: 50px; background: var(--unpaid-bg); color: var(--unpaid-text); display: inline-flex; align-items: center; gap: 6px; cursor: pointer; transition: 0.15s; border: 1px solid rgba(0,0,0,0.05); }
 .payment-badge.paid { background: var(--paid-bg); color: var(--paid-text); }
 .payment-badge:hover { filter: brightness(0.92); transform: scale(0.97); }
-.student-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+.student-actions { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
 .act-btn { background: var(--bg); border: 1px solid var(--border2); border-radius: 30px; padding: 4px 12px; font-size: 12px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; }
 .act-btn i { font-size: 14px; }
 .act-btn.edit:hover { background: var(--accent); color: white; border-color: var(--accent); }
-.act-btn.del:hover { background: #C28B77; border-color: #C28B77; color: white; }
+
+/* Nút xóa hình tròn nhỏ */
+.act-btn.del { 
+  background: var(--unpaid-bg); 
+  border-color: var(--unpaid-text); 
+  color: var(--unpaid-text);
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  transition: all 0.2s;
+  border: 1.5px solid rgba(0,0,0,0.15);
+}
+.act-btn.del i { 
+  font-size: 14px; 
+  margin: 0;
+}
+.act-btn.del:hover { 
+  background: #C28B77; 
+  border-color: #C28B77; 
+  color: white;
+  transform: scale(1.1);
+}
+.act-btn.del:active {
+  transform: scale(0.9);
+}
+
 .edit-panel { border-top: 1.5px solid var(--border); padding: 16px 18px; background: var(--bg); display: none; }
 .edit-panel.open { display: block; }
 .edit-btns { display: flex; gap: 14px; margin-top: 18px; }
@@ -118,6 +148,8 @@ button:active { transform: scale(0.97); }
   .search-wrap input { width: 150px; }
   .tab { padding: 8px 16px; font-size: 14px; }
   h1 { font-size: 20px; }
+  .act-btn.del { width: 24px; height: 24px; font-size: 12px; }
+  .act-btn.del i { font-size: 12px; }
 }
 </style>
 </head>
@@ -220,7 +252,6 @@ let isInitialLoad = true;
 function updateStudentsArray() {
   studentsArray = Object.keys(students).map(key => {
     const s = students[key];
-    // Đảm bảo id là number
     if (!s.id) s.id = parseInt(key);
     if (!s.payments) s.payments = {};
     if (!s.absents) s.absents = {};
@@ -364,7 +395,6 @@ function addStudent() {
 }
 
 function deleteStudent(id) { 
-  // Chuyển đổi id sang string để so sánh với key trong object
   const idStr = String(id);
   if(!students[idStr]) {
     console.error('❌ Không tìm thấy học sinh với ID:', id);
@@ -428,11 +458,9 @@ function getPreviousMonthKey(y, m) {
   return { year: prevY, month: prevM, key: getMonthKey(prevY, prevM) };
 }
 
-// ===== SỬA LỖI TOGGLE PAYMENT =====
 function togglePaymentStatus(studentId, year, month) {
   console.log('💰 Toggle payment status - ID:', studentId, 'Year:', year, 'Month:', month);
   
-  // Chuyển đổi studentId sang string để so sánh với key trong object
   const idStr = String(studentId);
   const student = students[idStr];
   
@@ -461,11 +489,9 @@ function getPaymentStatus(student, year, month) {
   return !!(student.payments && student.payments[key]); 
 }
 
-// ===== SỬA LỖI TOGGLE ABSENT =====
 function toggleAbsent(studentId, year, month, dateNum) {
   console.log('📅 Toggle absent - ID:', studentId, 'Year:', year, 'Month:', month, 'Date:', dateNum);
   
-  // Chuyển đổi studentId sang string để so sánh với key trong object
   const idStr = String(studentId);
   const student = students[idStr];
   
@@ -538,7 +564,7 @@ function renderStudentList() {
         <div class="payment-badge ${isPaid?'paid':''}" onclick="switchTab('report'); setTimeout(()=>{document.getElementById('repSearch').value='${s.name}';renderReport();},50)">💰 ${statusLabel}</div>
         <div class="student-actions">
           <button class="act-btn edit" onclick="toggleEdit(${s.id})"><i class="ti ti-edit"></i> Sửa</button>
-          <button class="act-btn del" onclick="deleteStudent(${s.id})"><i class="ti ti-trash"></i></button>
+          <button class="act-btn del" onclick="deleteStudent(${s.id})" title="Xóa học sinh"><i class="ti ti-trash"></i></button>
         </div>
       </div>
       <div class="edit-panel" id="edit-${s.id}">
