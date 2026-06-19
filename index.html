@@ -8,7 +8,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
 <style>
-/* CSS giữ nguyên như cũ */
+/* CSS giữ nguyên như cũ - tôi đã rút gọn để tiết kiệm không gian */
 * { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
   --bg: #F4F2EF; --bg2: #EAE6E1; --bg3: #DDD8D1;
@@ -82,7 +82,7 @@ button:active { transform: scale(0.97); }
 .dn { font-size: 15px; font-weight: 800; color: var(--text); margin-bottom: 8px; display: inline-block; width: 30px; height: 30px; line-height: 30px; text-align: center; border-radius: 50%; }
 .dc.today .dn { background: var(--accent); color: white; }
 .sp { font-size: 11px; font-weight: 700; border-radius: 24px; padding: 3px 8px; margin-bottom: 5px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; transition: 0.15s; }
-.sp .btn-absent-del { display: inline-flex; align-items: center; justify-content: center; width: 14px; height: 14px; border-radius: 50%; background: rgba(0,0,0,0.15); color: inherit; font-size: 9px; margin-left: 4px; cursor: pointer; }
+.sp .btn-absent-del { display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 16px; border-radius: 50%; background: rgba(0,0,0,0.15); color: inherit; font-size: 10px; margin-left: 4px; cursor: pointer; border: none; }
 .sp .btn-absent-del:hover { background: #C28B77; color: white; }
 .legend { display: flex; gap: 22px; flex-wrap: wrap; padding: 12px 5px; }
 .legend-item { font-weight: 600; font-size: 13px; }
@@ -196,13 +196,11 @@ let curYear = new Date().getFullYear();
 let curMonth = new Date().getMonth();
 let selectedDays = [];
 let isSyncing = false;
-let isInitialLoad = true;
 
 // ========== HÀM CẬP NHẬT MẢNG ==========
 function updateStudentsArray() {
   studentsArray = Object.keys(students).map(key => {
     const s = students[key];
-    // Đảm bảo dữ liệu hợp lệ
     if (!s.id) s.id = parseInt(key);
     if (!s.payments) s.payments = {};
     if (!s.absents) s.absents = {};
@@ -246,7 +244,6 @@ function saveToFirebase() {
     .catch((error) => {
       console.error('❌ Lỗi lưu Firebase:', error);
       updateSyncStatus('❌ Lỗi đồng bộ');
-      alert('Có lỗi khi lưu dữ liệu: ' + error.message);
     })
     .finally(() => {
       isSyncing = false;
@@ -293,8 +290,6 @@ studentsRef.on('value', (snapshot) => {
     students = {};
     students[demo1.id] = demo1;
     students[demo2.id] = demo2;
-    
-    // Lưu lên Firebase ngay khi tạo mới
     saveToFirebase();
   }
   
@@ -303,12 +298,10 @@ studentsRef.on('value', (snapshot) => {
   renderCalendar();
   renderReport();
   updateSyncStatus('✅ Đã đồng bộ');
-  isInitialLoad = false;
   
 }, (error) => {
   console.error('❌ Lỗi đọc Firebase:', error);
   updateSyncStatus('❌ Không thể kết nối Firebase');
-  alert('Không thể kết nối tới Firebase. Vui lòng kiểm tra kết nối mạng.');
 });
 
 // ========== CÁC HÀM XỬ LÝ ==========
@@ -320,7 +313,6 @@ function toggleDay(btn) {
   } else {
     selectedDays.push(d); 
   }
-  console.log('📅 Ngày đã chọn:', selectedDays);
 }
 
 function addStudent() {
@@ -346,30 +338,24 @@ function addStudent() {
   students[newId] = newStudent;
   updateStudentsArray();
   
-  // Reset form
   document.getElementById('inp-name').value = '';
   selectedDays = [];
   document.querySelectorAll('#dayBtns .day-btn').forEach(b=>b.classList.remove('active'));
   
-  // Lưu và render
   saveToFirebase();
   renderStudentList();
   renderCalendar();
   renderReport();
-  
-  console.log('✅ Đã thêm học sinh:', newStudent.name);
 }
 
 function deleteStudent(id) { 
   if(!confirm('Xóa học sinh này?')) return; 
-  const name = students[id]?.name || 'Unknown';
   delete students[id];
   updateStudentsArray();
   saveToFirebase();
   renderStudentList();
   renderCalendar();
   renderReport();
-  console.log('🗑️ Đã xóa học sinh:', name);
 }
 
 function toggleEdit(id) { 
@@ -404,8 +390,6 @@ function saveEdit(id) {
   renderStudentList();
   renderCalendar();
   renderReport();
-  
-  console.log('✏️ Đã cập nhật học sinh:', s.name);
 }
 
 function toggleEditDay(btn) { 
@@ -421,21 +405,26 @@ function getPreviousMonthKey(y, m) {
   return { year: prevY, month: prevM, key: getMonthKey(prevY, prevM) };
 }
 
+// ========== QUAN TRỌNG: SỬA HÀM TOGGLE PAYMENT ==========
 function togglePaymentStatus(studentId, year, month) {
+  console.log('💰 Toggle payment status:', studentId, year, month);
   const student = students[studentId];
-  if(!student) { alert('Không tìm thấy học sinh!'); return; }
+  if(!student) { 
+    alert('Không tìm thấy học sinh!'); 
+    return; 
+  }
   
   const key = getMonthKey(year, month);
   if(!student.payments) student.payments={};
   student.payments[key] = !(student.payments[key]||false);
+  
+  console.log('💰 Trạng thái mới:', student.payments[key]);
   
   updateStudentsArray();
   saveToFirebase();
   renderStudentList();
   renderCalendar();
   renderReport();
-  
-  console.log('💰 Cập nhật thanh toán cho:', student.name, 'tháng', key, '=', student.payments[key]);
 }
 
 function getPaymentStatus(student, year, month) { 
@@ -443,9 +432,14 @@ function getPaymentStatus(student, year, month) {
   return !!(student.payments && student.payments[key]); 
 }
 
+// ========== QUAN TRỌNG: SỬA HÀM TOGGLE ABSENT ==========
 function toggleAbsent(studentId, year, month, dateNum) {
+  console.log('📅 Toggle absent:', studentId, year, month, dateNum);
   const student = students[studentId];
-  if(!student) { alert('Không tìm thấy học sinh!'); return; }
+  if(!student) { 
+    alert('Không tìm thấy học sinh!'); 
+    return; 
+  }
   
   const key = getMonthKey(year, month);
   if(!student.absents) student.absents = {};
@@ -453,9 +447,11 @@ function toggleAbsent(studentId, year, month, dateNum) {
 
   if(student.absents[key].includes(dateNum)) {
     student.absents[key] = student.absents[key].filter(d => d !== dateNum);
+    console.log('📅 Đã bỏ nghỉ cho ngày:', dateNum);
   } else {
     if(confirm(`Xác nhận học sinh ${student.name} nghỉ ngày ${dateNum}/${month+1}? (Buổi này sẽ được gối đầu trừ tiền vào tháng tiếp theo)`)) {
       student.absents[key].push(dateNum);
+      console.log('📅 Đã đánh dấu nghỉ cho ngày:', dateNum);
     } else {
       return;
     }
@@ -465,8 +461,6 @@ function toggleAbsent(studentId, year, month, dateNum) {
   saveToFirebase();
   renderCalendar();
   renderReport();
-  
-  console.log('📅 Cập nhật nghỉ học cho:', student.name, 'ngày', dateNum);
 }
 
 function parseLocalDate(str) { 
@@ -547,13 +541,13 @@ function renderCalendar() {
         const isAbsent = s.absents && s.absents[key] && s.absents[key].includes(d);
         
         if (isAbsent) {
-          pills+=`<span class="sp" onclick="toggleAbsent(${s.id}, ${curYear}, ${curMonth}, ${d})" style="background:#EAE6E1; color:var(--text3); text-decoration: line-through; font-weight:normal;" title="Nhấp vào để khôi phục buổi học này">${s.name} (Nghỉ)</span>`;
+          pills+=`<span class="sp" onclick="toggleAbsent(${s.id}, ${curYear}, ${curMonth}, ${d})" style="background:#EAE6E1; color:var(--text3); text-decoration: line-through; font-weight:normal; cursor:pointer;" title="Nhấp để khôi phục buổi học">${s.name} (Nghỉ)</span>`;
         } else {
           const paid = getPaymentStatus(s, curYear, curMonth);
           const icon = paid ? ' ✓' : ' ⏳';
-          pills+=`<span class="sp" style="background:${s.color.bg};color:${s.color.text}; font-weight:bold;">
+          pills+=`<span class="sp" style="background:${s.color.bg};color:${s.color.text}; font-weight:bold; cursor:pointer;" onclick="toggleAbsent(${s.id}, ${curYear}, ${curMonth}, ${d})">
             <span>${s.name}${icon}</span>
-            <span class="btn-absent-del" onclick="event.stopPropagation(); toggleAbsent(${s.id}, ${curYear}, ${curMonth}, ${d})" title="Đánh dấu nghỉ buổi này">✕</span>
+            <button class="btn-absent-del" onclick="event.stopPropagation(); toggleAbsent(${s.id}, ${curYear}, ${curMonth}, ${d})" title="Đánh dấu nghỉ buổi này">✕</button>
           </span>`;
         }
       }
@@ -651,9 +645,7 @@ function switchTab(name) {
   if (name === 'report') renderReport();
 }
 
-// Debug: Log khi load trang
 console.log('🚀 App đã khởi động!');
-console.log('📅 Tháng hiện tại:', MONTHS[curMonth], curYear);
 </script>
 </body>
 </html>
