@@ -8,7 +8,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
 <style>
-/* CSS giữ nguyên như cũ - tôi đã rút gọn để tiết kiệm không gian */
+/* ===== GIỮ NGUYÊN CSS NHƯ CŨ ===== */
 * { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
   --bg: #F4F2EF; --bg2: #EAE6E1; --bg3: #DDD8D1;
@@ -197,7 +197,6 @@ let curMonth = new Date().getMonth();
 let selectedDays = [];
 let isSyncing = false;
 
-// ========== HÀM CẬP NHẬT MẢNG ==========
 function updateStudentsArray() {
   studentsArray = Object.keys(students).map(key => {
     const s = students[key];
@@ -211,7 +210,6 @@ function updateStudentsArray() {
   console.log('📊 Đã cập nhật studentsArray:', studentsArray.length, 'học sinh');
 }
 
-// ========== HÀM MÀU ==========
 function getPastelColorSoft(seed) {
   const palette = [
     {bg:'#DDE5DF', text:'#3A5C4F', dot:'#6A8E7C'},
@@ -224,13 +222,11 @@ function getPastelColorSoft(seed) {
   return palette[Math.abs(seed % palette.length)];
 }
 
-// ========== CẬP NHẬT TRẠNG THÁI ==========
 function updateSyncStatus(status) {
   const el = document.getElementById('syncStatus');
   if (el) el.innerHTML = status;
 }
 
-// ========== LƯU LÊN FIREBASE ==========
 function saveToFirebase() {
   if (isSyncing) return;
   isSyncing = true;
@@ -250,7 +246,6 @@ function saveToFirebase() {
     });
 }
 
-// ========== ĐỌC DỮ LIỆU TỪ FIREBASE ==========
 studentsRef.on('value', (snapshot) => {
   const data = snapshot.val();
   console.log('📥 Nhận dữ liệu từ Firebase:', data);
@@ -298,13 +293,11 @@ studentsRef.on('value', (snapshot) => {
   renderCalendar();
   renderReport();
   updateSyncStatus('✅ Đã đồng bộ');
-  
 }, (error) => {
   console.error('❌ Lỗi đọc Firebase:', error);
   updateSyncStatus('❌ Không thể kết nối Firebase');
 });
 
-// ========== CÁC HÀM XỬ LÝ ==========
 function toggleDay(btn) { 
   btn.classList.toggle('active'); 
   const d = parseInt(btn.dataset.d); 
@@ -405,12 +398,18 @@ function getPreviousMonthKey(y, m) {
   return { year: prevY, month: prevM, key: getMonthKey(prevY, prevM) };
 }
 
-// ========== QUAN TRỌNG: SỬA HÀM TOGGLE PAYMENT ==========
+// ===== SỬA LẠI HÀM TOGGLE PAYMENT =====
 function togglePaymentStatus(studentId, year, month) {
-  console.log('💰 Toggle payment status:', studentId, year, month);
-  const student = students[studentId];
+  console.log('💰 Toggle payment status - ID:', studentId, 'Year:', year, 'Month:', month);
+  
+  // Chuyển đổi studentId sang number nếu cần
+  const id = typeof studentId === 'string' ? parseInt(studentId) : studentId;
+  const student = students[id];
+  
   if(!student) { 
-    alert('Không tìm thấy học sinh!'); 
+    console.error('❌ Không tìm thấy học sinh với ID:', id);
+    console.log('📋 Danh sách students:', Object.keys(students));
+    alert('Không tìm thấy học sinh! Vui lòng refresh trang và thử lại.'); 
     return; 
   }
   
@@ -418,7 +417,7 @@ function togglePaymentStatus(studentId, year, month) {
   if(!student.payments) student.payments={};
   student.payments[key] = !(student.payments[key]||false);
   
-  console.log('💰 Trạng thái mới:', student.payments[key]);
+  console.log('💰 Trạng thái mới của', student.name, ':', student.payments[key]);
   
   updateStudentsArray();
   saveToFirebase();
@@ -432,12 +431,18 @@ function getPaymentStatus(student, year, month) {
   return !!(student.payments && student.payments[key]); 
 }
 
-// ========== QUAN TRỌNG: SỬA HÀM TOGGLE ABSENT ==========
+// ===== SỬA LẠI HÀM TOGGLE ABSENT =====
 function toggleAbsent(studentId, year, month, dateNum) {
-  console.log('📅 Toggle absent:', studentId, year, month, dateNum);
-  const student = students[studentId];
+  console.log('📅 Toggle absent - ID:', studentId, 'Year:', year, 'Month:', month, 'Date:', dateNum);
+  
+  // Chuyển đổi studentId sang number nếu cần
+  const id = typeof studentId === 'string' ? parseInt(studentId) : studentId;
+  const student = students[id];
+  
   if(!student) { 
-    alert('Không tìm thấy học sinh!'); 
+    console.error('❌ Không tìm thấy học sinh với ID:', id);
+    console.log('📋 Danh sách students:', Object.keys(students));
+    alert('Không tìm thấy học sinh! Vui lòng refresh trang và thử lại.'); 
     return; 
   }
   
@@ -447,11 +452,11 @@ function toggleAbsent(studentId, year, month, dateNum) {
 
   if(student.absents[key].includes(dateNum)) {
     student.absents[key] = student.absents[key].filter(d => d !== dateNum);
-    console.log('📅 Đã bỏ nghỉ cho ngày:', dateNum);
+    console.log('📅 Đã bỏ nghỉ cho', student.name, 'ngày', dateNum);
   } else {
     if(confirm(`Xác nhận học sinh ${student.name} nghỉ ngày ${dateNum}/${month+1}? (Buổi này sẽ được gối đầu trừ tiền vào tháng tiếp theo)`)) {
       student.absents[key].push(dateNum);
-      console.log('📅 Đã đánh dấu nghỉ cho ngày:', dateNum);
+      console.log('📅 Đã đánh dấu nghỉ cho', student.name, 'ngày', dateNum);
     } else {
       return;
     }
@@ -482,7 +487,6 @@ function getPlannedSessionsInMonth(student, year, month) {
   return sessions;
 }
 
-// ========== RENDER FUNCTIONS ==========
 function renderStudentList() {
   const el = document.getElementById('studentList');
   if(!studentsArray.length){ 
@@ -540,14 +544,20 @@ function renderCalendar() {
         const key = getMonthKey(curYear, curMonth);
         const isAbsent = s.absents && s.absents[key] && s.absents[key].includes(d);
         
+        // QUAN TRỌNG: Sử dụng data attributes để truyền tham số
         if (isAbsent) {
-          pills+=`<span class="sp" onclick="toggleAbsent(${s.id}, ${curYear}, ${curMonth}, ${d})" style="background:#EAE6E1; color:var(--text3); text-decoration: line-through; font-weight:normal; cursor:pointer;" title="Nhấp để khôi phục buổi học">${s.name} (Nghỉ)</span>`;
+          pills+=`<span class="sp" style="background:#EAE6E1; color:var(--text3); text-decoration: line-through; font-weight:normal; cursor:pointer;" 
+            onclick="toggleAbsent('${s.id}', ${curYear}, ${curMonth}, ${d})" 
+            title="Nhấp để khôi phục buổi học">
+            ${s.name} (Nghỉ)
+          </span>`;
         } else {
           const paid = getPaymentStatus(s, curYear, curMonth);
           const icon = paid ? ' ✓' : ' ⏳';
-          pills+=`<span class="sp" style="background:${s.color.bg};color:${s.color.text}; font-weight:bold; cursor:pointer;" onclick="toggleAbsent(${s.id}, ${curYear}, ${curMonth}, ${d})">
+          pills+=`<span class="sp" style="background:${s.color.bg};color:${s.color.text}; font-weight:bold; cursor:pointer;" 
+            onclick="toggleAbsent('${s.id}', ${curYear}, ${curMonth}, ${d})">
             <span>${s.name}${icon}</span>
-            <button class="btn-absent-del" onclick="event.stopPropagation(); toggleAbsent(${s.id}, ${curYear}, ${curMonth}, ${d})" title="Đánh dấu nghỉ buổi này">✕</button>
+            <button class="btn-absent-del" onclick="event.stopPropagation(); toggleAbsent('${s.id}', ${curYear}, ${curMonth}, ${d})" title="Đánh dấu nghỉ buổi này">✕</button>
           </span>`;
         }
       }
@@ -613,7 +623,7 @@ function renderReport() {
       <div class="rep-days" style="color: var(--text3); font-style: italic; font-size:12px;">ℹ️ Trong tháng này bé đã nghỉ ${currentMonthAbsents.length} buổi (ngày ${currentMonthAbsents.join(', ')}), số buổi này sẽ tự động được gối đầu trừ vào học phí của tháng sau.</div>
       
       <div class="pay-status-row">
-        <button class="pay-status-btn ${isPaid?'paid':''}" onclick="togglePaymentStatus(${s.id}, ${curYear}, ${curMonth})">
+        <button class="pay-status-btn ${isPaid?'paid':''}" onclick="togglePaymentStatus('${s.id}', ${curYear}, ${curMonth})">
           <i class="ti ti-${isPaid?'check':'circle-x'}"></i> ${isPaid?'✅ Đã nộp học phí':'⏳ Chưa nộp học phí'}
         </button>
         <span style="font-size:13px; font-weight: 500;">✏️ Nhấp để cập nhật trạng thái đóng đầu tháng</span>
