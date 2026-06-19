@@ -5,608 +5,101 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 <title>Quản lý học phí - Nhi's Class (Firebase)</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.0.0/tabler-icons.min.css" />
-<!-- Firebase SDKs -->
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
 <style>
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-
+/* CSS giữ nguyên như cũ */
+* { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
-  --bg: #F4F2EF;
-  --bg2: #EAE6E1;
-  --bg3: #DDD8D1;
-  --text: #2C2A29;
-  --text2: #6F6A64;
-  --text3: #928B82;
-  --border: rgba(120, 100, 85, 0.25);
-  --border2: rgba(100, 80, 65, 0.4);
-  --radius: 12px;
-  --radius-lg: 20px;
-  --accent: #7B9E87;
-  --accent-dark: #5E7D68;
-  --accent-light: #C2D5C8;
-  --paid-bg: #BED3C3;
-  --paid-text: #2C5A3E;
-  --paid-bg-dark: #446D53;
-  --unpaid-bg: #F0D9CF;
-  --unpaid-text: #B16148;
+  --bg: #F4F2EF; --bg2: #EAE6E1; --bg3: #DDD8D1;
+  --text: #2C2A29; --text2: #6F6A64; --text3: #928B82;
+  --border: rgba(120,100,85,0.25); --border2: rgba(100,80,65,0.4);
+  --radius: 12px; --radius-lg: 20px;
+  --accent: #7B9E87; --accent-dark: #5E7D68; --accent-light: #C2D5C8;
+  --paid-bg: #BED3C3; --paid-text: #2C5A3E;
+  --unpaid-bg: #F0D9CF; --unpaid-text: #B16148;
 }
-
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: #2B2A28;
-    --bg2: #3B3936;
-    --bg3: #201F1D;
-    --text: #EFECE8;
-    --text2: #B6ADA3;
-    --text3: #938A80;
-    --border: rgba(160, 140, 120, 0.3);
-    --border2: rgba(180, 160, 140, 0.5);
-    --accent: #6C8F7A;
-    --accent-dark: #537561;
-    --accent-light: #8FAD9B;
-    --paid-bg: #2C5940;
-    --paid-text: #C6F0DF;
-    --unpaid-bg: #6E4D3F;
-    --unpaid-text: #F3C5B4;
+    --bg: #2B2A28; --bg2: #3B3936; --bg3: #201F1D;
+    --text: #EFECE8; --text2: #B6ADA3; --text3: #938A80;
+    --border: rgba(160,140,120,0.3); --border2: rgba(180,160,140,0.5);
+    --accent: #6C8F7A; --accent-dark: #537561; --accent-light: #8FAD9B;
+    --paid-bg: #2C5940; --paid-text: #C6F0DF;
+    --unpaid-bg: #6E4D3F; --unpaid-text: #F3C5B4;
   }
 }
-
-body {
-  font-family: 'Segoe UI', 'Quicksand', system-ui, 'Inter', sans-serif;
-  background: var(--bg3);
-  color: var(--text);
-  min-height: 100vh;
-  font-size: 16px;
-}
-
-.container {
-  max-width: 1360px;
-  width: 94%;
-  margin: 0 auto;
-  padding: 1.5rem 1.2rem;
-}
-
-h1 {
-  font-size: 28px;
-  font-weight: 600;
-  margin-bottom: 1.5rem;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  color: var(--accent-dark);
-  letter-spacing: -0.2px;
-}
-
-.section {
-  background: var(--bg);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  padding: 1.6rem 2rem;
-  margin-bottom: 1.8rem;
-  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.03);
-}
-
-.sec-title {
-  font-size: 15px;
-  font-weight: 700;
-  color: var(--accent-dark);
-  margin-bottom: 18px;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-.field {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  margin-bottom: 18px;
-}
-
-.field label {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--text2);
-}
-
-input, select {
-  width: 100%;
-  padding: 10px 14px;
-  font-size: 15px;
-  font-weight: 500;
-  border: 1.5px solid var(--border2);
-  border-radius: var(--radius);
-  background: var(--bg);
-  color: var(--text);
-  outline: none;
-  transition: all 0.2s;
-}
-
-input:focus {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(107, 142, 115, 0.25);
-}
-
-button {
-  padding: 10px 20px;
-  font-size: 14px;
-  font-weight: 600;
-  border: 1.5px solid var(--border2);
-  border-radius: 40px;
-  background: var(--bg2);
-  color: var(--text);
-  cursor: pointer;
-  transition: all 0.2s;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-}
-
-button:hover {
-  background: var(--accent);
-  border-color: var(--accent);
-  color: white;
-  transform: translateY(-2px);
-}
-
-button:active {
-  transform: scale(0.97);
-}
-
-.btn-primary {
-  background: var(--accent);
-  color: white;
-  border-color: transparent;
-  width: 100%;
-  justify-content: center;
-  font-weight: 700;
-}
-
-.btn-primary:hover {
-  background: var(--accent-dark);
-  opacity: 0.95;
-}
-
-.days-row {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-  margin: 8px 0 12px;
-}
-
-.day-btn {
-  padding: 7px 20px;
-  font-size: 14px;
-  font-weight: 600;
-  border-radius: 40px;
-  border: 1.5px solid var(--border2);
-  background: var(--bg);
-  color: var(--text2);
-  transition: 0.2s;
-  cursor: pointer;
-}
-
-.day-btn.active {
-  background: var(--accent);
-  color: white;
-  border-color: var(--accent);
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-}
-
-.fee-row {
-  display: flex;
-  align-items: flex-end;
-  gap: 12px;
-  margin-bottom: 10px;
-}
-
-.fee-row input {
-  width: 180px;
-}
-
-/* Student list */
-.student-list {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-}
-
-.student-row {
-  background: var(--bg2);
-  border-radius: 20px;
-  overflow: hidden;
-  border: 1px solid var(--border);
-}
-
-.student-main {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 14px;
-  padding: 14px 18px;
-}
-
-.student-dot {
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  flex-shrink: 0;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
-}
-
-.student-name {
-  font-weight: 700;
-  font-size: 17px;
-  flex: 1;
-  min-width: 130px;
-  color: var(--text);
-}
-
-.student-schedule {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--accent-dark);
-  background: var(--bg);
-  padding: 5px 14px;
-  border-radius: 30px;
-}
-
-/* Badge thanh toán */
-.payment-badge {
-  font-size: 13px;
-  font-weight: 700;
-  padding: 5px 14px;
-  border-radius: 50px;
-  background: var(--unpaid-bg);
-  color: var(--unpaid-text);
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  cursor: pointer;
-  transition: 0.15s;
-  border: 1px solid rgba(0,0,0,0.05);
-}
-
-.payment-badge.paid {
-  background: var(--paid-bg);
-  color: var(--paid-text);
-  font-weight: 700;
-}
-
-.payment-badge:hover {
-  filter: brightness(0.92);
-  transform: scale(0.97);
-}
-
-.student-actions {
-  display: flex;
-  gap: 8px;
-}
-
-.act-btn {
-  background: var(--bg);
-  border: 1px solid var(--border2);
-  border-radius: 30px;
-  padding: 5px 14px;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.act-btn.edit:hover {
-  background: var(--accent);
-  color: white;
-  border-color: var(--accent);
-}
-
-.act-btn.del:hover {
-  background: #C28B77;
-  border-color: #C28B77;
-  color: white;
-}
-
-.edit-panel {
-  border-top: 1.5px solid var(--border);
-  padding: 18px;
-  background: var(--bg);
-  display: none;
-}
-
-.edit-panel.open {
-  display: block;
-}
-
-.edit-btns {
-  display: flex;
-  gap: 14px;
-  margin-top: 18px;
-}
-
-.btn-save {
-  background: var(--accent);
-  color: white;
-  border: none;
-  font-weight: bold;
-}
-
-.btn-cancel {
-  background: var(--bg2);
-}
-
-/* Tabs */
-.tab-row {
-  display: flex;
-  gap: 16px;
-  margin-bottom: 2rem;
-  flex-wrap: wrap;
-  border-bottom: 2px solid var(--border);
-  padding-bottom: 8px;
-}
-
-.tab {
-  background: transparent;
-  border: none;
-  padding: 10px 24px;
-  font-size: 16px;
-  font-weight: 700;
-  color: var(--text2);
-  border-radius: 40px;
-  transition: all 0.2s;
-  cursor: pointer;
-}
-
-.tab.active {
-  background: var(--accent);
-  color: white;
-  box-shadow: 0 2px 8px rgba(91, 121, 99, 0.3);
-}
-
-/* Calendar */
-.cal-nav {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 24px;
-  flex-wrap: wrap;
-  gap: 16px;
-}
-
-.cal-nav-center {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.month-title {
-  font-size: 22px;
-  font-weight: 800;
-  color: var(--accent-dark);
-}
-
-.search-wrap {
-  display: flex;
-  gap: 10px;
-}
-
-.search-wrap input {
-  width: 220px;
-}
-
-.cal-grid {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  border-left: 1px solid var(--border);
-  border-top: 1px solid var(--border);
-  border-radius: 20px;
-  overflow: hidden;
-  margin-bottom: 1.2rem;
-  background: var(--bg);
-}
-
-.dh {
-  text-align: center;
-  font-weight: 800;
-  font-size: 14px;
-  color: var(--accent-dark);
-  padding: 14px 4px;
-  background: var(--bg2);
-  border-right: 1px solid var(--border);
-  border-bottom: 1px solid var(--border);
-}
-
-.dc {
-  min-height: 100px;
-  border-right: 1px solid var(--border);
-  border-bottom: 1px solid var(--border);
-  padding: 8px;
-  background: var(--bg);
-}
-
-.dc.empty {
-  background: var(--bg3);
-}
-
-.dc.today {
-  background: #E8EFE9;
-}
-
-.dn {
-  font-size: 15px;
-  font-weight: 800;
-  color: var(--text);
-  margin-bottom: 8px;
-  display: inline-block;
-  width: 30px;
-  height: 30px;
-  line-height: 30px;
-  text-align: center;
-  border-radius: 50%;
-}
-
-.dc.today .dn {
-  background: var(--accent);
-  color: white;
-}
-
-.sp {
-  font-size: 11px;
-  font-weight: 700;
-  border-radius: 24px;
-  padding: 3px 8px;
-  margin-bottom: 5px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  cursor: pointer;
-  transition: 0.15s;
-}
-
-.sp .btn-absent-del {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  background: rgba(0,0,0,0.15);
-  color: inherit;
-  font-size: 9px;
-  margin-left: 4px;
-  cursor: pointer;
-}
-
-.sp .btn-absent-del:hover {
-  background: #C28B77;
-  color: white;
-}
-
-.legend {
-  display: flex;
-  gap: 22px;
-  flex-wrap: wrap;
-  padding: 12px 5px;
-}
-
-.legend-item {
-  font-weight: 600;
-  font-size: 13px;
-}
-
-/* Report card */
-.student-report {
-  background: var(--bg2);
-  border-radius: 24px;
-  padding: 18px;
-  margin-bottom: 20px;
-  border: 1px solid var(--border);
-}
-
-.rep-header {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 14px;
-  margin-bottom: 16px;
-}
-
-.stat-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 14px;
-  margin-bottom: 16px;
-}
-
-.stat-box {
-  background: var(--bg);
-  border-radius: 20px;
-  padding: 12px;
-  text-align: center;
-  border: 1px solid var(--border);
-}
-
-.stat-label {
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--text2);
-}
-
-.stat-val {
-  font-size: 22px;
-  font-weight: 800;
-  margin-top: 6px;
-  color: var(--accent-dark);
-}
-
-.rep-days {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--text2);
-  margin: 6px 0;
-}
-
-.pay-status-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: 16px;
-  padding-top: 14px;
-  border-top: 2px dashed var(--border);
-}
-
-.pay-status-btn {
-  font-size: 14px;
-  font-weight: 800;
-  padding: 8px 18px;
-  border-radius: 40px;
-  background: var(--unpaid-bg);
-  color: var(--unpaid-text);
-  border: none;
-  cursor: pointer;
-  transition: 0.2s;
-}
-
-.pay-status-btn.paid {
-  background: var(--paid-bg);
-  color: var(--paid-text);
-}
-
-.pay-status-btn:hover {
-  filter: brightness(0.9);
-  transform: scale(0.97);
-}
-
-.total-row {
-  background: var(--bg);
-  border-radius: 24px;
-  padding: 16px 20px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: 12px;
-  font-weight: 800;
-  font-size: 16px;
-  border: 1px solid var(--accent-light);
-}
-
-.empty-state {
-  text-align: center;
-  padding: 2.5rem;
-  color: var(--text3);
-  font-weight: 500;
-}
-
-.sync-status {
-  font-size: 12px;
-  background: var(--bg2);
-  padding: 4px 12px;
-  border-radius: 40px;
-  margin-left: 10px;
-  color: var(--accent-dark);
-}
+body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg3); color: var(--text); min-height: 100vh; font-size: 16px; }
+.container { max-width: 1360px; width: 94%; margin: 0 auto; padding: 1.5rem 1.2rem; }
+h1 { font-size: 28px; font-weight: 600; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 10px; color: var(--accent-dark); }
+.section { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 1.6rem 2rem; margin-bottom: 1.8rem; box-shadow: 0 6px 14px rgba(0,0,0,0.03); }
+.sec-title { font-size: 15px; font-weight: 700; color: var(--accent-dark); margin-bottom: 18px; text-transform: uppercase; letter-spacing: 0.05em; }
+.field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 18px; }
+.field label { font-size: 14px; font-weight: 600; color: var(--text2); }
+input, select { width: 100%; padding: 10px 14px; font-size: 15px; font-weight: 500; border: 1.5px solid var(--border2); border-radius: var(--radius); background: var(--bg); color: var(--text); outline: none; transition: all 0.2s; }
+input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(107,142,115,0.25); }
+button { padding: 10px 20px; font-size: 14px; font-weight: 600; border: 1.5px solid var(--border2); border-radius: 40px; background: var(--bg2); color: var(--text); cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; gap: 8px; }
+button:hover { background: var(--accent); border-color: var(--accent); color: white; transform: translateY(-2px); }
+button:active { transform: scale(0.97); }
+.btn-primary { background: var(--accent); color: white; border-color: transparent; width: 100%; justify-content: center; font-weight: 700; }
+.btn-primary:hover { background: var(--accent-dark); opacity: 0.95; }
+.days-row { display: flex; gap: 10px; flex-wrap: wrap; margin: 8px 0 12px; }
+.day-btn { padding: 7px 20px; font-size: 14px; font-weight: 600; border-radius: 40px; border: 1.5px solid var(--border2); background: var(--bg); color: var(--text2); transition: 0.2s; cursor: pointer; }
+.day-btn.active { background: var(--accent); color: white; border-color: var(--accent); box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+.fee-row { display: flex; align-items: flex-end; gap: 12px; margin-bottom: 10px; }
+.fee-row input { width: 180px; }
+.student-list { display: flex; flex-direction: column; gap: 14px; }
+.student-row { background: var(--bg2); border-radius: 20px; overflow: hidden; border: 1px solid var(--border); }
+.student-main { display: flex; align-items: center; flex-wrap: wrap; gap: 14px; padding: 14px 18px; }
+.student-dot { width: 14px; height: 14px; border-radius: 50%; flex-shrink: 0; box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
+.student-name { font-weight: 700; font-size: 17px; flex: 1; min-width: 130px; color: var(--text); }
+.student-schedule { font-size: 13px; font-weight: 600; color: var(--accent-dark); background: var(--bg); padding: 5px 14px; border-radius: 30px; }
+.payment-badge { font-size: 13px; font-weight: 700; padding: 5px 14px; border-radius: 50px; background: var(--unpaid-bg); color: var(--unpaid-text); display: inline-flex; align-items: center; gap: 6px; cursor: pointer; transition: 0.15s; border: 1px solid rgba(0,0,0,0.05); }
+.payment-badge.paid { background: var(--paid-bg); color: var(--paid-text); }
+.payment-badge:hover { filter: brightness(0.92); transform: scale(0.97); }
+.student-actions { display: flex; gap: 8px; }
+.act-btn { background: var(--bg); border: 1px solid var(--border2); border-radius: 30px; padding: 5px 14px; font-size: 13px; font-weight: 600; cursor: pointer; }
+.act-btn.edit:hover { background: var(--accent); color: white; border-color: var(--accent); }
+.act-btn.del:hover { background: #C28B77; border-color: #C28B77; color: white; }
+.edit-panel { border-top: 1.5px solid var(--border); padding: 18px; background: var(--bg); display: none; }
+.edit-panel.open { display: block; }
+.edit-btns { display: flex; gap: 14px; margin-top: 18px; }
+.btn-save { background: var(--accent); color: white; border: none; font-weight: bold; }
+.btn-cancel { background: var(--bg2); }
+.tab-row { display: flex; gap: 16px; margin-bottom: 2rem; flex-wrap: wrap; border-bottom: 2px solid var(--border); padding-bottom: 8px; }
+.tab { background: transparent; border: none; padding: 10px 24px; font-size: 16px; font-weight: 700; color: var(--text2); border-radius: 40px; transition: all 0.2s; cursor: pointer; }
+.tab.active { background: var(--accent); color: white; box-shadow: 0 2px 8px rgba(91,121,99,0.3); }
+.cal-nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; flex-wrap: wrap; gap: 16px; }
+.cal-nav-center { display: flex; align-items: center; gap: 12px; }
+.month-title { font-size: 22px; font-weight: 800; color: var(--accent-dark); }
+.search-wrap { display: flex; gap: 10px; }
+.search-wrap input { width: 220px; }
+.cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); border-left: 1px solid var(--border); border-top: 1px solid var(--border); border-radius: 20px; overflow: hidden; margin-bottom: 1.2rem; background: var(--bg); }
+.dh { text-align: center; font-weight: 800; font-size: 14px; color: var(--accent-dark); padding: 14px 4px; background: var(--bg2); border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+.dc { min-height: 100px; border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); padding: 8px; background: var(--bg); }
+.dc.empty { background: var(--bg3); }
+.dc.today { background: #E8EFE9; }
+.dn { font-size: 15px; font-weight: 800; color: var(--text); margin-bottom: 8px; display: inline-block; width: 30px; height: 30px; line-height: 30px; text-align: center; border-radius: 50%; }
+.dc.today .dn { background: var(--accent); color: white; }
+.sp { font-size: 11px; font-weight: 700; border-radius: 24px; padding: 3px 8px; margin-bottom: 5px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; transition: 0.15s; }
+.sp .btn-absent-del { display: inline-flex; align-items: center; justify-content: center; width: 14px; height: 14px; border-radius: 50%; background: rgba(0,0,0,0.15); color: inherit; font-size: 9px; margin-left: 4px; cursor: pointer; }
+.sp .btn-absent-del:hover { background: #C28B77; color: white; }
+.legend { display: flex; gap: 22px; flex-wrap: wrap; padding: 12px 5px; }
+.legend-item { font-weight: 600; font-size: 13px; }
+.student-report { background: var(--bg2); border-radius: 24px; padding: 18px; margin-bottom: 20px; border: 1px solid var(--border); }
+.rep-header { display: flex; align-items: center; flex-wrap: wrap; gap: 14px; margin-bottom: 16px; }
+.stat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 16px; }
+.stat-box { background: var(--bg); border-radius: 20px; padding: 12px; text-align: center; border: 1px solid var(--border); }
+.stat-label { font-size: 12px; font-weight: 600; color: var(--text2); }
+.stat-val { font-size: 22px; font-weight: 800; margin-top: 6px; color: var(--accent-dark); }
+.rep-days { font-size: 13px; font-weight: 600; color: var(--text2); margin: 6px 0; }
+.pay-status-row { display: flex; justify-content: space-between; align-items: center; margin-top: 16px; padding-top: 14px; border-top: 2px dashed var(--border); }
+.pay-status-btn { font-size: 14px; font-weight: 800; padding: 8px 18px; border-radius: 40px; background: var(--unpaid-bg); color: var(--unpaid-text); border: none; cursor: pointer; transition: 0.2s; }
+.pay-status-btn.paid { background: var(--paid-bg); color: var(--paid-text); }
+.pay-status-btn:hover { filter: brightness(0.9); transform: scale(0.97); }
+.total-row { background: var(--bg); border-radius: 24px; padding: 16px 20px; display: flex; justify-content: space-between; align-items: center; margin-top: 12px; font-weight: 800; font-size: 16px; border: 1px solid var(--accent-light); }
+.empty-state { text-align: center; padding: 2.5rem; color: var(--text3); font-weight: 500; }
+.sync-status { font-size: 12px; background: var(--bg2); padding: 4px 12px; border-radius: 40px; margin-left: 10px; color: var(--accent-dark); }
 </style>
 </head>
 <body>
@@ -703,11 +196,24 @@ let curYear = new Date().getFullYear();
 let curMonth = new Date().getMonth();
 let selectedDays = [];
 let isSyncing = false;
+let isInitialLoad = true;
 
+// ========== HÀM CẬP NHẬT MẢNG ==========
 function updateStudentsArray() {
-  studentsArray = Object.keys(students).map(key => students[key]);
+  studentsArray = Object.keys(students).map(key => {
+    const s = students[key];
+    // Đảm bảo dữ liệu hợp lệ
+    if (!s.id) s.id = parseInt(key);
+    if (!s.payments) s.payments = {};
+    if (!s.absents) s.absents = {};
+    if (!s.days) s.days = [];
+    if (!s.color) s.color = getPastelColorSoft(s.id);
+    return s;
+  });
+  console.log('📊 Đã cập nhật studentsArray:', studentsArray.length, 'học sinh');
 }
 
+// ========== HÀM MÀU ==========
 function getPastelColorSoft(seed) {
   const palette = [
     {bg:'#DDE5DF', text:'#3A5C4F', dot:'#6A8E7C'},
@@ -720,40 +226,49 @@ function getPastelColorSoft(seed) {
   return palette[Math.abs(seed % palette.length)];
 }
 
+// ========== CẬP NHẬT TRẠNG THÁI ==========
 function updateSyncStatus(status) {
   const el = document.getElementById('syncStatus');
-  if (el) {
-    el.innerHTML = status;
-  }
+  if (el) el.innerHTML = status;
 }
 
+// ========== LƯU LÊN FIREBASE ==========
 function saveToFirebase() {
   if (isSyncing) return;
   isSyncing = true;
   updateSyncStatus('💾 Đang lưu...');
   
-  studentsRef.set(students).then(() => {
-    updateSyncStatus('✅ Đã đồng bộ');
-  }).catch((error) => {
-    console.error('Lỗi lưu Firebase:', error);
-    updateSyncStatus('❌ Lỗi đồng bộ');
-  }).finally(() => {
-    isSyncing = false;
-  });
+  studentsRef.set(students)
+    .then(() => {
+      updateSyncStatus('✅ Đã đồng bộ');
+      console.log('✅ Lưu thành công!');
+    })
+    .catch((error) => {
+      console.error('❌ Lỗi lưu Firebase:', error);
+      updateSyncStatus('❌ Lỗi đồng bộ');
+      alert('Có lỗi khi lưu dữ liệu: ' + error.message);
+    })
+    .finally(() => {
+      isSyncing = false;
+    });
 }
 
+// ========== ĐỌC DỮ LIỆU TỪ FIREBASE ==========
 studentsRef.on('value', (snapshot) => {
   const data = snapshot.val();
-  if (data && typeof data === 'object') {
+  console.log('📥 Nhận dữ liệu từ Firebase:', data);
+  
+  if (data && typeof data === 'object' && Object.keys(data).length > 0) {
     students = data;
     Object.keys(students).forEach(key => {
       const s = students[key];
       if (!s.payments) s.payments = {};
       if (!s.absents) s.absents = {};
       if (!s.color) s.color = getPastelColorSoft(s.id || parseInt(key));
+      if (!s.days) s.days = [];
     });
-    updateStudentsArray();
   } else {
+    console.log('📝 Không có dữ liệu, tạo dữ liệu mẫu...');
     const demo1 = { 
       id: Date.now()+1, 
       name: "Bảo Anh", 
@@ -778,31 +293,44 @@ studentsRef.on('value', (snapshot) => {
     students = {};
     students[demo1.id] = demo1;
     students[demo2.id] = demo2;
-    updateStudentsArray();
+    
+    // Lưu lên Firebase ngay khi tạo mới
     saveToFirebase();
   }
+  
+  updateStudentsArray();
   renderStudentList();
   renderCalendar();
   renderReport();
   updateSyncStatus('✅ Đã đồng bộ');
+  isInitialLoad = false;
+  
 }, (error) => {
-  console.error('Lỗi đọc Firebase:', error);
+  console.error('❌ Lỗi đọc Firebase:', error);
   updateSyncStatus('❌ Không thể kết nối Firebase');
+  alert('Không thể kết nối tới Firebase. Vui lòng kiểm tra kết nối mạng.');
 });
 
+// ========== CÁC HÀM XỬ LÝ ==========
 function toggleDay(btn) { 
   btn.classList.toggle('active'); 
   const d = parseInt(btn.dataset.d); 
-  if (selectedDays.includes(d)) selectedDays = selectedDays.filter(x=>x!==d); 
-  else selectedDays.push(d); 
+  if (selectedDays.includes(d)) {
+    selectedDays = selectedDays.filter(x=>x!==d); 
+  } else {
+    selectedDays.push(d); 
+  }
+  console.log('📅 Ngày đã chọn:', selectedDays);
 }
 
 function addStudent() {
   const name = document.getElementById('inp-name').value.trim();
   const fee = parseInt(document.getElementById('inp-fee').value) || 135000;
   const start = document.getElementById('inp-start').value;
+  
   if (!name) { alert('Vui lòng nhập tên'); return; }
   if (!selectedDays.length) { alert('Chọn ít nhất 1 ngày học'); return; }
+  
   const newId = Date.now();
   const newStudent = { 
     id: newId, 
@@ -818,21 +346,35 @@ function addStudent() {
   students[newId] = newStudent;
   updateStudentsArray();
   
+  // Reset form
   document.getElementById('inp-name').value = '';
   selectedDays = [];
   document.querySelectorAll('#dayBtns .day-btn').forEach(b=>b.classList.remove('active'));
+  
+  // Lưu và render
   saveToFirebase();
+  renderStudentList();
+  renderCalendar();
+  renderReport();
+  
+  console.log('✅ Đã thêm học sinh:', newStudent.name);
 }
 
 function deleteStudent(id) { 
   if(!confirm('Xóa học sinh này?')) return; 
+  const name = students[id]?.name || 'Unknown';
   delete students[id];
   updateStudentsArray();
-  saveToFirebase(); 
+  saveToFirebase();
+  renderStudentList();
+  renderCalendar();
+  renderReport();
+  console.log('🗑️ Đã xóa học sinh:', name);
 }
 
 function toggleEdit(id) { 
   const panel = document.getElementById('edit-'+id); 
+  if (!panel) return;
   const open = panel.classList.contains('open'); 
   document.querySelectorAll('.edit-panel.open').forEach(p=>p.classList.remove('open')); 
   if(!open) panel.classList.add('open'); 
@@ -840,22 +382,30 @@ function toggleEdit(id) {
 
 function saveEdit(id) {
   const s = students[id];
-  if(!s) return;
+  if(!s) { alert('Không tìm thấy học sinh!'); return; }
+  
   const name = document.getElementById('ename-'+id).value.trim();
   const fee = parseInt(document.getElementById('efee-'+id).value) || s.fee;
   const start = document.getElementById('estart-'+id).value;
   const days = []; 
   document.querySelectorAll('#edays-'+id+' .day-btn.active').forEach(b=>days.push(parseInt(b.dataset.d)));
-  if(!name){alert('Tên không được trống');return;}
-  if(!days.length){alert('Chọn ngày học');return;}
-  s.name=name; 
-  s.fee=fee; 
-  s.start=start; 
-  s.days=days;
+  
+  if(!name){ alert('Tên không được trống'); return; }
+  if(!days.length){ alert('Chọn ngày học'); return; }
+  
+  s.name = name; 
+  s.fee = fee; 
+  s.start = start; 
+  s.days = days;
   
   updateStudentsArray();
   document.getElementById('edit-'+id).classList.remove('open');
   saveToFirebase();
+  renderStudentList();
+  renderCalendar();
+  renderReport();
+  
+  console.log('✏️ Đã cập nhật học sinh:', s.name);
 }
 
 function toggleEditDay(btn) { 
@@ -867,22 +417,25 @@ function getMonthKey(y,m){ return `${y}-${String(m+1).padStart(2,'0')}`; }
 function getPreviousMonthKey(y, m) {
   let prevM = m - 1;
   let prevY = y;
-  if (prevM < 0) {
-    prevM = 11;
-    prevY--;
-  }
+  if (prevM < 0) { prevM = 11; prevY--; }
   return { year: prevY, month: prevM, key: getMonthKey(prevY, prevM) };
 }
 
 function togglePaymentStatus(studentId, year, month) {
   const student = students[studentId];
-  if(!student) return;
+  if(!student) { alert('Không tìm thấy học sinh!'); return; }
+  
   const key = getMonthKey(year, month);
   if(!student.payments) student.payments={};
   student.payments[key] = !(student.payments[key]||false);
   
   updateStudentsArray();
   saveToFirebase();
+  renderStudentList();
+  renderCalendar();
+  renderReport();
+  
+  console.log('💰 Cập nhật thanh toán cho:', student.name, 'tháng', key, '=', student.payments[key]);
 }
 
 function getPaymentStatus(student, year, month) { 
@@ -892,7 +445,8 @@ function getPaymentStatus(student, year, month) {
 
 function toggleAbsent(studentId, year, month, dateNum) {
   const student = students[studentId];
-  if(!student) return;
+  if(!student) { alert('Không tìm thấy học sinh!'); return; }
+  
   const key = getMonthKey(year, month);
   if(!student.absents) student.absents = {};
   if(!student.absents[key]) student.absents[key] = [];
@@ -909,6 +463,10 @@ function toggleAbsent(studentId, year, month, dateNum) {
   
   updateStudentsArray();
   saveToFirebase();
+  renderCalendar();
+  renderReport();
+  
+  console.log('📅 Cập nhật nghỉ học cho:', student.name, 'ngày', dateNum);
 }
 
 function parseLocalDate(str) { 
@@ -930,14 +488,20 @@ function getPlannedSessionsInMonth(student, year, month) {
   return sessions;
 }
 
+// ========== RENDER FUNCTIONS ==========
 function renderStudentList() {
   const el = document.getElementById('studentList');
-  if(!studentsArray.length){ el.innerHTML='<div class="empty-state">🍃 Chưa có học sinh</div>'; return; }
+  if(!studentsArray.length){ 
+    el.innerHTML='<div class="empty-state">🍃 Chưa có học sinh</div>'; 
+    return; 
+  }
+  
   el.innerHTML = studentsArray.map(s=>{
     const dayStr = s.days.map(d=>DAY_SHORT[d]).join(', ');
     const dayBtns = DAY_SHORT.map((lbl,i)=>`<button class="day-btn${s.days.includes(i)?' active':''}" data-d="${i}" onclick="toggleEditDay(this)">${lbl}</button>`).join('');
     const isPaid = getPaymentStatus(s, curYear, curMonth);
     const statusLabel = isPaid ? '✅ Đã nộp' : '⏳ Chưa nộp';
+    
     return `<div class="student-row">
       <div class="student-main">
         <div class="student-dot" style="background:${s.color.dot}"></div>
@@ -1086,6 +650,10 @@ function switchTab(name) {
   if (name === 'calendar') renderCalendar();
   if (name === 'report') renderReport();
 }
+
+// Debug: Log khi load trang
+console.log('🚀 App đã khởi động!');
+console.log('📅 Tháng hiện tại:', MONTHS[curMonth], curYear);
 </script>
 </body>
 </html>
