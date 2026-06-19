@@ -8,7 +8,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
 <style>
-/* ===== GIỮ NGUYÊN CSS NHƯ CŨ ===== */
+/* ===== CSS GIỮ NGUYÊN ===== */
 * { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
   --bg: #F4F2EF; --bg2: #EAE6E1; --bg3: #DDD8D1;
@@ -249,10 +249,35 @@ let selectedDays = [];
 let isSyncing = false;
 let isInitialLoad = true;
 
+// ===== HÀM QUAN TRỌNG: Tìm học sinh theo ID =====
+function findStudentById(id) {
+  // Chuyển id sang string để so sánh
+  const idStr = String(id);
+  
+  // Duyệt qua tất cả học sinh
+  for (const key in students) {
+    const student = students[key];
+    // So sánh với trường id (nếu có) hoặc với key
+    if (String(student.id) === idStr || String(key) === idStr) {
+      return { key: key, student: student };
+    }
+  }
+  return null;
+}
+
+function getStudentId(student, key) {
+  if (student.id) return student.id;
+  if (key && !isNaN(parseInt(key))) return parseInt(key);
+  return Date.now() + Math.random() * 1000;
+}
+
 function updateStudentsArray() {
   studentsArray = Object.keys(students).map(key => {
     const s = students[key];
-    if (!s.id) s.id = parseInt(key);
+    // Đảm bảo có id
+    if (!s.id) {
+      s.id = getStudentId(s, key);
+    }
     if (!s.payments) s.payments = {};
     if (!s.absents) s.absents = {};
     if (!s.days) s.days = [];
@@ -304,13 +329,30 @@ studentsRef.on('value', (snapshot) => {
   
   if (data && typeof data === 'object' && Object.keys(data).length > 0) {
     students = data;
+    
+    // ===== QUAN TRỌNG: TỰ ĐỘNG THÊM ID CHO DỮ LIỆU CŨ =====
+    let needUpdate = false;
     Object.keys(students).forEach(key => {
       const s = students[key];
       if (!s.payments) s.payments = {};
       if (!s.absents) s.absents = {};
-      if (!s.color) s.color = getPastelColorSoft(s.id || parseInt(key));
       if (!s.days) s.days = [];
+      
+      // Nếu chưa có id, tạo từ key
+      if (!s.id) {
+        s.id = parseInt(key);
+        needUpdate = true;
+        console.log('✅ Đã thêm id cho học sinh:', s.name, 'ID:', s.id);
+      }
+      
+      if (!s.color) s.color = getPastelColorSoft(s.id);
     });
+    
+    // Nếu có dữ liệu cũ được cập nhật, lưu lại Firebase
+    if (needUpdate) {
+      console.log('🔄 Đang đồng bộ id cho dữ liệu cũ...');
+      saveToFirebase();
+    }
   } else {
     console.log('📝 Không có dữ liệu, tạo dữ liệu mẫu...');
     const demo1 = { 
@@ -394,15 +436,17 @@ function addStudent() {
   renderReport();
 }
 
+// ===== SỬA HÀM DELETE =====
 function deleteStudent(id) { 
-  const idStr = String(id);
-  if(!students[idStr]) {
+  const result = findStudentById(id);
+  if (!result) {
     console.error('❌ Không tìm thấy học sinh với ID:', id);
     alert('Không tìm thấy học sinh!');
     return;
   }
-  if(!confirm(`Xóa học sinh "${students[idStr].name}"?`)) return; 
-  delete students[idStr];
+  
+  if(!confirm(`Xóa học sinh "${result.student.name}"?`)) return; 
+  delete students[result.key];
   updateStudentsArray();
   saveToFirebase();
   renderStudentList();
@@ -418,11 +462,15 @@ function toggleEdit(id) {
   if(!open) panel.classList.add('open'); 
 }
 
+// ===== SỬA HÀM SAVE EDIT =====
 function saveEdit(id) {
-  const idStr = String(id);
-  const s = students[idStr];
-  if(!s) { alert('Không tìm thấy học sinh!'); return; }
+  const result = findStudentById(id);
+  if (!result) { 
+    alert('Không tìm thấy học sinh!'); 
+    return; 
+  }
   
+  const s = result.student;
   const name = document.getElementById('ename-'+id).value.trim();
   const fee = parseInt(document.getElementById('efee-'+id).value) || s.fee;
   const start = document.getElementById('estart-'+id).value;
@@ -458,19 +506,18 @@ function getPreviousMonthKey(y, m) {
   return { year: prevY, month: prevM, key: getMonthKey(prevY, prevM) };
 }
 
+// ===== SỬA HÀM TOGGLE PAYMENT =====
 function togglePaymentStatus(studentId, year, month) {
-  console.log('💰 Toggle payment status - ID:', studentId, 'Year:', year, 'Month:', month);
+  console.log('💰 Toggle payment status - ID:', studentId);
   
-  const idStr = String(studentId);
-  const student = students[idStr];
-  
-  if(!student) { 
+  const result = findStudentById(studentId);
+  if (!result) { 
     console.error('❌ Không tìm thấy học sinh với ID:', studentId);
-    console.log('📋 Danh sách students:', Object.keys(students));
-    alert('Không tìm thấy học sinh! Vui lòng refresh trang và thử lại.'); 
+    alert('Không tìm thấy học sinh!'); 
     return; 
   }
   
+  const student = result.student;
   const key = getMonthKey(year, month);
   if(!student.payments) student.payments={};
   student.payments[key] = !(student.payments[key]||false);
@@ -489,19 +536,18 @@ function getPaymentStatus(student, year, month) {
   return !!(student.payments && student.payments[key]); 
 }
 
+// ===== SỬA HÀM TOGGLE ABSENT =====
 function toggleAbsent(studentId, year, month, dateNum) {
-  console.log('📅 Toggle absent - ID:', studentId, 'Year:', year, 'Month:', month, 'Date:', dateNum);
+  console.log('📅 Toggle absent - ID:', studentId);
   
-  const idStr = String(studentId);
-  const student = students[idStr];
-  
-  if(!student) { 
+  const result = findStudentById(studentId);
+  if (!result) { 
     console.error('❌ Không tìm thấy học sinh với ID:', studentId);
-    console.log('📋 Danh sách students:', Object.keys(students));
-    alert('Không tìm thấy học sinh! Vui lòng refresh trang và thử lại.'); 
+    alert('Không tìm thấy học sinh!'); 
     return; 
   }
   
+  const student = result.student;
   const key = getMonthKey(year, month);
   if(!student.absents) student.absents = {};
   if(!student.absents[key]) student.absents[key] = [];
