@@ -721,7 +721,7 @@ function renderReport() {
       
       <div class="rep-days">📅 Lịch học tháng này: ${currentPlannedSessions.length ? currentPlannedSessions.join(', ') : 'Không có lịch'}</div>
       <div class="rep-days" style="color: #A08060;">⚠️ Số buổi nghỉ tháng trước được trừ: ${countPrevAbsents > 0 ? prevAbsentDays.sort((a,b)=>a-b).map(d=>d+'/'+(prev.month+1)).join(', ') : 'Không có'}</div>
-      <div class="rep-days" style="color: var(--text3); font-style: italic; font-size:12px;">ℹ️ Trong tháng này bé đã nghỉ ${currentMonthAbsents.length} buổi (ngày ${currentMonthAbsents.join(', ')}), số buổi này sẽ tự động được gối đầu trừ vào học phí của tháng sau.</div>
+      <div class="rep-days" style="color: var(--text3); font-style: italic; font-size:12px;">ℹ️ Trong tháng này học sinh đã nghỉ ${currentMonthAbsents.length} buổi (ngày ${currentMonthAbsents.join(', ')}), số buổi này sẽ tự động được gối đầu trừ vào học phí của tháng sau.</div>
       
       <div class="pay-status-row">
         <button class="pay-status-btn ${isPaid?'paid':''}" onclick="togglePaymentStatus('${s.id}', ${curYear}, ${curMonth})">
