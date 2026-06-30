@@ -132,6 +132,172 @@ button:active { transform: scale(0.97); }
 .empty-state { text-align: center; padding: 2.5rem; color: var(--text3); font-weight: 500; }
 .sync-status { font-size: 12px; background: var(--bg2); padding: 4px 12px; border-radius: 40px; margin-left: 10px; color: var(--accent-dark); }
 
+/* ===== CSS MỚI CHO TÍNH NĂNG GỬI PHIẾU HỌC PHÍ ===== */
+.invoice-section {
+  background: linear-gradient(135deg, var(--bg), var(--bg2));
+  border: 2px solid var(--accent-light);
+  border-radius: var(--radius-lg);
+  padding: 1.8rem 2rem;
+  margin-bottom: 1.8rem;
+}
+
+.invoice-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  margin-top: 1rem;
+}
+
+.invoice-left {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.student-checkbox-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 12px;
+  background: var(--bg);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.student-checkbox-group label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 6px 14px;
+  background: var(--bg2);
+  border-radius: 30px;
+  transition: 0.2s;
+  border: 1px solid transparent;
+}
+
+.student-checkbox-group label:hover {
+  border-color: var(--accent);
+  background: var(--accent-light);
+}
+
+.student-checkbox-group input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
+.invoice-right {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  background: var(--bg);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+}
+
+.invoice-right .qr-placeholder {
+  width: 180px;
+  height: 180px;
+  background: white;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border: 2px dashed var(--border2);
+  color: var(--text3);
+  font-size: 13px;
+  text-align: center;
+  padding: 12px;
+  position: relative;
+  overflow: hidden;
+}
+
+.invoice-right .qr-placeholder img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.invoice-right .bank-info {
+  font-size: 13px;
+  text-align: center;
+  color: var(--text2);
+  line-height: 1.6;
+  padding: 8px 16px;
+  background: var(--bg2);
+  border-radius: var(--radius);
+  width: 100%;
+}
+
+.invoice-right .bank-info strong {
+  color: var(--accent-dark);
+}
+
+.invoice-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+
+.invoice-actions .btn-primary {
+  width: auto;
+  padding: 10px 32px;
+}
+
+.btn-secondary {
+  background: var(--bg2);
+  border-color: var(--border2);
+}
+
+.btn-secondary:hover {
+  background: var(--bg3);
+  border-color: var(--text3);
+}
+
+.qr-upload-btn {
+  position: relative;
+  overflow: hidden;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.qr-upload-btn input[type="file"] {
+  position: absolute;
+  left: 0;
+  top: 0;
+  opacity: 0;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+}
+
+/* QR code preview trong danh sách */
+.qr-preview-thumb {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  object-fit: cover;
+  border: 1px solid var(--border);
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.qr-preview-thumb:hover {
+  transform: scale(1.1);
+  border-color: var(--accent);
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .container { width: 98%; padding: 0.8rem; }
@@ -150,6 +316,13 @@ button:active { transform: scale(0.97); }
   h1 { font-size: 20px; }
   .act-btn.del { width: 24px; height: 24px; font-size: 12px; }
   .act-btn.del i { font-size: 12px; }
+  .invoice-grid {
+    grid-template-columns: 1fr;
+  }
+  .invoice-right .qr-placeholder {
+    width: 140px;
+    height: 140px;
+  }
 }
 </style>
 </head>
@@ -163,6 +336,7 @@ button:active { transform: scale(0.97); }
     <button class="tab active" onclick="switchTab('students')"><i class="ti ti-users"></i> Học sinh</button>
     <button class="tab" onclick="switchTab('calendar')"><i class="ti ti-calendar"></i> Lịch học</button>
     <button class="tab" onclick="switchTab('report')"><i class="ti ti-report-money"></i> Học phí & Nộp tiền</button>
+    <button class="tab" onclick="switchTab('invoice')"><i class="ti ti-receipt"></i> Gửi phiếu học phí</button>
   </div>
 
   <div id="tab-students">
@@ -219,6 +393,55 @@ button:active { transform: scale(0.97); }
       <div id="reportContent"></div>
     </div>
   </div>
+
+  <!-- ===== TAB GỬI PHIẾU HỌC PHÍ MỚI ===== -->
+  <div id="tab-invoice" style="display:none">
+    <div class="invoice-section">
+      <div class="sec-title"><i class="ti ti-receipt"></i> Tạo phiếu học phí</div>
+      
+      <div class="invoice-grid">
+        <div class="invoice-left">
+          <div class="field">
+            <label>📋 Chọn học sinh (có thể chọn nhiều nếu cùng phụ huynh)</label>
+            <div class="student-checkbox-group" id="invoiceStudentCheckboxes">
+              <!-- Sẽ được render bằng JS -->
+              <div class="empty-state" style="padding:10px;">Đang tải danh sách...</div>
+            </div>
+          </div>
+          
+          <div class="field">
+            <label>📅 Tháng áp dụng</label>
+            <input type="month" id="invoiceMonth" />
+          </div>
+          
+          <div class="invoice-actions">
+            <button class="btn-primary" onclick="generateInvoice()"><i class="ti ti-receipt"></i> Tạo phiếu học phí</button>
+            <button class="btn-secondary" onclick="selectAllStudents()"><i class="ti ti-check-all"></i> Chọn tất cả</button>
+            <button class="btn-secondary" onclick="deselectAllStudents()"><i class="ti ti-x"></i> Bỏ chọn</button>
+          </div>
+        </div>
+        
+        <div class="invoice-right">
+          <label style="font-weight:700;color:var(--accent-dark);"><i class="ti ti-qrcode"></i> Mã QR ngân hàng</label>
+          <div class="qr-placeholder" id="qrDisplay">
+            <i class="ti ti-qrcode" style="font-size:48px;color:var(--text3);"></i>
+            <span id="qrText">Chưa có mã QR</span>
+          </div>
+          <div class="bank-info">
+            <strong>🏦 Ngân hàng:</strong> <span id="bankNameDisplay">Vietcombank</span><br>
+            <strong>💰 Số tài khoản:</strong> <span id="accountNumberDisplay">0123456789</span><br>
+            <strong>👤 Chủ tài khoản:</strong> <span id="accountHolderDisplay">Nguyễn Thị Nhi</span>
+          </div>
+          <button class="qr-upload-btn btn-secondary" onclick="document.getElementById('qrFileInput').click()">
+            <i class="ti ti-upload"></i> Tải lên mã QR
+          </button>
+          <input type="file" id="qrFileInput" accept="image/*" style="display:none" onchange="handleQRUpload(event)" />
+        </div>
+      </div>
+      
+      <div id="invoicePreview" style="margin-top:1.5rem;"></div>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -249,15 +472,14 @@ let selectedDays = [];
 let isSyncing = false;
 let isInitialLoad = true;
 
+// Biến lưu QR code
+let qrImageData = null;
+
 // ===== HÀM QUAN TRỌNG: Tìm học sinh theo ID =====
 function findStudentById(id) {
-  // Chuyển id sang string để so sánh
   const idStr = String(id);
-  
-  // Duyệt qua tất cả học sinh
   for (const key in students) {
     const student = students[key];
-    // So sánh với trường id (nếu có) hoặc với key
     if (String(student.id) === idStr || String(key) === idStr) {
       return { key: key, student: student };
     }
@@ -274,10 +496,7 @@ function getStudentId(student, key) {
 function updateStudentsArray() {
   studentsArray = Object.keys(students).map(key => {
     const s = students[key];
-    // Đảm bảo có id
-    if (!s.id) {
-      s.id = getStudentId(s, key);
-    }
+    if (!s.id) s.id = getStudentId(s, key);
     if (!s.payments) s.payments = {};
     if (!s.absents) s.absents = {};
     if (!s.days) s.days = [];
@@ -329,26 +548,19 @@ studentsRef.on('value', (snapshot) => {
   
   if (data && typeof data === 'object' && Object.keys(data).length > 0) {
     students = data;
-    
-    // ===== QUAN TRỌNG: TỰ ĐỘNG THÊM ID CHO DỮ LIỆU CŨ =====
     let needUpdate = false;
     Object.keys(students).forEach(key => {
       const s = students[key];
       if (!s.payments) s.payments = {};
       if (!s.absents) s.absents = {};
       if (!s.days) s.days = [];
-      
-      // Nếu chưa có id, tạo từ key
       if (!s.id) {
         s.id = parseInt(key);
         needUpdate = true;
         console.log('✅ Đã thêm id cho học sinh:', s.name, 'ID:', s.id);
       }
-      
       if (!s.color) s.color = getPastelColorSoft(s.id);
     });
-    
-    // Nếu có dữ liệu cũ được cập nhật, lưu lại Firebase
     if (needUpdate) {
       console.log('🔄 Đang đồng bộ id cho dữ liệu cũ...');
       saveToFirebase();
@@ -386,12 +598,231 @@ studentsRef.on('value', (snapshot) => {
   renderStudentList();
   renderCalendar();
   renderReport();
+  renderInvoiceStudents();
   updateSyncStatus('✅ Đã đồng bộ');
   isInitialLoad = false;
 }, (error) => {
   console.error('❌ Lỗi đọc Firebase:', error);
   updateSyncStatus('❌ Không thể kết nối Firebase');
 });
+
+// ===== HÀM CHO INVOICE =====
+function renderInvoiceStudents() {
+  const container = document.getElementById('invoiceStudentCheckboxes');
+  if (!studentsArray.length) {
+    container.innerHTML = '<div class="empty-state" style="padding:10px;">Chưa có học sinh</div>';
+    return;
+  }
+  
+  container.innerHTML = studentsArray.map(s => `
+    <label>
+      <input type="checkbox" class="invoice-student-check" value="${s.id}" />
+      <span style="display:flex;align-items:center;gap:6px;">
+        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${s.color.dot};"></span>
+        ${s.name}
+      </span>
+    </label>
+  `).join('');
+  
+  // Set default month
+  const now = new Date();
+  document.getElementById('invoiceMonth').value = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+}
+
+function selectAllStudents() {
+  document.querySelectorAll('.invoice-student-check').forEach(cb => cb.checked = true);
+}
+
+function deselectAllStudents() {
+  document.querySelectorAll('.invoice-student-check').forEach(cb => cb.checked = false);
+}
+
+function handleQRUpload(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    qrImageData = e.target.result;
+    updateQRDisplay();
+    // Lưu QR vào localStorage để giữ khi refresh
+    try {
+      localStorage.setItem('qrImageData', qrImageData);
+    } catch(err) {
+      console.warn('Không thể lưu QR vào localStorage:', err);
+    }
+  };
+  reader.readAsDataURL(file);
+}
+
+function updateQRDisplay() {
+  const container = document.getElementById('qrDisplay');
+  if (qrImageData) {
+    container.innerHTML = `<img src="${qrImageData}" alt="Mã QR ngân hàng" style="max-width:100%;max-height:100%;object-fit:contain;" />`;
+  } else {
+    container.innerHTML = `
+      <i class="ti ti-qrcode" style="font-size:48px;color:var(--text3);"></i>
+      <span id="qrText">Chưa có mã QR</span>
+    `;
+  }
+}
+
+// Load QR từ localStorage
+try {
+  const savedQR = localStorage.getItem('qrImageData');
+  if (savedQR) {
+    qrImageData = savedQR;
+    setTimeout(updateQRDisplay, 100);
+  }
+} catch(err) {}
+
+function generateInvoice() {
+  const selectedChecks = document.querySelectorAll('.invoice-student-check:checked');
+  if (!selectedChecks.length) {
+    alert('Vui lòng chọn ít nhất 1 học sinh để tạo phiếu học phí');
+    return;
+  }
+  
+  const monthInput = document.getElementById('invoiceMonth').value;
+  if (!monthInput) {
+    alert('Vui lòng chọn tháng áp dụng');
+    return;
+  }
+  
+  const [year, month] = monthInput.split('-').map(Number);
+  const monthKey = getMonthKey(year, month-1);
+  const monthName = MONTHS[month-1] + ' ' + year;
+  
+  let selectedStudents = [];
+  selectedChecks.forEach(cb => {
+    const id = cb.value;
+    const result = findStudentById(id);
+    if (result) selectedStudents.push(result.student);
+  });
+  
+  if (!selectedStudents.length) {
+    alert('Không tìm thấy thông tin học sinh');
+    return;
+  }
+  
+  // Tạo nội dung phiếu học phí
+  let html = `
+    <div style="background:white;border-radius:20px;padding:24px;border:2px solid var(--accent-light);max-width:800px;margin:0 auto;">
+      <div style="text-align:center;border-bottom:2px dashed var(--border);padding-bottom:16px;margin-bottom:16px;">
+        <h2 style="color:var(--accent-dark);"><i class="ti ti-leaf"></i> PHIẾU HỌC PHÍ</h2>
+        <p style="color:var(--text2);font-weight:500;">Tháng ${monthName}</p>
+        <p style="color:var(--text3);font-size:13px;">Trung tâm Anh ngữ Nhi's Class</p>
+      </div>
+      
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:12px 0;">
+  `;
+  
+  let totalAmount = 0;
+  selectedStudents.forEach(s => {
+    const plannedSessions = getPlannedSessionsInMonth(s, year, month-1);
+    const prev = getPreviousMonthKey(year, month-1);
+    const prevAbsents = (s.absents && s.absents[prev.key]) ? s.absents[prev.key] : [];
+    const refund = prevAbsents.length * s.fee;
+    const finalFee = Math.max(0, plannedSessions.length * s.fee - refund);
+    totalAmount += finalFee;
+    
+    const isPaid = getPaymentStatus(s, year, month-1);
+    const paidText = isPaid ? '✅ Đã nộp' : '⏳ Chưa nộp';
+    
+    html += `
+      <div style="background:${s.color.bg};border-radius:12px;padding:12px 16px;border:1px solid var(--border);">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:${s.color.dot};"></span>
+          <strong>${s.name}</strong>
+          <span style="font-size:11px;background:var(--bg);padding:2px 10px;border-radius:20px;">${s.days.map(d=>DAY_SHORT[d]).join(', ')}</span>
+        </div>
+        <div style="margin-top:6px;font-size:14px;">
+          <div>📅 ${plannedSessions.length} buổi × ${s.fee.toLocaleString('vi-VN')}đ</div>
+          ${prevAbsents.length ? `<div style="color:var(--unpaid-text);">🔹 Trừ tháng trước: -${prevAbsents.length} buổi (-${(prevAbsents.length * s.fee).toLocaleString('vi-VN')}đ)</div>` : ''}
+          <div style="font-weight:700;font-size:16px;color:var(--accent-dark);margin-top:4px;">
+            💰 ${finalFee.toLocaleString('vi-VN')}đ
+          </div>
+          <div style="font-size:12px;margin-top:2px;">Trạng thái: ${paidText}</div>
+        </div>
+      </div>
+    `;
+  });
+  
+  const bankName = document.getElementById('bankNameDisplay').textContent || 'Vietcombank';
+  const accountNumber = document.getElementById('accountNumberDisplay').textContent || '0123456789';
+  const accountHolder = document.getElementById('accountHolderDisplay').textContent || 'Nguyễn Thị Nhi';
+  
+  html += `
+      </div>
+      
+      <div style="border-top:2px solid var(--border);padding-top:16px;margin-top:8px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+        <div>
+          <div style="font-weight:800;font-size:18px;color:var(--accent-dark);">
+            Tổng cộng: ${totalAmount.toLocaleString('vi-VN')}đ
+          </div>
+          <div style="font-size:13px;color:var(--text3);">${selectedStudents.length} học sinh</div>
+        </div>
+        <div style="text-align:right;font-size:13px;color:var(--text2);">
+          <div>🏦 ${bankName}</div>
+          <div><strong>${accountNumber}</strong></div>
+          <div>${accountHolder}</div>
+        </div>
+      </div>
+      
+      <div style="margin-top:16px;padding-top:16px;border-top:1px dashed var(--border);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
+        <div style="font-size:12px;color:var(--text3);">
+          <i class="ti ti-info-circle"></i> Vui lòng chuyển khoản đúng số tiền và ghi chú tên học sinh
+        </div>
+        <div style="display:flex;gap:12px;">
+          <button onclick="printInvoice()" class="btn-primary" style="padding:6px 20px;font-size:13px;width:auto;">
+            <i class="ti ti-printer"></i> In
+          </button>
+          <button onclick="document.getElementById('invoicePreview').innerHTML=''" class="btn-secondary" style="padding:6px 20px;font-size:13px;width:auto;">
+            <i class="ti ti-x"></i> Đóng
+          </button>
+        </div>
+      </div>
+      
+      ${qrImageData ? `
+        <div style="text-align:center;margin-top:16px;padding-top:16px;border-top:1px dashed var(--border);">
+          <p style="font-size:12px;color:var(--text3);margin-bottom:8px;">📱 Quét mã QR để chuyển khoản nhanh</p>
+          <img src="${qrImageData}" alt="Mã QR" style="width:150px;height:150px;border-radius:12px;border:1px solid var(--border);" />
+        </div>
+      ` : ''}
+    </div>
+  `;
+  
+  document.getElementById('invoicePreview').innerHTML = html;
+}
+
+function printInvoice() {
+  const content = document.getElementById('invoicePreview').innerHTML;
+  if (!content) {
+    alert('Vui lòng tạo phiếu học phí trước khi in');
+    return;
+  }
+  
+  const win = window.open('', '_blank');
+  win.document.write(`
+    <html>
+      <head><title>Phiếu học phí - Nhi's Class</title>
+      <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.0.0/tabler-icons.min.css" />
+      <style>
+        body { font-family: 'Segoe UI', system-ui, sans-serif; padding: 40px; background: white; }
+        * { box-sizing: border-box; }
+        .no-print { display: none; }
+      </style>
+      </head>
+      <body>
+        ${content.replace(/<button[^>]*>.*?<\/button>/gs, '')}
+        <script>
+          window.onload = function() { window.print(); window.close(); }
+        <\/script>
+      </body>
+    </html>
+  `);
+  win.document.close();
+}
 
 function toggleDay(btn) { 
   btn.classList.toggle('active'); 
@@ -434,9 +865,9 @@ function addStudent() {
   renderStudentList();
   renderCalendar();
   renderReport();
+  renderInvoiceStudents();
 }
 
-// ===== SỬA HÀM DELETE =====
 function deleteStudent(id) { 
   const result = findStudentById(id);
   if (!result) {
@@ -452,6 +883,7 @@ function deleteStudent(id) {
   renderStudentList();
   renderCalendar();
   renderReport();
+  renderInvoiceStudents();
 }
 
 function toggleEdit(id) { 
@@ -462,7 +894,6 @@ function toggleEdit(id) {
   if(!open) panel.classList.add('open'); 
 }
 
-// ===== SỬA HÀM SAVE EDIT =====
 function saveEdit(id) {
   const result = findStudentById(id);
   if (!result) { 
@@ -491,6 +922,7 @@ function saveEdit(id) {
   renderStudentList();
   renderCalendar();
   renderReport();
+  renderInvoiceStudents();
 }
 
 function toggleEditDay(btn) { 
@@ -506,7 +938,6 @@ function getPreviousMonthKey(y, m) {
   return { year: prevY, month: prevM, key: getMonthKey(prevY, prevM) };
 }
 
-// ===== SỬA HÀM TOGGLE PAYMENT =====
 function togglePaymentStatus(studentId, year, month) {
   console.log('💰 Toggle payment status - ID:', studentId);
   
@@ -529,6 +960,7 @@ function togglePaymentStatus(studentId, year, month) {
   renderStudentList();
   renderCalendar();
   renderReport();
+  renderInvoiceStudents();
 }
 
 function getPaymentStatus(student, year, month) { 
@@ -536,7 +968,6 @@ function getPaymentStatus(student, year, month) {
   return !!(student.payments && student.payments[key]); 
 }
 
-// ===== SỬA HÀM TOGGLE ABSENT =====
 function toggleAbsent(studentId, year, month, dateNum) {
   console.log('📅 Toggle absent - ID:', studentId);
   
@@ -568,6 +999,7 @@ function toggleAbsent(studentId, year, month, dateNum) {
   saveToFirebase();
   renderCalendar();
   renderReport();
+  renderInvoiceStudents();
 }
 
 function parseLocalDate(str) { 
@@ -748,12 +1180,14 @@ function switchTab(name) {
   document.getElementById('tab-students').style.display = name === 'students' ? '' : 'none';
   document.getElementById('tab-calendar').style.display = name === 'calendar' ? '' : 'none';
   document.getElementById('tab-report').style.display = name === 'report' ? '' : 'none';
+  document.getElementById('tab-invoice').style.display = name === 'invoice' ? '' : 'none';
   document.querySelectorAll('.tab').forEach((b, i) => {
-    const tabNames = ['students', 'calendar', 'report'];
+    const tabNames = ['students', 'calendar', 'report', 'invoice'];
     b.classList.toggle('active', tabNames[i] === name);
   });
   if (name === 'calendar') renderCalendar();
   if (name === 'report') renderReport();
+  if (name === 'invoice') renderInvoiceStudents();
 }
 
 console.log('🚀 App đã khởi động!');
