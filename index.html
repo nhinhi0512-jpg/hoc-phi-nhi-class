@@ -462,6 +462,7 @@ button:active { transform: scale(0.97); }
 
 <script>
 // ========== FIREBASE CONFIG ==========
+// ========== FIREBASE CONFIG ==========
 const firebaseConfig = {
   apiKey: "AIzaSyAGr5zM79FPI5X8cL0ePNSoHU8o8rhfvOI",
   authDomain: "hethong-tuvung.firebaseapp.com",
@@ -487,8 +488,6 @@ let curMonth = new Date().getMonth();
 let selectedDays = [];
 let isSyncing = false;
 let isInitialLoad = true;
-
-// Biến lưu QR code
 let qrImageData = null;
 
 // ===== HÀM QUAN TRỌNG: Tìm học sinh theo ID =====
@@ -544,18 +543,70 @@ function saveToFirebase() {
   isSyncing = true;
   updateSyncStatus('💾 Đang lưu...');
   
-  studentsRef.set(students)
+  // Kiểm tra và làm sạch dữ liệu trước khi lưu
+  const cleanData = {};
+  Object.keys(students).forEach(key => {
+    const s = students[key];
+    // Đảm bảo mọi field đều có giá trị hợp lệ
+    cleanData[key] = {
+      id: s.id || parseInt(key) || Date.now() + Math.random() * 1000,
+      name: s.name || 'Chưa có tên',
+      fee: typeof s.fee === 'number' ? s.fee : 125000,
+      days: Array.isArray(s.days) ? s.days : [],
+      start: s.start || new Date().toISOString().split('T')[0],
+      payments: s.payments || {},
+      absents: s.absents || {},
+      color: s.color || getPastelColorSoft(s.id || Date.now())
+    };
+  });
+  
+  studentsRef.set(cleanData)
     .then(() => {
       updateSyncStatus('✅ Đã đồng bộ');
       console.log('✅ Lưu thành công!');
     })
     .catch((error) => {
       console.error('❌ Lỗi lưu Firebase:', error);
-      updateSyncStatus('❌ Lỗi đồng bộ');
+      updateSyncStatus('❌ Lỗi đồng bộ: ' + error.message);
+      // Hiển thị lỗi chi tiết để debug
+      alert('Lỗi lưu dữ liệu: ' + error.message);
     })
     .finally(() => {
       isSyncing = false;
     });
+}
+
+// Hàm tạo dữ liệu mẫu với ID duy nhất
+function createDemoData() {
+  const id1 = Date.now() + 1000;
+  const id2 = Date.now() + 2000;
+  
+  const demo1 = { 
+    id: id1, 
+    name: "Bảo Anh", 
+    fee: 140000, 
+    days: [2,4,6], 
+    start: "2026-06-01", 
+    payments: {}, 
+    absents: {}, 
+    color: getPastelColorSoft(id1) 
+  };
+  
+  const demo2 = { 
+    id: id2, 
+    name: "Minh Khang", 
+    fee: 155000, 
+    days: [1,3,5], 
+    start: "2026-06-01", 
+    payments: {"2026-06": true}, 
+    absents: {}, 
+    color: getPastelColorSoft(id2) 
+  };
+  
+  students = {};
+  students[id1] = demo1;
+  students[id2] = demo2;
+  saveToFirebase();
 }
 
 studentsRef.on('value', (snapshot) => {
@@ -567,15 +618,15 @@ studentsRef.on('value', (snapshot) => {
     let needUpdate = false;
     Object.keys(students).forEach(key => {
       const s = students[key];
-      if (!s.payments) s.payments = {};
-      if (!s.absents) s.absents = {};
-      if (!s.days) s.days = [];
+      if (!s.payments) { s.payments = {}; needUpdate = true; }
+      if (!s.absents) { s.absents = {}; needUpdate = true; }
+      if (!s.days) { s.days = []; needUpdate = true; }
       if (!s.id) {
         s.id = parseInt(key);
         needUpdate = true;
         console.log('✅ Đã thêm id cho học sinh:', s.name, 'ID:', s.id);
       }
-      if (!s.color) s.color = getPastelColorSoft(s.id);
+      if (!s.color) { s.color = getPastelColorSoft(s.id); needUpdate = true; }
     });
     if (needUpdate) {
       console.log('🔄 Đang đồng bộ id cho dữ liệu cũ...');
@@ -583,31 +634,7 @@ studentsRef.on('value', (snapshot) => {
     }
   } else {
     console.log('📝 Không có dữ liệu, tạo dữ liệu mẫu...');
-    const demo1 = { 
-      id: Date.now()+1, 
-      name: "Bảo Anh", 
-      fee: 140000, 
-      days: [2,4,6], 
-      start: "2026-06-01", 
-      payments: {}, 
-      absents: {}, 
-      color: getPastelColorSoft(Date.now()+1) 
-    };
-    const demo2 = { 
-      id: Date.now()+2, 
-      name: "Minh Khang", 
-      fee: 155000, 
-      days: [1,3,5], 
-      start: "2026-06-01", 
-      payments: {"2026-06": true}, 
-      absents: {}, 
-      color: getPastelColorSoft(Date.now()+2) 
-    };
-    
-    students = {};
-    students[demo1.id] = demo1;
-    students[demo2.id] = demo2;
-    saveToFirebase();
+    createDemoData();
   }
   
   updateStudentsArray();
@@ -620,6 +647,7 @@ studentsRef.on('value', (snapshot) => {
 }, (error) => {
   console.error('❌ Lỗi đọc Firebase:', error);
   updateSyncStatus('❌ Không thể kết nối Firebase');
+  document.getElementById('studentList').innerHTML = '<div class="empty-state">⚠️ Không thể kết nối Firebase. Vui lòng kiểm tra kết nối mạng.</div>';
 });
 
 // ===== HÀM CHO INVOICE =====
@@ -1025,13 +1053,14 @@ function addStudent() {
   if (!name) { alert('Vui lòng nhập tên'); return; }
   if (!selectedDays.length) { alert('Chọn ít nhất 1 ngày học'); return; }
   
-  const newId = Date.now();
+  // Tạo ID duy nhất với timestamp + random để tránh trùng
+  const newId = Date.now() + Math.floor(Math.random() * 10000);
   const newStudent = { 
     id: newId, 
-    name, 
-    fee, 
+    name: name, 
+    fee: fee, 
     days: [...selectedDays], 
-    start, 
+    start: start, 
     payments: {}, 
     absents: {}, 
     color: getPastelColorSoft(newId) 
@@ -1373,7 +1402,6 @@ function switchTab(name) {
   if (name === 'invoice') renderInvoiceStudents();
 }
 
-console.log('🚀 App đã khởi động!');
-</script>
+console.log('🚀 App đã khởi động!');</script>
 </body>
 </html>
