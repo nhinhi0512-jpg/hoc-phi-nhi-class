@@ -282,33 +282,6 @@ button:active { transform: scale(0.97); }
   cursor: pointer;
 }
 
-/* Responsive */
-@media (max-width: 768px) {
-  .container { width: 98%; padding: 0.8rem; }
-  .section { padding: 1rem; }
-  .student-main { gap: 8px; padding: 10px 12px; }
-  .student-name { font-size: 14px; min-width: 80px; }
-  .stat-grid { grid-template-columns: 1fr; }
-  .cal-grid { font-size: 12px; }
-  .dc { min-height: 70px; padding: 4px; }
-  .dh { padding: 8px 2px; font-size: 11px; }
-  .sp { font-size: 10px; padding: 2px 6px; }
-  .fee-row { flex-wrap: wrap; }
-  .fee-row input { width: 100%; }
-  .search-wrap input { width: 150px; }
-  .tab { padding: 8px 16px; font-size: 14px; }
-  h1 { font-size: 20px; }
-  .act-btn.del { width: 24px; height: 24px; font-size: 12px; }
-  .act-btn.del i { font-size: 12px; }
-  .invoice-grid {
-    grid-template-columns: 1fr;
-  }
-  .invoice-right .qr-placeholder {
-    width: 140px;
-    height: 140px;
-  }
-}
-
 /* CSS cho bảng lịch học trong phiếu */
 .schedule-table {
   width: 100%;
@@ -340,6 +313,33 @@ button:active { transform: scale(0.97); }
 .schedule-table .empty-cell {
   background: #F5F5F5;
   color: #ccc;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .container { width: 98%; padding: 0.8rem; }
+  .section { padding: 1rem; }
+  .student-main { gap: 8px; padding: 10px 12px; }
+  .student-name { font-size: 14px; min-width: 80px; }
+  .stat-grid { grid-template-columns: 1fr; }
+  .cal-grid { font-size: 12px; }
+  .dc { min-height: 70px; padding: 4px; }
+  .dh { padding: 8px 2px; font-size: 11px; }
+  .sp { font-size: 10px; padding: 2px 6px; }
+  .fee-row { flex-wrap: wrap; }
+  .fee-row input { width: 100%; }
+  .search-wrap input { width: 150px; }
+  .tab { padding: 8px 16px; font-size: 14px; }
+  h1 { font-size: 20px; }
+  .act-btn.del { width: 24px; height: 24px; font-size: 12px; }
+  .act-btn.del i { font-size: 12px; }
+  .invoice-grid {
+    grid-template-columns: 1fr;
+  }
+  .invoice-right .qr-placeholder {
+    width: 140px;
+    height: 140px;
+  }
 }
 </style>
 </head>
@@ -462,7 +462,6 @@ button:active { transform: scale(0.97); }
 
 <script>
 // ========== FIREBASE CONFIG ==========
-// ========== FIREBASE CONFIG ==========
 const firebaseConfig = {
   apiKey: "AIzaSyAGr5zM79FPI5X8cL0ePNSoHU8o8rhfvOI",
   authDomain: "hethong-tuvung.firebaseapp.com",
@@ -543,11 +542,9 @@ function saveToFirebase() {
   isSyncing = true;
   updateSyncStatus('💾 Đang lưu...');
   
-  // Kiểm tra và làm sạch dữ liệu trước khi lưu
   const cleanData = {};
   Object.keys(students).forEach(key => {
     const s = students[key];
-    // Đảm bảo mọi field đều có giá trị hợp lệ
     cleanData[key] = {
       id: s.id || parseInt(key) || Date.now() + Math.random() * 1000,
       name: s.name || 'Chưa có tên',
@@ -568,7 +565,6 @@ function saveToFirebase() {
     .catch((error) => {
       console.error('❌ Lỗi lưu Firebase:', error);
       updateSyncStatus('❌ Lỗi đồng bộ: ' + error.message);
-      // Hiển thị lỗi chi tiết để debug
       alert('Lỗi lưu dữ liệu: ' + error.message);
     })
     .finally(() => {
@@ -576,7 +572,6 @@ function saveToFirebase() {
     });
 }
 
-// Hàm tạo dữ liệu mẫu với ID duy nhất
 function createDemoData() {
   const id1 = Date.now() + 1000;
   const id2 = Date.now() + 2000;
@@ -668,7 +663,6 @@ function renderInvoiceStudents() {
     </label>
   `).join('');
   
-  // Set default month
   const now = new Date();
   document.getElementById('invoiceMonth').value = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
 }
@@ -710,7 +704,6 @@ function updateQRDisplay() {
   }
 }
 
-// Load QR từ localStorage
 try {
   const savedQR = localStorage.getItem('qrImageData');
   if (savedQR) {
@@ -719,18 +712,28 @@ try {
   }
 } catch(err) {}
 
-// Hàm lấy TẤT CẢ các buổi học trong tháng
-function getAllSessionsInMonth(student, year, month) {
-  const total = new Date(year, month+1, 0).getDate();
+// ===== HÀM LẤY CÁC BUỔI HỌC TRONG THÁNG (CÓ XÉT NGÀY BẮT ĐẦU) =====
+function getSessionsInMonth(student, year, month) {
+  // month là tháng (0-11)
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
   const startDate = parseLocalDate(student.start);
   const sessions = [];
-  for(let d=1; d<=total; d++) {
+  
+  for (let d = 1; d <= daysInMonth; d++) {
     const date = new Date(year, month, d);
-    if(date >= startDate && student.days.includes(date.getDay())) {
+    // Chỉ tính nếu ngày >= ngày bắt đầu
+    if (date >= startDate && student.days.includes(date.getDay())) {
       sessions.push(d);
     }
   }
   return sessions;
+}
+
+function getPreviousMonthKey(year, month) {
+  let prevM = month - 1;
+  let prevY = year;
+  if (prevM < 0) { prevM = 11; prevY--; }
+  return { year: prevY, month: prevM, key: getMonthKey(prevY, prevM) };
 }
 
 function generateInvoice() {
@@ -747,8 +750,9 @@ function generateInvoice() {
   }
   
   const [year, month] = monthInput.split('-').map(Number);
-  const monthKey = getMonthKey(year, month-1);
-  const monthName = MONTHS[month-1] + ' ' + year;
+  // month từ input là 1-12, chuyển về 0-11
+  const monthIndex = month - 1;
+  const monthName = MONTHS[monthIndex] + ' ' + year;
   
   let selectedStudents = [];
   selectedChecks.forEach(cb => {
@@ -762,7 +766,6 @@ function generateInvoice() {
     return;
   }
   
-  // Lấy thông tin ngân hàng
   const bankName = document.getElementById('bankNameDisplay').textContent || 'ACB';
   const accountNumber = document.getElementById('accountNumberDisplay').textContent || '26935497';
   const accountHolder = document.getElementById('accountHolderDisplay').textContent || 'Phan Thị Quỳnh Nhi';
@@ -777,67 +780,68 @@ function generateInvoice() {
   `;
   
   let totalAmount = 0;
+  
   selectedStudents.forEach(s => {
-    // Lấy tất cả các buổi học trong tháng
-    const allSessions = getAllSessionsInMonth(s, year, month-1);
-    const prev = getPreviousMonthKey(year, month-1);
+    // ===== SỬA: Lấy các buổi học từ ngày bắt đầu trở đi =====
+    const allSessions = getSessionsInMonth(s, year, monthIndex);
+    const totalSessions = allSessions.length;
+    
+    // Lấy số buổi vắng từ tháng trước
+    const prev = getPreviousMonthKey(year, monthIndex);
     const prevAbsents = (s.absents && s.absents[prev.key]) ? s.absents[prev.key] : [];
-    const refund = prevAbsents.length * s.fee;
-    const finalFee = Math.max(0, allSessions.length * s.fee - refund);
+    const countPrevAbsents = prevAbsents.length;
+    const refundAmount = countPrevAbsents * s.fee;
+    
+    const finalFee = Math.max(0, totalSessions * s.fee - refundAmount);
     totalAmount += finalFee;
     
-    const isPaid = getPaymentStatus(s, year, month-1);
+    const isPaid = getPaymentStatus(s, year, monthIndex);
     const paidText = isPaid ? '✅ Đã nộp' : '⏳ Chưa nộp';
     
-    // Tạo danh sách ngày vắng chi tiết
-    const absentDays = prevAbsents.length > 0
-      ? prevAbsents.sort((a,b)=>a-b).map(d => `${d}/${prev.month+1}`).join(', ')
-      : 'Không có buổi vắng';
+    // Tạo bảng lịch học
+    const daysInMonth = new Date(year, monthIndex + 1, 0).getDate();
+    const studentDays = s.days.sort((a, b) => a - b);
     
-    // Tạo bảng lịch học theo thứ trong tuần
-    const daysInMonth = new Date(year, month, 0).getDate();
+    // Xác định các ngày học thực tế trong tháng (có xét ngày bắt đầu)
+    const studyDays = new Set(allSessions);
     
-    // Lấy danh sách các thứ mà học sinh học
-    const studentDays = s.days.sort((a,b) => a-b);
-    
-    // Tạo header cho bảng
+    // Tạo header
     let tableHtml = `<table class="schedule-table">
       <thead>
         <tr>`;
-    
-    // Tạo cột header theo thứ tự ngày học của học sinh
     studentDays.forEach(day => {
       tableHtml += `<th>${DAY_SHORT[day]}</th>`;
     });
     tableHtml += `</tr></thead><tbody>`;
     
-    // Tạo các hàng cho từng tuần trong tháng
+    // Tạo các hàng theo tuần
     let weeks = [];
     let currentWeek = {};
-    let weekIndex = 0;
     
     for (let d = 1; d <= daysInMonth; d++) {
-      const date = new Date(year, month-1, d);
+      const date = new Date(year, monthIndex, d);
       const dayOfWeek = date.getDay();
       
-      // Nếu ngày này là ngày học của học sinh
       if (s.days.includes(dayOfWeek)) {
         const isAbsent = prevAbsents.includes(d);
-        currentWeek[dayOfWeek] = { day: d, isAbsent: isAbsent };
+        const isStudy = studyDays.has(d);
+        // Chỉ hiển thị ngày nếu nó là ngày học (tính từ ngày bắt đầu)
+        if (isStudy) {
+          currentWeek[dayOfWeek] = { day: d, isAbsent: isAbsent, isStudy: true };
+        } else {
+          currentWeek[dayOfWeek] = { day: d, isAbsent: false, isStudy: false };
+        }
       }
       
       // Kiểm tra xem đã đủ các ngày trong tuần chưa
       const allDaysInWeek = s.days.every(day => currentWeek[day] !== undefined);
-      
       if (allDaysInWeek) {
         weeks.push({ ...currentWeek });
         currentWeek = {};
       }
     }
     
-    // Nếu còn dư ngày ở cuối tháng, thêm vào tuần cuối
     if (Object.keys(currentWeek).length > 0) {
-      // Kiểm tra xem có ngày nào trong tuần cuối không
       let hasData = false;
       s.days.forEach(day => {
         if (currentWeek[day]) hasData = true;
@@ -847,17 +851,19 @@ function generateInvoice() {
       }
     }
     
-    // Hiển thị bảng
     if (weeks.length > 0) {
-      weeks.forEach((week, idx) => {
+      weeks.forEach((week) => {
         tableHtml += `<tr>`;
         studentDays.forEach(day => {
           const data = week[day];
           if (data) {
-            const isAbsent = data.isAbsent;
-            const cellClass = isAbsent ? 'absent-cell' : 'study-cell';
-            const label = isAbsent ? 'Nghỉ' : (data.day + '/' + month);
-            tableHtml += `<td class="${cellClass}">${label}</td>`;
+            if (!data.isStudy) {
+              tableHtml += `<td class="empty-cell">-</td>`;
+            } else if (data.isAbsent) {
+              tableHtml += `<td class="absent-cell">${data.day}/${month}</td>`;
+            } else {
+              tableHtml += `<td class="study-cell">${data.day}/${month}</td>`;
+            }
           } else {
             tableHtml += `<td class="empty-cell">-</td>`;
           }
@@ -867,8 +873,12 @@ function generateInvoice() {
     } else {
       tableHtml += `<tr><td colspan="${studentDays.length}" style="text-align:center;color:var(--text3);padding:12px;">Không có lịch học</td></tr>`;
     }
-    
     tableHtml += `</tbody></table>`;
+    
+    // Tạo danh sách ngày vắng
+    const absentDaysStr = prevAbsents.length > 0
+      ? prevAbsents.sort((a, b) => a - b).map(d => `${d}/${prev.month+1}`).join(', ')
+      : 'Không có buổi vắng';
     
     html += `
       <div style="background:${s.color.bg};border-radius:12px;padding:16px 20px;margin-bottom:14px;border:1px solid var(--border);">
@@ -879,32 +889,29 @@ function generateInvoice() {
           <span style="font-size:12px;background:rgba(255,255,255,0.5);padding:2px 14px;border-radius:20px;font-weight:600;">${s.fee.toLocaleString('vi-VN')}đ/buổi</span>
         </div>
         
-        <!-- Bảng lịch học -->
         <div style="background:rgba(255,255,255,0.5);border-radius:10px;padding:12px;margin-bottom:12px;">
           <div style="font-weight:700;color:var(--accent-dark);margin-bottom:8px;">📚 Lịch học trong tháng:</div>
           ${tableHtml}
         </div>
         
-        <!-- Danh sách ngày vắng -->
         <div style="background:rgba(255,255,255,0.3);border-radius:10px;padding:10px;margin-bottom:12px;border-left:3px solid var(--unpaid-text);">
           <div style="font-weight:700;color:var(--unpaid-text);margin-bottom:4px;">📌 Ngày vắng (trừ tháng trước):</div>
           <div style="font-size:14px;color:var(--unpaid-text);">
-            ${absentDays}
+            ${absentDaysStr}
           </div>
-          <div style="font-size:12px;color:var(--text3);margin-top:4px;">Số buổi vắng: ${prevAbsents.length} buổi</div>
+          <div style="font-size:12px;color:var(--text3);margin-top:4px;">Số buổi vắng: ${countPrevAbsents} buổi</div>
         </div>
         
-        <!-- Thông tin học phí -->
         <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;font-size:14px;margin-top:6px;">
           <div style="background:rgba(255,255,255,0.4);border-radius:8px;padding:8px;text-align:center;">
             <div style="font-weight:600;color:var(--text2);">Số buổi học</div>
-            <div style="font-weight:800;font-size:18px;">${allSessions.length} buổi</div>
+            <div style="font-weight:800;font-size:18px;">${totalSessions} buổi</div>
             <div style="font-size:12px;color:var(--text3);">× ${s.fee.toLocaleString('vi-VN')}đ</div>
           </div>
           <div style="background:rgba(255,255,255,0.4);border-radius:8px;padding:8px;text-align:center;">
             <div style="font-weight:600;color:var(--unpaid-text);">Trừ buổi vắng</div>
-            <div style="font-weight:800;font-size:18px;color:var(--unpaid-text);">-${prevAbsents.length} buổi</div>
-            <div style="font-size:12px;color:var(--text3);">-${(prevAbsents.length * s.fee).toLocaleString('vi-VN')}đ</div>
+            <div style="font-weight:800;font-size:18px;color:var(--unpaid-text);">-${countPrevAbsents} buổi</div>
+            <div style="font-size:12px;color:var(--text3);">-${refundAmount.toLocaleString('vi-VN')}đ</div>
           </div>
           <div style="background:${s.color.dot}20;border-radius:8px;padding:8px;text-align:center;border:2px solid ${s.color.dot};">
             <div style="font-weight:600;color:var(--accent-dark);">Thành tiền</div>
@@ -916,11 +923,9 @@ function generateInvoice() {
     `;
   });
   
-  // Tổng kết phiếu - chỉ hiển thị thông tin ngân hàng 1 lần
   html += `
       </div>
       
-      <!-- PHẦN TỔNG KẾT -->
       <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:20px;padding-top:16px;border-top:2px solid var(--border);margin-top:8px;">
         <div>
           <div style="font-weight:800;font-size:20px;color:var(--accent-dark);">
@@ -950,7 +955,6 @@ function generateInvoice() {
         `}
       </div>
       
-      <!-- Lưu ý và nút in -->
       <div style="margin-top:16px;padding-top:16px;border-top:1px dashed var(--border);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
         <div style="font-size:12px;color:var(--text3);">
           <i class="ti ti-info-circle"></i> Vui lòng kiểm tra kĩ thông tin trước khi chuyển khoản
@@ -1053,7 +1057,6 @@ function addStudent() {
   if (!name) { alert('Vui lòng nhập tên'); return; }
   if (!selectedDays.length) { alert('Chọn ít nhất 1 ngày học'); return; }
   
-  // Tạo ID duy nhất với timestamp + random để tránh trùng
   const newId = Date.now() + Math.floor(Math.random() * 10000);
   const newStudent = { 
     id: newId, 
@@ -1143,13 +1146,6 @@ function toggleEditDay(btn) {
 
 function getMonthKey(y,m){ return `${y}-${String(m+1).padStart(2,'0')}`; }
 
-function getPreviousMonthKey(y, m) {
-  let prevM = m - 1;
-  let prevY = y;
-  if (prevM < 0) { prevM = 11; prevY--; }
-  return { year: prevY, month: prevM, key: getMonthKey(prevY, prevM) };
-}
-
 function togglePaymentStatus(studentId, year, month) {
   console.log('💰 Toggle payment status - ID:', studentId);
   
@@ -1221,16 +1217,8 @@ function parseLocalDate(str) {
 }
 
 function getPlannedSessionsInMonth(student, year, month) {
-  const total = new Date(year, month+1, 0).getDate();
-  const startDate = parseLocalDate(student.start);
-  const sessions = [];
-  for(let d=1; d<=total; d++) {
-    const date = new Date(year, month, d);
-    if(date >= startDate && student.days.includes(date.getDay())) {
-      sessions.push(d);
-    }
-  }
-  return sessions;
+  // Sử dụng hàm getSessionsInMonth để đảm bảo tính nhất quán
+  return getSessionsInMonth(student, year, month);
 }
 
 function renderStudentList() {
@@ -1326,7 +1314,7 @@ function renderReport() {
   let html='';
   
   visible.forEach(s=>{
-    const currentPlannedSessions = getPlannedSessionsInMonth(s, curYear, curMonth);
+    const currentPlannedSessions = getSessionsInMonth(s, curYear, curMonth);
     const feePlanned = currentPlannedSessions.length * s.fee;
     
     const prev = getPreviousMonthKey(curYear, curMonth);
@@ -1402,6 +1390,7 @@ function switchTab(name) {
   if (name === 'invoice') renderInvoiceStudents();
 }
 
-console.log('🚀 App đã khởi động!');</script>
+console.log('🚀 App đã khởi động!');
+</script>
 </body>
 </html>
