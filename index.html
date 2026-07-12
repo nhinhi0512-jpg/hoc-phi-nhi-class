@@ -364,7 +364,7 @@ button:active { transform: scale(0.97); }
         <div class="field" style="margin:0"><label>Học phí/buổi (đ)</label><input id="inp-fee" type="number" value="125000" /></div>
         <span class="fee-unit">đ</span>
       </div>
-      <div class="field" style="margin-bottom:0"><label>📅 Ngày học trong tuần</label></div>
+      <div class="field" style="margin-bottom:0"><label>Ngày học trong tuần</label></div>
       <div class="days-row" id="dayBtns">
         <button class="day-btn" data-d="1" onclick="toggleDay(this)">T2</button>
         <button class="day-btn" data-d="2" onclick="toggleDay(this)">T3</button>
@@ -426,7 +426,7 @@ button:active { transform: scale(0.97); }
           </div>
           
           <div class="field">
-            <label>📅 Tháng áp dụng</label>
+            <label>Tháng áp dụng</label>
             <input type="month" id="invoiceMonth" />
           </div>
           
@@ -941,16 +941,16 @@ function generateInvoice() {
               <img src="${qrImageData}" alt="Mã QR" style="width:80px;height:80px;border-radius:8px;border:2px solid var(--accent-light);background:white;padding:4px;" />
             </div>
             <div style="font-size:12px;color:var(--text2);line-height:1.8;">
-              <div><strong>🏦 Ngân hàng:</strong> ${bankName}</div>
-              <div><strong>💰 Số tài khoản:</strong> ${accountNumber}</div>
-              <div><strong>👤 Chủ tài khoản:</strong> ${accountHolder}</div>
+              <div><strong>Ngân hàng:</strong> ${bankName}</div>
+              <div><strong>Số tài khoản:</strong> ${accountNumber}</div>
+              <div><strong>Chủ tài khoản:</strong> ${accountHolder}</div>
             </div>
           </div>
         ` : `
           <div style="font-size:13px;color:var(--text2);text-align:right;line-height:1.8;background:var(--bg2);padding:12px 20px;border-radius:12px;">
-            <div><strong>🏦 Ngân hàng:</strong> ${bankName}</div>
-            <div><strong>💰 Số tài khoản:</strong> ${accountNumber}</div>
-            <div><strong>👤 Chủ tài khoản:</strong> ${accountHolder}</div>
+            <div><strong>Ngân hàng:</strong> ${bankName}</div>
+            <div><strong>Số tài khoản:</strong> ${accountNumber}</div>
+            <div><strong>Chủ tài khoản:</strong> ${accountHolder}</div>
           </div>
         `}
       </div>
