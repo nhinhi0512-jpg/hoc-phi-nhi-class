@@ -444,9 +444,9 @@ button:active { transform: scale(0.97); }
             <span id="qrText">Chưa có mã QR</span>
           </div>
           <div class="bank-info">
-            <strong>🏦 Ngân hàng:</strong> <span id="bankNameDisplay">ACB</span><br>
-            <strong>💰 Số tài khoản:</strong> <span id="accountNumberDisplay">26935497</span><br>
-            <strong>👤 Chủ tài khoản:</strong> <span id="accountHolderDisplay">Phan Thị Quỳnh Nhi</span>
+            <strong>Ngân hàng:</strong> <span id="bankNameDisplay">ACB</span><br>
+            <strong>Số tài khoản:</strong> <span id="accountNumberDisplay">26935497</span><br>
+            <strong>Chủ tài khoản:</strong> <span id="accountHolderDisplay">Phan Thị Quỳnh Nhi</span>
           </div>
           <button class="qr-upload-btn btn-secondary" onclick="document.getElementById('qrFileInput').click()">
             <i class="ti ti-upload"></i> Tải lên mã QR
@@ -890,12 +890,12 @@ function generateInvoice() {
         </div>
         
         <div style="background:rgba(255,255,255,0.5);border-radius:10px;padding:12px;margin-bottom:12px;">
-          <div style="font-weight:700;color:var(--accent-dark);margin-bottom:8px;">📚 Lịch học trong tháng:</div>
+          <div style="font-weight:700;color:var(--accent-dark);margin-bottom:8px;">Lịch học trong tháng:</div>
           ${tableHtml}
         </div>
         
         <div style="background:rgba(255,255,255,0.3);border-radius:10px;padding:10px;margin-bottom:12px;border-left:3px solid var(--unpaid-text);">
-          <div style="font-weight:700;color:var(--unpaid-text);margin-bottom:4px;">📌 Ngày vắng (trừ tháng trước):</div>
+          <div style="font-weight:700;color:var(--unpaid-text);margin-bottom:4px;">Ngày vắng (trừ tháng trước):</div>
           <div style="font-size:14px;color:var(--unpaid-text);">
             ${absentDaysStr}
           </div>
@@ -937,7 +937,7 @@ function generateInvoice() {
         ${qrImageData ? `
           <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;background:var(--bg2);padding:12px 20px;border-radius:12px;">
             <div style="text-align:center;">
-              <div style="font-size:12px;font-weight:600;color:var(--accent-dark);margin-bottom:6px;">📱 Quét mã QR</div>
+              <div style="font-size:12px;font-weight:600;color:var(--accent-dark);margin-bottom:6px;">Quét mã QR</div>
               <img src="${qrImageData}" alt="Mã QR" style="width:80px;height:80px;border-radius:8px;border:2px solid var(--accent-light);background:white;padding:4px;" />
             </div>
             <div style="font-size:12px;color:var(--text2);line-height:1.8;">
