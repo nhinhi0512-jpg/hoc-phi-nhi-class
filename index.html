@@ -8,7 +8,6 @@
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
 <style>
-/* ===== CSS ===== */
 * { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
   --bg: #F4F2EF; --bg2: #EAE6E1; --bg3: #DDD8D1;
@@ -18,7 +17,6 @@
   --accent: #7B9E87; --accent-dark: #5E7D68; --accent-light: #C2D5C8;
   --paid-bg: #BED3C3; --paid-text: #2C5A3E;
   --unpaid-bg: #F0D9CF; --unpaid-text: #B16148;
-  --change-bg: #E8E0D0;
 }
 @media (prefers-color-scheme: dark) {
   :root {
@@ -28,7 +26,6 @@
     --accent: #6C8F7A; --accent-dark: #537561; --accent-light: #8FAD9B;
     --paid-bg: #2C5940; --paid-text: #C6F0DF;
     --unpaid-bg: #6E4D3F; --unpaid-text: #F3C5B4;
-    --change-bg: #4A4035;
   }
 }
 body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg3); color: var(--text); min-height: 100vh; font-size: 16px; }
@@ -63,24 +60,9 @@ button:active { transform: scale(0.97); }
 .act-btn { background: var(--bg); border: 1px solid var(--border2); border-radius: 30px; padding: 4px 12px; font-size: 12px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; }
 .act-btn i { font-size: 14px; }
 .act-btn.edit:hover { background: var(--accent); color: white; border-color: var(--accent); }
-.act-btn.del { 
-  background: var(--unpaid-bg); 
-  border-color: var(--unpaid-text); 
-  color: var(--unpaid-text);
-  width: 28px;
-  height: 28px;
-  padding: 0;
-  border-radius: 50%;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 14px;
-  transition: all 0.2s;
-  border: 1.5px solid rgba(0,0,0,0.15);
-}
+.act-btn.del { background: var(--unpaid-bg); border-color: var(--unpaid-text); color: var(--unpaid-text); width: 28px; height: 28px; padding: 0; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 14px; transition: all 0.2s; border: 1.5px solid rgba(0,0,0,0.15); }
 .act-btn.del i { font-size: 14px; margin: 0; }
 .act-btn.del:hover { background: #C28B77; border-color: #C28B77; color: white; transform: scale(1.1); }
-.act-btn.del:active { transform: scale(0.9); }
 .edit-panel { border-top: 1.5px solid var(--border); padding: 16px 18px; background: var(--bg); display: none; }
 .edit-panel.open { display: block; }
 .edit-btns { display: flex; gap: 14px; margin-top: 18px; }
@@ -120,213 +102,37 @@ button:active { transform: scale(0.97); }
 .total-row { background: var(--bg); border-radius: 24px; padding: 16px 20px; display: flex; justify-content: space-between; align-items: center; margin-top: 12px; font-weight: 800; font-size: 16px; border: 1px solid var(--accent-light); flex-wrap: wrap; gap: 10px; }
 .empty-state { text-align: center; padding: 2.5rem; color: var(--text3); font-weight: 500; }
 .sync-status { font-size: 12px; background: var(--bg2); padding: 4px 12px; border-radius: 40px; margin-left: 10px; color: var(--accent-dark); }
-
-/* ===== CSS CHO TÍNH NĂNG GỬI PHIẾU HỌC PHÍ ===== */
-.invoice-section {
-  background: linear-gradient(135deg, var(--bg), var(--bg2));
-  border: 2px solid var(--accent-light);
-  border-radius: var(--radius-lg);
-  padding: 1.8rem 2rem;
-  margin-bottom: 1.8rem;
-}
-.invoice-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 2rem;
-  margin-top: 1rem;
-}
-.invoice-left {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-.student-checkbox-group {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  padding: 12px;
-  background: var(--bg);
-  border-radius: var(--radius);
-  border: 1px solid var(--border);
-  max-height: 200px;
-  overflow-y: auto;
-}
-.student-checkbox-group label {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  padding: 6px 14px;
-  background: var(--bg2);
-  border-radius: 30px;
-  transition: 0.2s;
-  border: 1px solid transparent;
-}
-.student-checkbox-group label:hover {
-  border-color: var(--accent);
-  background: var(--accent-light);
-}
-.student-checkbox-group input[type="checkbox"] {
-  width: 18px;
-  height: 18px;
-  accent-color: var(--accent);
-  cursor: pointer;
-}
-.invoice-right {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 12px;
-  padding: 16px;
-  background: var(--bg);
-  border-radius: var(--radius);
-  border: 1px solid var(--border);
-}
-.invoice-right .qr-placeholder {
-  width: 180px;
-  height: 180px;
-  background: white;
-  border-radius: 12px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  border: 2px dashed var(--border2);
-  color: var(--text3);
-  font-size: 13px;
-  text-align: center;
-  padding: 12px;
-  position: relative;
-  overflow: hidden;
-}
-.invoice-right .qr-placeholder img {
-  max-width: 100%;
-  max-height: 100%;
-  object-fit: contain;
-}
-.invoice-right .bank-info {
-  font-size: 13px;
-  text-align: center;
-  color: var(--text2);
-  line-height: 1.6;
-  padding: 8px 16px;
-  background: var(--bg2);
-  border-radius: var(--radius);
-  width: 100%;
-}
-.invoice-right .bank-info strong {
-  color: var(--accent-dark);
-}
-.invoice-actions {
-  display: flex;
-  gap: 12px;
-  flex-wrap: wrap;
-  margin-top: 8px;
-}
-.invoice-actions .btn-primary {
-  width: auto;
-  padding: 10px 32px;
-}
-.btn-secondary {
-  background: var(--bg2);
-  border-color: var(--border2);
-}
-.btn-secondary:hover {
-  background: var(--bg3);
-  border-color: var(--text3);
-}
-.qr-upload-btn {
-  position: relative;
-  overflow: hidden;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-}
-.qr-upload-btn input[type="file"] {
-  position: absolute;
-  left: 0;
-  top: 0;
-  opacity: 0;
-  width: 100%;
-  height: 100%;
-  cursor: pointer;
-}
-
-/* CSS cho bảng lịch học trong phiếu */
-.schedule-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 14px;
-  margin-top: 8px;
-}
-.schedule-table th {
-  background: var(--accent-light);
-  color: var(--accent-dark);
-  padding: 6px 10px;
-  border: 1px solid var(--border);
-  text-align: center;
-  font-weight: 700;
-}
-.schedule-table td {
-  padding: 6px 10px;
-  border: 1px solid var(--border);
-  text-align: center;
-}
-.schedule-table .absent-cell {
-  background: #F0D9CF;
-  color: #B16148;
-}
-.schedule-table .study-cell {
-  background: #E8F0E8;
-  color: #2C5A3E;
-}
-.schedule-table .old-schedule-cell {
-  background: #FFF8E7;
-  color: #8B7A5A;
-}
-.schedule-table .empty-cell {
-  background: #F5F5F5;
-  color: #ccc;
-}
-.schedule-table .change-marker {
-  background: #FFE4B5;
-  color: #8B6914;
-  font-weight: 700;
-}
-
-/* CSS cho lịch học theo tháng */
-.month-schedule-edit {
-  background: var(--bg);
-  border-radius: 12px;
-  padding: 12px 16px;
-  margin: 8px 0;
-  border: 1px solid var(--border);
-}
-.month-schedule-edit .days-row {
-  margin: 4px 0 8px;
-}
-.month-schedule-edit .small-btn {
-  padding: 4px 16px;
-  font-size: 12px;
-  border-radius: 20px;
-}
-.change-date-input {
-  max-width: 70px;
-  padding: 4px 8px;
-  font-size: 13px;
-  border-radius: 8px;
-  border: 1.5px solid var(--border2);
-  background: var(--bg);
-  color: var(--text);
-}
-.change-date-input:focus {
-  border-color: var(--accent);
-  outline: none;
-}
-
-/* Responsive */
+.invoice-section { background: linear-gradient(135deg, var(--bg), var(--bg2)); border: 2px solid var(--accent-light); border-radius: var(--radius-lg); padding: 1.8rem 2rem; margin-bottom: 1.8rem; }
+.invoice-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-top: 1rem; }
+.invoice-left { display: flex; flex-direction: column; gap: 1rem; }
+.student-checkbox-group { display: flex; flex-wrap: wrap; gap: 10px; padding: 12px; background: var(--bg); border-radius: var(--radius); border: 1px solid var(--border); max-height: 200px; overflow-y: auto; }
+.student-checkbox-group label { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; cursor: pointer; padding: 6px 14px; background: var(--bg2); border-radius: 30px; transition: 0.2s; border: 1px solid transparent; }
+.student-checkbox-group label:hover { border-color: var(--accent); background: var(--accent-light); }
+.student-checkbox-group input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--accent); cursor: pointer; }
+.invoice-right { display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 16px; background: var(--bg); border-radius: var(--radius); border: 1px solid var(--border); }
+.invoice-right .qr-placeholder { width: 180px; height: 180px; background: white; border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; border: 2px dashed var(--border2); color: var(--text3); font-size: 13px; text-align: center; padding: 12px; position: relative; overflow: hidden; }
+.invoice-right .qr-placeholder img { max-width: 100%; max-height: 100%; object-fit: contain; }
+.invoice-right .bank-info { font-size: 13px; text-align: center; color: var(--text2); line-height: 1.6; padding: 8px 16px; background: var(--bg2); border-radius: var(--radius); width: 100%; }
+.invoice-right .bank-info strong { color: var(--accent-dark); }
+.invoice-actions { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 8px; }
+.invoice-actions .btn-primary { width: auto; padding: 10px 32px; }
+.btn-secondary { background: var(--bg2); border-color: var(--border2); }
+.btn-secondary:hover { background: var(--bg3); border-color: var(--text3); }
+.qr-upload-btn { position: relative; overflow: hidden; display: inline-flex; align-items: center; gap: 8px; }
+.qr-upload-btn input[type="file"] { position: absolute; left: 0; top: 0; opacity: 0; width: 100%; height: 100%; cursor: pointer; }
+.schedule-table { width: 100%; border-collapse: collapse; font-size: 14px; margin-top: 8px; }
+.schedule-table th { background: var(--accent-light); color: var(--accent-dark); padding: 6px 10px; border: 1px solid var(--border); text-align: center; font-weight: 700; }
+.schedule-table td { padding: 6px 10px; border: 1px solid var(--border); text-align: center; }
+.schedule-table .absent-cell { background: #F0D9CF; color: #B16148; }
+.schedule-table .study-cell { background: #E8F0E8; color: #2C5A3E; }
+.schedule-table .new-schedule-cell { background: #D4E8D4; color: #2C5A3E; font-weight: 700; }
+.schedule-table .empty-cell { background: #F5F5F5; color: #ccc; }
+.schedule-table .old-schedule-cell { background: #FFF8E7; color: #8B7A5A; }
+.month-schedule-edit { background: var(--bg); border-radius: 12px; padding: 12px 16px; margin: 8px 0; border: 1px solid var(--border); }
+.month-schedule-edit .days-row { margin: 4px 0 8px; }
+.month-schedule-edit .small-btn { padding: 4px 16px; font-size: 12px; border-radius: 20px; }
+.change-date-input { max-width: 70px; padding: 4px 8px; font-size: 13px; border-radius: 8px; border: 1.5px solid var(--border2); background: var(--bg); color: var(--text); }
+.change-date-input:focus { border-color: var(--accent); outline: none; }
 @media (max-width: 768px) {
   .container { width: 98%; padding: 0.8rem; }
   .section { padding: 1rem; }
@@ -344,13 +150,8 @@ button:active { transform: scale(0.97); }
   h1 { font-size: 20px; }
   .act-btn.del { width: 24px; height: 24px; font-size: 12px; }
   .act-btn.del i { font-size: 12px; }
-  .invoice-grid {
-    grid-template-columns: 1fr;
-  }
-  .invoice-right .qr-placeholder {
-    width: 140px;
-    height: 140px;
-  }
+  .invoice-grid { grid-template-columns: 1fr; }
+  .invoice-right .qr-placeholder { width: 140px; height: 140px; }
 }
 </style>
 </head>
@@ -422,7 +223,6 @@ button:active { transform: scale(0.97); }
     </div>
   </div>
 
-  <!-- ===== TAB GỬI PHIẾU HỌC PHÍ ===== -->
   <div id="tab-invoice" style="display:none">
     <div class="invoice-section">
       <div class="sec-title"><i class="ti ti-receipt"></i> Tạo phiếu học phí</div>
@@ -472,7 +272,6 @@ button:active { transform: scale(0.97); }
 </div>
 
 <script>
-// ========== FIREBASE CONFIG ==========
 const firebaseConfig = {
   apiKey: "AIzaSyAGr5zM79FPI5X8cL0ePNSoHU8o8rhfvOI",
   authDomain: "hethong-tuvung.firebaseapp.com",
@@ -527,7 +326,6 @@ function updateStudentsArray() {
     if (!s.monthDays) s.monthDays = {};
     return s;
   });
-  console.log('📊 Đã cập nhật studentsArray:', studentsArray.length, 'học sinh');
 }
 
 function getPastelColorSoft(seed) {
@@ -571,7 +369,6 @@ function saveToFirebase() {
   studentsRef.set(cleanData)
     .then(() => {
       updateSyncStatus('✅ Đã đồng bộ');
-      console.log('✅ Lưu thành công!');
     })
     .catch((error) => {
       console.error('❌ Lỗi lưu Firebase:', error);
@@ -619,7 +416,6 @@ function createDemoData() {
 
 studentsRef.on('value', (snapshot) => {
   const data = snapshot.val();
-  console.log('📥 Nhận dữ liệu từ Firebase:', data);
   
   if (data && typeof data === 'object' && Object.keys(data).length > 0) {
     students = data;
@@ -632,17 +428,14 @@ studentsRef.on('value', (snapshot) => {
       if (!s.id) {
         s.id = parseInt(key);
         needUpdate = true;
-        console.log('✅ Đã thêm id cho học sinh:', s.name, 'ID:', s.id);
       }
       if (!s.color) { s.color = getPastelColorSoft(s.id); needUpdate = true; }
       if (!s.monthDays) { s.monthDays = {}; needUpdate = true; }
     });
     if (needUpdate) {
-      console.log('🔄 Đang đồng bộ id cho dữ liệu cũ...');
       saveToFirebase();
     }
   } else {
-    console.log('📝 Không có dữ liệu, tạo dữ liệu mẫu...');
     createDemoData();
   }
   
@@ -698,9 +491,7 @@ function handleQRUpload(event) {
     updateQRDisplay();
     try {
       localStorage.setItem('qrImageData', qrImageData);
-    } catch(err) {
-      console.warn('Không thể lưu QR vào localStorage:', err);
-    }
+    } catch(err) {}
   };
   reader.readAsDataURL(file);
 }
@@ -725,62 +516,6 @@ try {
   }
 } catch(err) {}
 
-// ===== HÀM TÍNH SỐ BUỔI HỌC CHÍNH XÁC THEO NGÀY THAY ĐỔI =====
-function getSessionsWithChangeDate(student, year, month) {
-  const daysInMonth = new Date(year, month + 1, 0).getDate();
-  const startDate = parseLocalDate(student.start);
-  const monthKey = getMonthKey(year, month);
-  const sessions = [];
-  
-  // Lấy lịch mặc định
-  const defaultDays = student.days || [];
-  
-  // Kiểm tra lịch đặc biệt
-  const monthSchedule = student.monthDays && student.monthDays[monthKey];
-  
-  if (monthSchedule && monthSchedule.days) {
-    const newDays = monthSchedule.days;
-    const changeDate = monthSchedule.changeDate || 1;
-    
-    for (let d = 1; d <= daysInMonth; d++) {
-      const date = new Date(year, month, d);
-      if (date >= startDate) {
-        const dayOfWeek = date.getDay();
-        // Từ ngày thay đổi trở đi dùng lịch mới
-        if (d >= changeDate) {
-          if (newDays.includes(dayOfWeek)) {
-            sessions.push(d);
-          }
-        } else {
-          // Trước ngày thay đổi dùng lịch cũ
-          if (defaultDays.includes(dayOfWeek)) {
-            sessions.push(d);
-          }
-        }
-      }
-    }
-    
-    // Thêm thông tin về ngày thay đổi vào kết quả để hiển thị
-    sessions.changeDate = changeDate;
-    sessions.hasChange = true;
-    sessions.newDays = newDays;
-    sessions.oldDays = defaultDays;
-    
-  } else {
-    // Không có lịch đặc biệt, dùng lịch mặc định
-    for (let d = 1; d <= daysInMonth; d++) {
-      const date = new Date(year, month, d);
-      if (date >= startDate && defaultDays.includes(date.getDay())) {
-        sessions.push(d);
-      }
-    }
-    sessions.hasChange = false;
-  }
-  
-  return sessions;
-}
-
-// ===== LẤY THÔNG TIN CHI TIẾT SỐ BUỔI HỌC THEO LỊCH CŨ VÀ MỚI =====
 function getSessionDetails(student, year, month) {
   const daysInMonth = new Date(year, month + 1, 0).getDate();
   const startDate = parseLocalDate(student.start);
@@ -806,13 +541,11 @@ function getSessionDetails(student, year, month) {
       if (date >= startDate) {
         const dayOfWeek = date.getDay();
         if (d < changeDate) {
-          // Trước ngày thay đổi: lịch cũ
           if (defaultDays.includes(dayOfWeek)) {
             oldScheduleSessions.push(d);
             totalSessions.push({ day: d, type: 'old' });
           }
         } else {
-          // Từ ngày thay đổi: lịch mới
           if (newDays.includes(dayOfWeek)) {
             newScheduleSessions.push(d);
             totalSessions.push({ day: d, type: 'new' });
@@ -821,7 +554,6 @@ function getSessionDetails(student, year, month) {
       }
     }
   } else {
-    // Không có thay đổi, tất cả là lịch cũ
     for (let d = 1; d <= daysInMonth; d++) {
       const date = new Date(year, month, d);
       if (date >= startDate && defaultDays.includes(date.getDay())) {
@@ -845,15 +577,6 @@ function getSessionDetails(student, year, month) {
   };
 }
 
-function getDaysForMonth(student, year, month) {
-  const monthKey = getMonthKey(year, month);
-  const monthSchedule = student.monthDays && student.monthDays[monthKey];
-  if (monthSchedule && monthSchedule.days) {
-    return monthSchedule.days;
-  }
-  return student.days || [];
-}
-
 function getPreviousMonthKey(year, month) {
   let prevM = month - 1;
   let prevY = year;
@@ -870,13 +593,11 @@ function updateMonthSchedule(studentId, year, month, newDays, changeDate) {
   
   if (!student.monthDays) student.monthDays = {};
   
-  // Lưu lịch mới với ngày thay đổi
   const scheduleData = {
     days: newDays,
     changeDate: changeDate || 1
   };
   
-  // So sánh với lịch mặc định
   const defaultDays = student.days || [];
   const isSame = JSON.stringify(newDays.sort()) === JSON.stringify(defaultDays.sort());
   
@@ -909,7 +630,6 @@ function applyMonthScheduleFromNow(studentId, year, month, newDays, changeDate) 
   const currentYear = year;
   const currentMonth = month;
   
-  // Áp dụng từ tháng hiện tại về sau
   for (let y = currentYear; y <= currentYear + 2; y++) {
     for (let m = (y === currentYear ? currentMonth : 0); m < 12; m++) {
       if ((y - currentYear) * 12 + (m - currentMonth) > 24) break;
@@ -924,7 +644,6 @@ function applyMonthScheduleFromNow(studentId, year, month, newDays, changeDate) 
     }
   }
   
-  // Áp dụng cho tháng hiện tại
   const currentKey = getMonthKey(currentYear, currentMonth);
   const defaultDays = student.days || [];
   if (JSON.stringify(newDays.sort()) !== JSON.stringify(defaultDays.sort()) || (changeDate && changeDate > 1)) {
@@ -991,7 +710,6 @@ function addStudent() {
 function deleteStudent(id) { 
   const result = findStudentById(id);
   if (!result) {
-    console.error('❌ Không tìm thấy học sinh với ID:', id);
     alert('Không tìm thấy học sinh!');
     return;
   }
@@ -1152,7 +870,7 @@ function renderStudentList() {
       <div class="student-main">
         <div class="student-dot" style="background:${s.color.dot}"></div>
         <div class="student-name">${s.name}</div>
-        <div class="student-schedule">${dayStr} · ${s.fee.toLocaleString('vi-VN')}đ</div>
+        <div class="student-schedule">${s.fee.toLocaleString('vi-VN')}đ/buổi</div>
         <div class="payment-badge ${isPaid?'paid':''}" onclick="switchTab('report'); setTimeout(()=>{document.getElementById('repSearch').value='${s.name}';renderReport();},50)">💰 ${statusLabel}</div>
         <div class="student-actions">
           <button class="act-btn edit" onclick="toggleEdit(${s.id})"><i class="ti ti-edit"></i> Sửa</button>
@@ -1281,10 +999,13 @@ function renderCalendar() {
     let pills = '';
     visible.forEach(s=>{
       const sd = parseLocalDate(s.start);
-      const sessions = getSessionsWithChangeDate(s, curYear, curMonth);
-      if(date>=sd && sessions.includes(d)){
+      const details = getSessionDetails(s, curYear, curMonth);
+      const isStudy = details.totalSessions.some(item => item.day === d);
+      if(date>=sd && isStudy){
         const key = getMonthKey(curYear, curMonth);
         const isAbsent = s.absents && s.absents[key] && s.absents[key].includes(d);
+        const isNew = details.totalSessions.some(item => item.day === d && item.type === 'new');
+        const bgColor = isNew ? '#D4E8D4' : s.color.bg;
         
         if (isAbsent) {
           pills+=`<span class="sp" style="background:#EAE6E1; color:var(--text3); text-decoration: line-through; font-weight:normal; cursor:pointer;" 
@@ -1295,10 +1016,6 @@ function renderCalendar() {
         } else {
           const paid = getPaymentStatus(s, curYear, curMonth);
           const icon = paid ? ' ✓' : ' ⏳';
-          // Kiểm tra xem ngày này thuộc lịch cũ hay mới
-          const details = getSessionDetails(s, curYear, curMonth);
-          const isNewSchedule = details.totalSessions.find(item => item.day === d && item.type === 'new');
-          const bgColor = isNewSchedule ? '#D4E8D4' : s.color.bg;
           
           pills+=`<span class="sp" style="background:${bgColor};color:${s.color.text}; font-weight:bold; cursor:pointer;" 
             onclick="toggleAbsent('${s.id}', ${curYear}, ${curMonth}, ${d})">
@@ -1357,7 +1074,6 @@ function renderReport() {
     }
     const monthDayStr = displayDays.map(d=>DAY_SHORT[d]).join(', ');
     
-    // Thông tin chi tiết số buổi học
     let sessionInfo = '';
     if (isSpecial && changeDate > 1) {
       const oldSessions = details.oldSessions;
@@ -1446,7 +1162,6 @@ function switchTab(name) {
   if (name === 'invoice') renderInvoiceStudents();
 }
 
-// ===== TẠO PHIẾU HỌC PHÍ =====
 function generateInvoice() {
   const selectedChecks = document.querySelectorAll('.invoice-student-check:checked');
   if (!selectedChecks.length) {
@@ -1516,6 +1231,7 @@ function generateInvoice() {
     let changeDate = 1;
     let isSpecial = false;
     let newDaysStr = '';
+    let oldDaysStr = (s.days || []).map(d=>DAY_SHORT[d]).join(', ');
     
     if (monthSchedule && monthSchedule.days) {
       displayDays = monthSchedule.days;
@@ -1524,38 +1240,48 @@ function generateInvoice() {
       newDaysStr = displayDays.map(d=>DAY_SHORT[d]).join(', ');
     }
     
-    const studentDays = displayDays.sort((a, b) => a - b);
     const daysInMonth = new Date(year, monthIndex + 1, 0).getDate();
     
-    // Tạo bảng lịch học chi tiết
+    // Lấy TẤT CẢ các ngày đã học trong tháng (bao gồm cả lịch cũ và mới)
+    const allStudyDays = details.totalSessions.map(item => item.day);
+    
+    // Lấy danh sách các ngày trong tuần đã học (UNION của lịch cũ và mới)
+    let allDaysOfWeek = new Set();
+    details.totalSessions.forEach(item => {
+      const date = new Date(year, monthIndex, item.day);
+      allDaysOfWeek.add(date.getDay());
+    });
+    
+    // Sắp xếp các ngày trong tuần theo thứ tự
+    let sortedDaysOfWeek = Array.from(allDaysOfWeek).sort((a, b) => {
+      if (a === 0) return 1;
+      if (b === 0) return -1;
+      return a - b;
+    });
+    
+    // Tạo bảng lịch học - hiển thị TẤT CẢ các ngày đã học trong tháng
     let tableHtml = `<table class="schedule-table">
       <thead>
         <tr>`;
-    studentDays.forEach(day => {
+    sortedDaysOfWeek.forEach(day => {
       tableHtml += `<th>${DAY_SHORT[day]}</th>`;
     });
-    if (isSpecial && changeDate > 1) {
-      tableHtml += `<th style="background:#FFE4B5;color:#8B6914;">📌 Đổi lịch</th>`;
-    }
     tableHtml += `</tr></thead><tbody>`;
     
     // Tạo các hàng theo tuần
     let weeks = [];
     let currentWeek = {};
     
-    // Lấy danh sách các ngày học đã tính toán
-    const sessionDays = details.totalSessions;
-    const sessionDaySet = new Set(sessionDays.map(item => item.day));
-    
     for (let d = 1; d <= daysInMonth; d++) {
       const date = new Date(year, monthIndex, d);
       const dayOfWeek = date.getDay();
       
-      if (studentDays.includes(dayOfWeek)) {
-        const isStudy = sessionDaySet.has(d);
+      // Chỉ xử lý các ngày đã học
+      if (allDaysOfWeek.has(dayOfWeek)) {
+        const isStudy = allStudyDays.includes(d);
         const isAbsent = prevAbsents.includes(d);
-        const isOldSchedule = sessionDays.find(item => item.day === d && item.type === 'old');
-        const isNewSchedule = sessionDays.find(item => item.day === d && item.type === 'new');
+        const isNewSchedule = details.totalSessions.some(item => item.day === d && item.type === 'new');
+        const isOldSchedule = details.totalSessions.some(item => item.day === d && item.type === 'old');
         
         if (isStudy) {
           currentWeek[dayOfWeek] = { 
@@ -1569,16 +1295,18 @@ function generateInvoice() {
         }
       }
       
-      const allDaysInWeek = studentDays.every(day => currentWeek[day] !== undefined);
-      if (allDaysInWeek) {
+      // Kiểm tra xem đã có đủ các ngày trong tuần chưa
+      const allDaysInWeek = sortedDaysOfWeek.every(day => currentWeek[day] !== undefined);
+      if (allDaysInWeek && Object.keys(currentWeek).length === sortedDaysOfWeek.length) {
         weeks.push({ ...currentWeek });
         currentWeek = {};
       }
     }
     
+    // Thêm tuần cuối cùng nếu còn
     if (Object.keys(currentWeek).length > 0) {
       let hasData = false;
-      studentDays.forEach(day => {
+      sortedDaysOfWeek.forEach(day => {
         if (currentWeek[day]) hasData = true;
       });
       if (hasData) {
@@ -1588,9 +1316,9 @@ function generateInvoice() {
     
     // Hiển thị các tuần
     if (weeks.length > 0) {
-      weeks.forEach((week, weekIndex) => {
+      weeks.forEach((week) => {
         tableHtml += `<tr>`;
-        studentDays.forEach(day => {
+        sortedDaysOfWeek.forEach(day => {
           const data = week[day];
           if (data) {
             if (!data.isStudy) {
@@ -1598,23 +1326,18 @@ function generateInvoice() {
             } else if (data.isAbsent) {
               tableHtml += `<td class="absent-cell">${data.day}/${month}</td>`;
             } else if (data.type === 'new') {
-              tableHtml += `<td class="study-cell" style="background:#D4E8D4;font-weight:700;">${data.day}/${month}</td>`;
+              tableHtml += `<td class="new-schedule-cell">${data.day}/${month}</td>`;
             } else {
-              tableHtml += `<td class="study-cell">${data.day}/${month}</td>`;
+              tableHtml += `<td class="old-schedule-cell">${data.day}/${month}</td>`;
             }
           } else {
             tableHtml += `<td class="empty-cell">-</td>`;
           }
         });
-        // Thêm cột đánh dấu đổi lịch
-        if (isSpecial && changeDate > 1) {
-          const isChangeWeek = weekIndex === 0 ? false : true;
-          tableHtml += `<td style="background:#FFE4B5;color:#8B6914;font-size:11px;text-align:center;">${isChangeWeek ? '🔄' : ''}</td>`;
-        }
         tableHtml += `</tr>`;
       });
     } else {
-      const colspan = studentDays.length + (isSpecial && changeDate > 1 ? 1 : 0);
+      const colspan = sortedDaysOfWeek.length;
       tableHtml += `<tr><td colspan="${colspan}" style="text-align:center;color:var(--text3);padding:12px;">Không có lịch học</td></tr>`;
     }
     tableHtml += `</tbody></table>`;
@@ -1624,7 +1347,6 @@ function generateInvoice() {
     if (isSpecial && changeDate > 1) {
       const oldCount = details.oldCount;
       const newCount = details.newCount;
-      const oldDaysStr = (s.days || []).map(d=>DAY_SHORT[d]).join(', ');
       sessionDetailHtml = `
         <div style="background:rgba(255,255,255,0.3);border-radius:8px;padding:8px 12px;margin-bottom:10px;border-left:3px solid var(--accent);">
           <div style="font-size:13px;color:var(--text2);">
@@ -1644,13 +1366,15 @@ function generateInvoice() {
     
     const changeInfo = isSpecial && changeDate > 1 ? `(thay đổi từ ngày ${changeDate})` : '';
     
+    // Tạo chuỗi hiển thị các ngày đã học
+    const studyDaysStr = allStudyDays.sort((a,b) => a-b).join(', ');
+    
     html += `
       <div style="background:${s.color.bg};border-radius:12px;padding:16px 20px;margin-bottom:14px;border:1px solid var(--border);">
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap;">
           <span style="display:inline-block;width:14px;height:14px;border-radius:50%;background:${s.color.dot};"></span>
           <strong style="font-size:17px;">${s.name}</strong>
-          <span style="font-size:12px;background:var(--bg);padding:2px 14px;border-radius:20px;font-weight:600;">${displayDays.map(d=>DAY_SHORT[d]).join(', ')} ${changeInfo}</span>
-          <span style="font-size:12px;background:rgba(255,255,255,0.5);padding:2px 14px;border-radius:20px;font-weight:600;">${s.fee.toLocaleString('vi-VN')}đ/buổi</span>
+          <span style="font-size:12px;background:var(--bg);padding:2px 14px;border-radius:20px;font-weight:600;">${s.fee.toLocaleString('vi-VN')}đ/buổi</span>
         </div>
         
         ${sessionDetailHtml}
@@ -1658,6 +1382,10 @@ function generateInvoice() {
         <div style="background:rgba(255,255,255,0.5);border-radius:10px;padding:12px;margin-bottom:12px;">
           <div style="font-weight:700;color:var(--accent-dark);margin-bottom:8px;">Lịch học trong tháng:</div>
           ${tableHtml}
+          <div style="margin-top:8px;font-size:12px;color:var(--text3);">
+            📌 Các ngày đã học: ${studyDaysStr}
+            ${isSpecial && changeDate > 1 ? ` (${details.oldCount} buổi theo lịch cũ trước ngày ${changeDate}, ${details.newCount} buổi theo lịch mới từ ngày ${changeDate})` : ''}
+          </div>
         </div>
         
         <div style="background:rgba(255,255,255,0.3);border-radius:10px;padding:10px;margin-bottom:12px;border-left:3px solid var(--unpaid-text);">
@@ -1787,13 +1515,18 @@ function printInvoice() {
           background: #E8F0E8;
           color: #2C5A3E;
         }
-        .schedule-table .empty-cell {
-          background: #F5F5F5;
-          color: #ccc;
+        .schedule-table .new-schedule-cell {
+          background: #D4E8D4;
+          color: #2C5A3E;
+          font-weight: 700;
         }
         .schedule-table .old-schedule-cell {
           background: #FFF8E7;
           color: #8B7A5A;
+        }
+        .schedule-table .empty-cell {
+          background: #F5F5F5;
+          color: #ccc;
         }
       </style>
       </head>
