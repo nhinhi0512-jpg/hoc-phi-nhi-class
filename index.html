@@ -488,6 +488,7 @@ let selectedDays = [];
 let isSyncing = false;
 let isInitialLoad = true;
 let qrImageData = null;
+let openEditId = null;
 
 // ===== HÀM QUAN TRỌNG: Tìm học sinh theo ID =====
 function findStudentById(id) {
@@ -514,6 +515,9 @@ function updateStudentsArray() {
     if (!s.payments) s.payments = {};
     if (!s.absents) s.absents = {};
     if (!s.days) s.days = [];
+    if (!Array.isArray(s.scheduleHistory) || !s.scheduleHistory.length) {
+      s.scheduleHistory = [{ from: s.start, days: s.days }];
+    }
     if (!s.color) s.color = getPastelColorSoft(s.id);
     return s;
   });
@@ -553,6 +557,9 @@ function saveToFirebase() {
       start: s.start || new Date().toISOString().split('T')[0],
       payments: s.payments || {},
       absents: s.absents || {},
+      scheduleHistory: (Array.isArray(s.scheduleHistory) && s.scheduleHistory.length)
+        ? s.scheduleHistory
+        : [{ from: s.start || new Date().toISOString().split('T')[0], days: Array.isArray(s.days) ? s.days : [] }],
       color: s.color || getPastelColorSoft(s.id || Date.now())
     };
   });
@@ -584,6 +591,7 @@ function createDemoData() {
     start: "2026-06-01", 
     payments: {}, 
     absents: {}, 
+    scheduleHistory: [{ from: "2026-06-01", days: [2,4,6] }],
     color: getPastelColorSoft(id1) 
   };
   
@@ -595,6 +603,7 @@ function createDemoData() {
     start: "2026-06-01", 
     payments: {"2026-06": true}, 
     absents: {}, 
+    scheduleHistory: [{ from: "2026-06-01", days: [1,3,5] }],
     color: getPastelColorSoft(id2) 
   };
   
@@ -616,6 +625,11 @@ studentsRef.on('value', (snapshot) => {
       if (!s.payments) { s.payments = {}; needUpdate = true; }
       if (!s.absents) { s.absents = {}; needUpdate = true; }
       if (!s.days) { s.days = []; needUpdate = true; }
+      if (!Array.isArray(s.scheduleHistory) || !s.scheduleHistory.length) {
+        s.scheduleHistory = [{ from: s.start || new Date().toISOString().split('T')[0], days: Array.isArray(s.days) ? s.days : [] }];
+        needUpdate = true;
+        console.log('✅ Đã tạo scheduleHistory cho học sinh cũ:', s.name);
+      }
       if (!s.id) {
         s.id = parseInt(key);
         needUpdate = true;
@@ -624,8 +638,7 @@ studentsRef.on('value', (snapshot) => {
       if (!s.color) { s.color = getPastelColorSoft(s.id); needUpdate = true; }
     });
     if (needUpdate) {
-      console.log('🔄 Đang đồng bộ id cho dữ liệu cũ...');
-      saveToFirebase();
+      console.log('🔄 Đã tự vá dữ liệu cũ trong bộ nhớ (sẽ lưu thật vào lần sửa/lưu tiếp theo, không ghi ngay để tránh render lại giữa lúc đang thao tác)');
     }
   } else {
     console.log('📝 Không có dữ liệu, tạo dữ liệu mẫu...');
@@ -712,17 +725,57 @@ try {
   }
 } catch(err) {}
 
-// ===== HÀM LẤY CÁC BUỔI HỌC TRONG THÁNG (CÓ XÉT NGÀY BẮT ĐẦU) =====
+// ===== QUẢN LÝ LỊCH SỬ THAY ĐỔI LỊCH HỌC =====
+// Mỗi học sinh có scheduleHistory: [{from:'YYYY-MM-DD', days:[..]}, ...]
+// Cho phép đổi số buổi/ngày học giữa chừng (VD: tháng 7 học 2 buổi, từ 11/8 học 3 buổi)
+// mà không ảnh hưởng đến các tháng/ngày trước đó.
+function getScheduleHistoryOf(student) {
+  if (Array.isArray(student.scheduleHistory) && student.scheduleHistory.length) {
+    return student.scheduleHistory;
+  }
+  // Dữ liệu cũ chưa có scheduleHistory -> coi như chỉ có 1 lịch duy nhất từ ngày bắt đầu
+  return [{ from: student.start, days: Array.isArray(student.days) ? student.days : [] }];
+}
+
+// Trả về mảng ngày trong tuần (days) đang áp dụng tại 1 ngày cụ thể (Date)
+function getScheduleForDate(student, date) {
+  const history = getScheduleHistoryOf(student);
+  let applicable = null;
+  history.forEach(seg => {
+    const segDate = parseLocalDate(seg.from);
+    if (segDate <= date && (!applicable || segDate >= parseLocalDate(applicable.from))) {
+      applicable = seg;
+    }
+  });
+  return applicable ? applicable.days : [];
+}
+
+// Gộp tất cả các "ngày trong tuần" từng được áp dụng trong 1 tháng (dùng để hiển thị cột lịch/báo cáo)
+function getDaysUnionForMonth(student, year, month) {
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const set = new Set();
+  for (let d = 1; d <= daysInMonth; d++) {
+    getScheduleForDate(student, new Date(year, month, d)).forEach(dow => set.add(dow));
+  }
+  return Array.from(set).sort((a, b) => a - b);
+}
+
+function formatDMY(str) {
+  if (!str) return '';
+  const [y, m, d] = str.split('-');
+  return `${d}/${m}/${y}`;
+}
+
+// ===== HÀM LẤY CÁC BUỔI HỌC TRONG THÁNG (CÓ XÉT LỊCH SỬ THAY ĐỔI LỊCH HỌC) =====
 function getSessionsInMonth(student, year, month) {
   // month là tháng (0-11)
   const daysInMonth = new Date(year, month + 1, 0).getDate();
-  const startDate = parseLocalDate(student.start);
   const sessions = [];
   
   for (let d = 1; d <= daysInMonth; d++) {
     const date = new Date(year, month, d);
-    // Chỉ tính nếu ngày >= ngày bắt đầu
-    if (date >= startDate && student.days.includes(date.getDay())) {
+    const activeDays = getScheduleForDate(student, date);
+    if (activeDays.includes(date.getDay())) {
       sessions.push(d);
     }
   }
@@ -798,9 +851,9 @@ function generateInvoice() {
     const isPaid = getPaymentStatus(s, year, monthIndex);
     const paidText = isPaid ? '✅ Đã nộp' : '⏳ Chưa nộp';
     
-    // Tạo bảng lịch học
+    // Tạo bảng lịch học (gộp tất cả ngày trong tuần từng áp dụng trong tháng, kể cả khi đổi lịch giữa chừng)
     const daysInMonth = new Date(year, monthIndex + 1, 0).getDate();
-    const studentDays = s.days.sort((a, b) => a - b);
+    const studentDays = getDaysUnionForMonth(s, year, monthIndex);
     
     // Xác định các ngày học thực tế trong tháng (có xét ngày bắt đầu)
     const studyDays = new Set(allSessions);
@@ -822,7 +875,7 @@ function generateInvoice() {
       const date = new Date(year, monthIndex, d);
       const dayOfWeek = date.getDay();
       
-      if (s.days.includes(dayOfWeek)) {
+      if (studentDays.includes(dayOfWeek)) {
         const isAbsent = prevAbsents.includes(d);
         const isStudy = studyDays.has(d);
         // Chỉ hiển thị ngày nếu nó là ngày học (tính từ ngày bắt đầu)
@@ -834,7 +887,7 @@ function generateInvoice() {
       }
       
       // Kiểm tra xem đã đủ các ngày trong tuần chưa
-      const allDaysInWeek = s.days.every(day => currentWeek[day] !== undefined);
+      const allDaysInWeek = studentDays.every(day => currentWeek[day] !== undefined);
       if (allDaysInWeek) {
         weeks.push({ ...currentWeek });
         currentWeek = {};
@@ -843,7 +896,7 @@ function generateInvoice() {
     
     if (Object.keys(currentWeek).length > 0) {
       let hasData = false;
-      s.days.forEach(day => {
+      studentDays.forEach(day => {
         if (currentWeek[day]) hasData = true;
       });
       if (hasData) {
@@ -885,7 +938,7 @@ function generateInvoice() {
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap;">
           <span style="display:inline-block;width:14px;height:14px;border-radius:50%;background:${s.color.dot};"></span>
           <strong style="font-size:17px;">${s.name}</strong>
-          <span style="font-size:12px;background:var(--bg);padding:2px 14px;border-radius:20px;font-weight:600;">${s.days.map(d=>DAY_SHORT[d]).join(', ')}</span>
+          <span style="font-size:12px;background:var(--bg);padding:2px 14px;border-radius:20px;font-weight:600;">${studentDays.length ? studentDays.map(d=>DAY_SHORT[d]).join(', ') : 'Chưa có lịch'}</span>
           <span style="font-size:12px;background:rgba(255,255,255,0.5);padding:2px 14px;border-radius:20px;font-weight:600;">${s.fee.toLocaleString('vi-VN')}đ/buổi</span>
         </div>
         
@@ -1066,6 +1119,7 @@ function addStudent() {
     start: start, 
     payments: {}, 
     absents: {}, 
+    scheduleHistory: [{ from: start, days: [...selectedDays] }],
     color: getPastelColorSoft(newId) 
   };
   
@@ -1106,7 +1160,7 @@ function toggleEdit(id) {
   if (!panel) return;
   const open = panel.classList.contains('open'); 
   document.querySelectorAll('.edit-panel.open').forEach(p=>p.classList.remove('open')); 
-  if(!open) panel.classList.add('open'); 
+  if(!open) { panel.classList.add('open'); openEditId = id; } else { openEditId = null; }
 }
 
 function saveEdit(id) {
@@ -1130,9 +1184,70 @@ function saveEdit(id) {
   s.fee = fee; 
   s.start = start; 
   s.days = days;
+
+  // Đồng bộ lịch gốc (mốc đầu tiên) trong lịch sử thay đổi lịch học
+  if (!Array.isArray(s.scheduleHistory) || !s.scheduleHistory.length) {
+    s.scheduleHistory = [{ from: start, days: days }];
+  } else {
+    const sorted = [...s.scheduleHistory].sort((a,b)=>parseLocalDate(a.from)-parseLocalDate(b.from));
+    sorted[0] = { from: start, days: days };
+    s.scheduleHistory = sorted;
+  }
   
   updateStudentsArray();
   document.getElementById('edit-'+id).classList.remove('open');
+  openEditId = null;
+  saveToFirebase();
+  renderStudentList();
+  renderCalendar();
+  renderReport();
+  renderInvoiceStudents();
+}
+
+// ===== ĐỔI LỊCH HỌC GIỮA CHỪNG: áp dụng từ 1 ngày trở về sau, không ảnh hưởng các tháng trước =====
+function addScheduleChange(id) {
+  const result = findStudentById(id);
+  if (!result) { alert('Không tìm thấy học sinh!'); return; }
+  const s = result.student;
+
+  const fromDate = document.getElementById('newSchedFrom-'+id).value;
+  if (!fromDate) { alert('Vui lòng chọn ngày áp dụng lịch mới'); return; }
+
+  const days = [];
+  document.querySelectorAll('#newSchedDays-'+id+' .day-btn.active').forEach(b=>days.push(parseInt(b.dataset.d)));
+  if (!days.length) { alert('Chọn ít nhất 1 ngày học cho lịch mới'); return; }
+
+  if (!Array.isArray(s.scheduleHistory) || !s.scheduleHistory.length) {
+    s.scheduleHistory = [{ from: s.start, days: Array.isArray(s.days) ? s.days : [] }];
+  }
+  // Nếu đã có thay đổi áp dụng đúng ngày này thì ghi đè, tránh trùng lặp
+  s.scheduleHistory = s.scheduleHistory.filter(seg => seg.from !== fromDate);
+  s.scheduleHistory.push({ from: fromDate, days: days });
+  s.scheduleHistory.sort((a,b)=>parseLocalDate(a.from)-parseLocalDate(b.from));
+
+  updateStudentsArray();
+  saveToFirebase();
+  renderStudentList();
+  renderCalendar();
+  renderReport();
+  renderInvoiceStudents();
+
+  alert(`✅ Đã áp dụng lịch học mới (${days.map(d=>DAY_SHORT[d]).join(', ')}) từ ngày ${formatDMY(fromDate)} trở về sau. Các tháng tiếp theo sẽ tự động tính theo lịch này, không cần chỉnh tay từng tháng.`);
+}
+
+function deleteScheduleChange(id, fromDate) {
+  const result = findStudentById(id);
+  if (!result) { alert('Không tìm thấy học sinh!'); return; }
+  const s = result.student;
+
+  if (!Array.isArray(s.scheduleHistory) || s.scheduleHistory.length <= 1) {
+    alert('Không thể xoá lịch học duy nhất. Hãy sửa "Ngày học ban đầu" nếu muốn thay đổi.');
+    return;
+  }
+  if (!confirm(`Xoá thay đổi lịch học áp dụng từ ${formatDMY(fromDate)}?`)) return;
+
+  s.scheduleHistory = s.scheduleHistory.filter(seg => seg.from !== fromDate);
+  updateStudentsArray();
   saveToFirebase();
   renderStudentList();
   renderCalendar();
@@ -1227,10 +1342,33 @@ function renderStudentList() {
     el.innerHTML='<div class="empty-state">🍃 Chưa có học sinh</div>'; 
     return; 
   }
+
+  // Lưu lại giá trị đang nhập dở ở form "Đổi lịch học" (nếu panel đang mở) để không bị mất khi render lại
+  let pendingNewSched = null;
+  if (openEditId !== null) {
+    const fromInput = document.getElementById('newSchedFrom-'+openEditId);
+    const daysContainer = document.getElementById('newSchedDays-'+openEditId);
+    if (fromInput || daysContainer) {
+      pendingNewSched = {
+        from: fromInput ? fromInput.value : '',
+        days: daysContainer ? Array.from(daysContainer.querySelectorAll('.day-btn.active')).map(b=>b.dataset.d) : []
+      };
+    }
+  }
   
   el.innerHTML = studentsArray.map(s=>{
-    const dayStr = s.days.map(d=>DAY_SHORT[d]).join(', ');
+    const activeDaysNow = getScheduleForDate(s, new Date());
+    const dayStr = activeDaysNow.length ? activeDaysNow.map(d=>DAY_SHORT[d]).join(', ') : 'Chưa có lịch';
     const dayBtns = DAY_SHORT.map((lbl,i)=>`<button class="day-btn${s.days.includes(i)?' active':''}" data-d="${i}" onclick="toggleEditDay(this)">${lbl}</button>`).join('');
+    const history = [...getScheduleHistoryOf(s)].sort((a,b)=>parseLocalDate(a.from)-parseLocalDate(b.from));
+    const scheduleHistoryHtml = history.map((seg, idx) => `
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;background:var(--bg);padding:7px 12px;border-radius:14px;margin-bottom:6px;font-size:13px;border:1px solid var(--border);">
+        <span><strong>Từ ${formatDMY(seg.from)}:</strong> ${seg.days.length ? seg.days.map(d=>DAY_SHORT[d]).join(', ') : 'Không học'}</span>
+        ${idx > 0
+          ? `<button class="act-btn del" style="width:22px;height:22px;" onclick="deleteScheduleChange(${s.id}, '${seg.from}')" title="Xoá thay đổi này"><i class="ti ti-x"></i></button>`
+          : `<span style="font-size:11px;color:var(--text3);white-space:nowrap;">(lịch gốc)</span>`}
+      </div>`).join('');
+    const newSchedDayBtns = DAY_SHORT.map((lbl,i)=>`<button class="day-btn" data-d="${i}" onclick="toggleEditDay(this)">${lbl}</button>`).join('');
     const isPaid = getPaymentStatus(s, curYear, curMonth);
     const statusLabel = isPaid ? '✅ Đã nộp' : '⏳ Chưa nộp';
     
@@ -1250,12 +1388,36 @@ function renderStudentList() {
           <div class="field"><label>Tên</label><input id="ename-${s.id}" value="${s.name.replace(/"/g, '&quot;')}"/></div>
           <div class="field"><label>Học phí/buổi</label><input id="efee-${s.id}" type="number" value="${s.fee}"/></div>
         </div>
-        <div class="field">Ngày học</div><div class="days-row" id="edays-${s.id}">${dayBtns}</div>
+        <div class="field">Ngày học ban đầu</div><div class="days-row" id="edays-${s.id}">${dayBtns}</div>
         <div class="field"><label>Bắt đầu từ</label><input id="estart-${s.id}" type="date" value="${s.start||''}"/></div>
         <div class="edit-btns"><button class="btn-save" onclick="saveEdit(${s.id})"><i class="ti ti-check"></i> Lưu</button><button class="btn-cancel" onclick="toggleEdit(${s.id})"><i class="ti ti-x"></i> Huỷ</button></div>
+
+        <div style="margin-top:18px;padding-top:14px;border-top:1.5px dashed var(--border);">
+          <div class="field" style="margin-bottom:8px;"><label>🔁 Lịch sử thay đổi lịch học</label></div>
+          ${scheduleHistoryHtml}
+          <div class="field" style="margin-top:12px;margin-bottom:4px;"><label>➕ Đổi lịch học, áp dụng từ ngày:</label><input type="date" id="newSchedFrom-${s.id}"/></div>
+          <div class="days-row" id="newSchedDays-${s.id}">${newSchedDayBtns}</div>
+          <button class="btn-save" style="margin-top:6px;" onclick="addScheduleChange(${s.id})"><i class="ti ti-refresh"></i> Áp dụng từ đây về sau với lịch học này</button>
+          <div style="font-size:12px;color:var(--text3);margin-top:6px;">ℹ️ Lịch mới sẽ tự động áp dụng cho ngày đã chọn trở về sau (kể cả các tháng tiếp theo), không ảnh hưởng các buổi học trước ngày đó.</div>
+        </div>
       </div>
     </div>`;
   }).join('');
+
+  if (openEditId !== null) {
+    const panel = document.getElementById('edit-'+openEditId);
+    if (panel) panel.classList.add('open');
+    if (pendingNewSched) {
+      const fromInput = document.getElementById('newSchedFrom-'+openEditId);
+      if (fromInput && pendingNewSched.from) fromInput.value = pendingNewSched.from;
+      const daysContainer = document.getElementById('newSchedDays-'+openEditId);
+      if (daysContainer && pendingNewSched.days.length) {
+        daysContainer.querySelectorAll('.day-btn').forEach(b=>{
+          if (pendingNewSched.days.includes(b.dataset.d)) b.classList.add('active');
+        });
+      }
+    }
+  }
 }
 
 function renderCalendar() {
@@ -1273,8 +1435,8 @@ function renderCalendar() {
     const date = new Date(curYear, curMonth, d);
     let pills = '';
     visible.forEach(s=>{
-      const sd = parseLocalDate(s.start);
-      if(date>=sd && s.days.includes(date.getDay())){
+      const activeDaysToday = getScheduleForDate(s, date);
+      if(activeDaysToday.includes(date.getDay())){
         const key = getMonthKey(curYear, curMonth);
         const isAbsent = s.absents && s.absents[key] && s.absents[key].includes(d);
         
@@ -1316,6 +1478,7 @@ function renderReport() {
   visible.forEach(s=>{
     const currentPlannedSessions = getSessionsInMonth(s, curYear, curMonth);
     const feePlanned = currentPlannedSessions.length * s.fee;
+    const scheduleDaysThisMonth = getDaysUnionForMonth(s, curYear, curMonth);
     
     const prev = getPreviousMonthKey(curYear, curMonth);
     const prevAbsentDays = (s.absents && s.absents[prev.key]) ? s.absents[prev.key] : [];
@@ -1333,7 +1496,7 @@ function renderReport() {
       <div class="rep-header">
         <div style="width:14px;height:14px;border-radius:50%;background:${s.color.dot}"></div>
         <span style="font-weight:800;font-size:17px;">${s.name}</span>
-        <span style="background:var(--bg);padding:3px 14px;border-radius:30px;font-size:12px;font-weight:600;">${s.days.map(d=>DAY_SHORT[d]).join(', ')}</span>
+        <span style="background:var(--bg);padding:3px 14px;border-radius:30px;font-size:12px;font-weight:600;">${scheduleDaysThisMonth.length ? scheduleDaysThisMonth.map(d=>DAY_SHORT[d]).join(', ') : 'Chưa có lịch'}</span>
       </div>
       
       <div class="stat-grid">
