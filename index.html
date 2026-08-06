@@ -8,7 +8,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
 <style>
-/* ===== CSS GIỮ NGUYÊN ===== */
+/* ===== CSS ===== */
 * { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
   --bg: #F4F2EF; --bg2: #EAE6E1; --bg3: #DDD8D1;
@@ -18,6 +18,7 @@
   --accent: #7B9E87; --accent-dark: #5E7D68; --accent-light: #C2D5C8;
   --paid-bg: #BED3C3; --paid-text: #2C5A3E;
   --unpaid-bg: #F0D9CF; --unpaid-text: #B16148;
+  --change-bg: #E8E0D0;
 }
 @media (prefers-color-scheme: dark) {
   :root {
@@ -27,6 +28,7 @@
     --accent: #6C8F7A; --accent-dark: #537561; --accent-light: #8FAD9B;
     --paid-bg: #2C5940; --paid-text: #C6F0DF;
     --unpaid-bg: #6E4D3F; --unpaid-text: #F3C5B4;
+    --change-bg: #4A4035;
   }
 }
 body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg3); color: var(--text); min-height: 100vh; font-size: 16px; }
@@ -61,8 +63,6 @@ button:active { transform: scale(0.97); }
 .act-btn { background: var(--bg); border: 1px solid var(--border2); border-radius: 30px; padding: 4px 12px; font-size: 12px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; }
 .act-btn i { font-size: 14px; }
 .act-btn.edit:hover { background: var(--accent); color: white; border-color: var(--accent); }
-
-/* Nút xóa hình tròn nhỏ */
 .act-btn.del { 
   background: var(--unpaid-bg); 
   border-color: var(--unpaid-text); 
@@ -78,20 +78,9 @@ button:active { transform: scale(0.97); }
   transition: all 0.2s;
   border: 1.5px solid rgba(0,0,0,0.15);
 }
-.act-btn.del i { 
-  font-size: 14px; 
-  margin: 0;
-}
-.act-btn.del:hover { 
-  background: #C28B77; 
-  border-color: #C28B77; 
-  color: white;
-  transform: scale(1.1);
-}
-.act-btn.del:active {
-  transform: scale(0.9);
-}
-
+.act-btn.del i { font-size: 14px; margin: 0; }
+.act-btn.del:hover { background: #C28B77; border-color: #C28B77; color: white; transform: scale(1.1); }
+.act-btn.del:active { transform: scale(0.9); }
 .edit-panel { border-top: 1.5px solid var(--border); padding: 16px 18px; background: var(--bg); display: none; }
 .edit-panel.open { display: block; }
 .edit-btns { display: flex; gap: 14px; margin-top: 18px; }
@@ -140,20 +129,17 @@ button:active { transform: scale(0.97); }
   padding: 1.8rem 2rem;
   margin-bottom: 1.8rem;
 }
-
 .invoice-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 2rem;
   margin-top: 1rem;
 }
-
 .invoice-left {
   display: flex;
   flex-direction: column;
   gap: 1rem;
 }
-
 .student-checkbox-group {
   display: flex;
   flex-wrap: wrap;
@@ -165,7 +151,6 @@ button:active { transform: scale(0.97); }
   max-height: 200px;
   overflow-y: auto;
 }
-
 .student-checkbox-group label {
   display: flex;
   align-items: center;
@@ -179,19 +164,16 @@ button:active { transform: scale(0.97); }
   transition: 0.2s;
   border: 1px solid transparent;
 }
-
 .student-checkbox-group label:hover {
   border-color: var(--accent);
   background: var(--accent-light);
 }
-
 .student-checkbox-group input[type="checkbox"] {
   width: 18px;
   height: 18px;
   accent-color: var(--accent);
   cursor: pointer;
 }
-
 .invoice-right {
   display: flex;
   flex-direction: column;
@@ -202,7 +184,6 @@ button:active { transform: scale(0.97); }
   border-radius: var(--radius);
   border: 1px solid var(--border);
 }
-
 .invoice-right .qr-placeholder {
   width: 180px;
   height: 180px;
@@ -220,13 +201,11 @@ button:active { transform: scale(0.97); }
   position: relative;
   overflow: hidden;
 }
-
 .invoice-right .qr-placeholder img {
   max-width: 100%;
   max-height: 100%;
   object-fit: contain;
 }
-
 .invoice-right .bank-info {
   font-size: 13px;
   text-align: center;
@@ -237,33 +216,27 @@ button:active { transform: scale(0.97); }
   border-radius: var(--radius);
   width: 100%;
 }
-
 .invoice-right .bank-info strong {
   color: var(--accent-dark);
 }
-
 .invoice-actions {
   display: flex;
   gap: 12px;
   flex-wrap: wrap;
   margin-top: 8px;
 }
-
 .invoice-actions .btn-primary {
   width: auto;
   padding: 10px 32px;
 }
-
 .btn-secondary {
   background: var(--bg2);
   border-color: var(--border2);
 }
-
 .btn-secondary:hover {
   background: var(--bg3);
   border-color: var(--text3);
 }
-
 .qr-upload-btn {
   position: relative;
   overflow: hidden;
@@ -271,7 +244,6 @@ button:active { transform: scale(0.97); }
   align-items: center;
   gap: 8px;
 }
-
 .qr-upload-btn input[type="file"] {
   position: absolute;
   left: 0;
@@ -310,9 +282,48 @@ button:active { transform: scale(0.97); }
   background: #E8F0E8;
   color: #2C5A3E;
 }
+.schedule-table .old-schedule-cell {
+  background: #FFF8E7;
+  color: #8B7A5A;
+}
 .schedule-table .empty-cell {
   background: #F5F5F5;
   color: #ccc;
+}
+.schedule-table .change-marker {
+  background: #FFE4B5;
+  color: #8B6914;
+  font-weight: 700;
+}
+
+/* CSS cho lịch học theo tháng */
+.month-schedule-edit {
+  background: var(--bg);
+  border-radius: 12px;
+  padding: 12px 16px;
+  margin: 8px 0;
+  border: 1px solid var(--border);
+}
+.month-schedule-edit .days-row {
+  margin: 4px 0 8px;
+}
+.month-schedule-edit .small-btn {
+  padding: 4px 16px;
+  font-size: 12px;
+  border-radius: 20px;
+}
+.change-date-input {
+  max-width: 70px;
+  padding: 4px 8px;
+  font-size: 13px;
+  border-radius: 8px;
+  border: 1.5px solid var(--border2);
+  background: var(--bg);
+  color: var(--text);
+}
+.change-date-input:focus {
+  border-color: var(--accent);
+  outline: none;
 }
 
 /* Responsive */
@@ -473,7 +484,6 @@ const firebaseConfig = {
   measurementId: "G-9WN67MEMP3"
 };
 
-// Initialize Firebase
 firebase.initializeApp(firebaseConfig);
 const database = firebase.database();
 const studentsRef = database.ref('students');
@@ -488,9 +498,7 @@ let selectedDays = [];
 let isSyncing = false;
 let isInitialLoad = true;
 let qrImageData = null;
-let openEditId = null;
 
-// ===== HÀM QUAN TRỌNG: Tìm học sinh theo ID =====
 function findStudentById(id) {
   const idStr = String(id);
   for (const key in students) {
@@ -515,10 +523,8 @@ function updateStudentsArray() {
     if (!s.payments) s.payments = {};
     if (!s.absents) s.absents = {};
     if (!s.days) s.days = [];
-    if (!Array.isArray(s.scheduleHistory) || !s.scheduleHistory.length) {
-      s.scheduleHistory = [{ from: s.start, days: s.days }];
-    }
     if (!s.color) s.color = getPastelColorSoft(s.id);
+    if (!s.monthDays) s.monthDays = {};
     return s;
   });
   console.log('📊 Đã cập nhật studentsArray:', studentsArray.length, 'học sinh');
@@ -557,10 +563,8 @@ function saveToFirebase() {
       start: s.start || new Date().toISOString().split('T')[0],
       payments: s.payments || {},
       absents: s.absents || {},
-      scheduleHistory: (Array.isArray(s.scheduleHistory) && s.scheduleHistory.length)
-        ? s.scheduleHistory
-        : [{ from: s.start || new Date().toISOString().split('T')[0], days: Array.isArray(s.days) ? s.days : [] }],
-      color: s.color || getPastelColorSoft(s.id || Date.now())
+      color: s.color || getPastelColorSoft(s.id || Date.now()),
+      monthDays: s.monthDays || {}
     };
   });
   
@@ -591,8 +595,8 @@ function createDemoData() {
     start: "2026-06-01", 
     payments: {}, 
     absents: {}, 
-    scheduleHistory: [{ from: "2026-06-01", days: [2,4,6] }],
-    color: getPastelColorSoft(id1) 
+    color: getPastelColorSoft(id1),
+    monthDays: {}
   };
   
   const demo2 = { 
@@ -603,8 +607,8 @@ function createDemoData() {
     start: "2026-06-01", 
     payments: {"2026-06": true}, 
     absents: {}, 
-    scheduleHistory: [{ from: "2026-06-01", days: [1,3,5] }],
-    color: getPastelColorSoft(id2) 
+    color: getPastelColorSoft(id2),
+    monthDays: {}
   };
   
   students = {};
@@ -625,20 +629,17 @@ studentsRef.on('value', (snapshot) => {
       if (!s.payments) { s.payments = {}; needUpdate = true; }
       if (!s.absents) { s.absents = {}; needUpdate = true; }
       if (!s.days) { s.days = []; needUpdate = true; }
-      if (!Array.isArray(s.scheduleHistory) || !s.scheduleHistory.length) {
-        s.scheduleHistory = [{ from: s.start || new Date().toISOString().split('T')[0], days: Array.isArray(s.days) ? s.days : [] }];
-        needUpdate = true;
-        console.log('✅ Đã tạo scheduleHistory cho học sinh cũ:', s.name);
-      }
       if (!s.id) {
         s.id = parseInt(key);
         needUpdate = true;
         console.log('✅ Đã thêm id cho học sinh:', s.name, 'ID:', s.id);
       }
       if (!s.color) { s.color = getPastelColorSoft(s.id); needUpdate = true; }
+      if (!s.monthDays) { s.monthDays = {}; needUpdate = true; }
     });
     if (needUpdate) {
-      console.log('🔄 Đã tự vá dữ liệu cũ trong bộ nhớ (sẽ lưu thật vào lần sửa/lưu tiếp theo, không ghi ngay để tránh render lại giữa lúc đang thao tác)');
+      console.log('🔄 Đang đồng bộ id cho dữ liệu cũ...');
+      saveToFirebase();
     }
   } else {
     console.log('📝 Không có dữ liệu, tạo dữ liệu mẫu...');
@@ -658,7 +659,6 @@ studentsRef.on('value', (snapshot) => {
   document.getElementById('studentList').innerHTML = '<div class="empty-state">⚠️ Không thể kết nối Firebase. Vui lòng kiểm tra kết nối mạng.</div>';
 });
 
-// ===== HÀM CHO INVOICE =====
 function renderInvoiceStudents() {
   const container = document.getElementById('invoiceStudentCheckboxes');
   if (!studentsArray.length) {
@@ -725,61 +725,133 @@ try {
   }
 } catch(err) {}
 
-// ===== QUẢN LÝ LỊCH SỬ THAY ĐỔI LỊCH HỌC =====
-// Mỗi học sinh có scheduleHistory: [{from:'YYYY-MM-DD', days:[..]}, ...]
-// Cho phép đổi số buổi/ngày học giữa chừng (VD: tháng 7 học 2 buổi, từ 11/8 học 3 buổi)
-// mà không ảnh hưởng đến các tháng/ngày trước đó.
-function getScheduleHistoryOf(student) {
-  if (Array.isArray(student.scheduleHistory) && student.scheduleHistory.length) {
-    return student.scheduleHistory;
-  }
-  // Dữ liệu cũ chưa có scheduleHistory -> coi như chỉ có 1 lịch duy nhất từ ngày bắt đầu
-  return [{ from: student.start, days: Array.isArray(student.days) ? student.days : [] }];
-}
-
-// Trả về mảng ngày trong tuần (days) đang áp dụng tại 1 ngày cụ thể (Date)
-function getScheduleForDate(student, date) {
-  const history = getScheduleHistoryOf(student);
-  let applicable = null;
-  history.forEach(seg => {
-    const segDate = parseLocalDate(seg.from);
-    if (segDate <= date && (!applicable || segDate >= parseLocalDate(applicable.from))) {
-      applicable = seg;
-    }
-  });
-  return applicable ? applicable.days : [];
-}
-
-// Gộp tất cả các "ngày trong tuần" từng được áp dụng trong 1 tháng (dùng để hiển thị cột lịch/báo cáo)
-function getDaysUnionForMonth(student, year, month) {
+// ===== HÀM TÍNH SỐ BUỔI HỌC CHÍNH XÁC THEO NGÀY THAY ĐỔI =====
+function getSessionsWithChangeDate(student, year, month) {
   const daysInMonth = new Date(year, month + 1, 0).getDate();
-  const set = new Set();
-  for (let d = 1; d <= daysInMonth; d++) {
-    getScheduleForDate(student, new Date(year, month, d)).forEach(dow => set.add(dow));
-  }
-  return Array.from(set).sort((a, b) => a - b);
-}
-
-function formatDMY(str) {
-  if (!str) return '';
-  const [y, m, d] = str.split('-');
-  return `${d}/${m}/${y}`;
-}
-
-// ===== HÀM LẤY CÁC BUỔI HỌC TRONG THÁNG (CÓ XÉT LỊCH SỬ THAY ĐỔI LỊCH HỌC) =====
-function getSessionsInMonth(student, year, month) {
-  // month là tháng (0-11)
-  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const startDate = parseLocalDate(student.start);
+  const monthKey = getMonthKey(year, month);
   const sessions = [];
   
-  for (let d = 1; d <= daysInMonth; d++) {
-    const date = new Date(year, month, d);
-    const activeDays = getScheduleForDate(student, date);
-    if (activeDays.includes(date.getDay())) {
-      sessions.push(d);
+  // Lấy lịch mặc định
+  const defaultDays = student.days || [];
+  
+  // Kiểm tra lịch đặc biệt
+  const monthSchedule = student.monthDays && student.monthDays[monthKey];
+  
+  if (monthSchedule && monthSchedule.days) {
+    const newDays = monthSchedule.days;
+    const changeDate = monthSchedule.changeDate || 1;
+    
+    for (let d = 1; d <= daysInMonth; d++) {
+      const date = new Date(year, month, d);
+      if (date >= startDate) {
+        const dayOfWeek = date.getDay();
+        // Từ ngày thay đổi trở đi dùng lịch mới
+        if (d >= changeDate) {
+          if (newDays.includes(dayOfWeek)) {
+            sessions.push(d);
+          }
+        } else {
+          // Trước ngày thay đổi dùng lịch cũ
+          if (defaultDays.includes(dayOfWeek)) {
+            sessions.push(d);
+          }
+        }
+      }
+    }
+    
+    // Thêm thông tin về ngày thay đổi vào kết quả để hiển thị
+    sessions.changeDate = changeDate;
+    sessions.hasChange = true;
+    sessions.newDays = newDays;
+    sessions.oldDays = defaultDays;
+    
+  } else {
+    // Không có lịch đặc biệt, dùng lịch mặc định
+    for (let d = 1; d <= daysInMonth; d++) {
+      const date = new Date(year, month, d);
+      if (date >= startDate && defaultDays.includes(date.getDay())) {
+        sessions.push(d);
+      }
+    }
+    sessions.hasChange = false;
+  }
+  
+  return sessions;
+}
+
+// ===== LẤY THÔNG TIN CHI TIẾT SỐ BUỔI HỌC THEO LỊCH CŨ VÀ MỚI =====
+function getSessionDetails(student, year, month) {
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const startDate = parseLocalDate(student.start);
+  const monthKey = getMonthKey(year, month);
+  
+  const defaultDays = student.days || [];
+  const monthSchedule = student.monthDays && student.monthDays[monthKey];
+  
+  let oldScheduleSessions = [];
+  let newScheduleSessions = [];
+  let totalSessions = [];
+  let changeDate = 1;
+  let hasChange = false;
+  let newDays = defaultDays;
+  
+  if (monthSchedule && monthSchedule.days) {
+    newDays = monthSchedule.days;
+    changeDate = monthSchedule.changeDate || 1;
+    hasChange = true;
+    
+    for (let d = 1; d <= daysInMonth; d++) {
+      const date = new Date(year, month, d);
+      if (date >= startDate) {
+        const dayOfWeek = date.getDay();
+        if (d < changeDate) {
+          // Trước ngày thay đổi: lịch cũ
+          if (defaultDays.includes(dayOfWeek)) {
+            oldScheduleSessions.push(d);
+            totalSessions.push({ day: d, type: 'old' });
+          }
+        } else {
+          // Từ ngày thay đổi: lịch mới
+          if (newDays.includes(dayOfWeek)) {
+            newScheduleSessions.push(d);
+            totalSessions.push({ day: d, type: 'new' });
+          }
+        }
+      }
+    }
+  } else {
+    // Không có thay đổi, tất cả là lịch cũ
+    for (let d = 1; d <= daysInMonth; d++) {
+      const date = new Date(year, month, d);
+      if (date >= startDate && defaultDays.includes(date.getDay())) {
+        oldScheduleSessions.push(d);
+        totalSessions.push({ day: d, type: 'old' });
+      }
     }
   }
-  return sessions;
+  
+  return {
+    totalSessions: totalSessions,
+    oldSessions: oldScheduleSessions,
+    newSessions: newScheduleSessions,
+    changeDate: changeDate,
+    hasChange: hasChange,
+    newDays: newDays,
+    oldDays: defaultDays,
+    count: totalSessions.length,
+    oldCount: oldScheduleSessions.length,
+    newCount: newScheduleSessions.length
+  };
+}
+
+function getDaysForMonth(student, year, month) {
+  const monthKey = getMonthKey(year, month);
+  const monthSchedule = student.monthDays && student.monthDays[monthKey];
+  if (monthSchedule && monthSchedule.days) {
+    return monthSchedule.days;
+  }
+  return student.days || [];
 }
 
 function getPreviousMonthKey(year, month) {
@@ -789,6 +861,592 @@ function getPreviousMonthKey(year, month) {
   return { year: prevY, month: prevM, key: getMonthKey(prevY, prevM) };
 }
 
+function updateMonthSchedule(studentId, year, month, newDays, changeDate) {
+  const result = findStudentById(studentId);
+  if (!result) return;
+  
+  const student = result.student;
+  const monthKey = getMonthKey(year, month);
+  
+  if (!student.monthDays) student.monthDays = {};
+  
+  // Lưu lịch mới với ngày thay đổi
+  const scheduleData = {
+    days: newDays,
+    changeDate: changeDate || 1
+  };
+  
+  // So sánh với lịch mặc định
+  const defaultDays = student.days || [];
+  const isSame = JSON.stringify(newDays.sort()) === JSON.stringify(defaultDays.sort());
+  
+  if (isSame && (!changeDate || changeDate === 1)) {
+    delete student.monthDays[monthKey];
+  } else {
+    student.monthDays[monthKey] = scheduleData;
+  }
+  
+  updateStudentsArray();
+  saveToFirebase();
+  renderStudentList();
+  renderCalendar();
+  renderReport();
+  renderInvoiceStudents();
+}
+
+function applyMonthScheduleFromNow(studentId, year, month, newDays, changeDate) {
+  const result = findStudentById(studentId);
+  if (!result) return;
+  
+  const student = result.student;
+  if (!student.monthDays) student.monthDays = {};
+  
+  const scheduleData = {
+    days: newDays,
+    changeDate: changeDate || 1
+  };
+  
+  const currentYear = year;
+  const currentMonth = month;
+  
+  // Áp dụng từ tháng hiện tại về sau
+  for (let y = currentYear; y <= currentYear + 2; y++) {
+    for (let m = (y === currentYear ? currentMonth : 0); m < 12; m++) {
+      if ((y - currentYear) * 12 + (m - currentMonth) > 24) break;
+      
+      const key = getMonthKey(y, m);
+      if (!student.monthDays[key]) {
+        const defaultDays = student.days || [];
+        if (JSON.stringify(newDays.sort()) !== JSON.stringify(defaultDays.sort()) || (changeDate && changeDate > 1)) {
+          student.monthDays[key] = { ...scheduleData };
+        }
+      }
+    }
+  }
+  
+  // Áp dụng cho tháng hiện tại
+  const currentKey = getMonthKey(currentYear, currentMonth);
+  const defaultDays = student.days || [];
+  if (JSON.stringify(newDays.sort()) !== JSON.stringify(defaultDays.sort()) || (changeDate && changeDate > 1)) {
+    student.monthDays[currentKey] = { ...scheduleData };
+  } else {
+    delete student.monthDays[currentKey];
+  }
+  
+  updateStudentsArray();
+  saveToFirebase();
+  renderStudentList();
+  renderCalendar();
+  renderReport();
+  renderInvoiceStudents();
+  
+  alert(`✅ Đã áp dụng lịch học mới cho ${student.name} từ tháng ${MONTHS[month]} ${year} về sau!`);
+}
+
+function toggleDay(btn) { 
+  btn.classList.toggle('active'); 
+  const d = parseInt(btn.dataset.d); 
+  if (selectedDays.includes(d)) {
+    selectedDays = selectedDays.filter(x=>x!==d); 
+  } else {
+    selectedDays.push(d); 
+  }
+}
+
+function addStudent() {
+  const name = document.getElementById('inp-name').value.trim();
+  const fee = parseInt(document.getElementById('inp-fee').value) || 135000;
+  const start = document.getElementById('inp-start').value;
+  
+  if (!name) { alert('Vui lòng nhập tên'); return; }
+  if (!selectedDays.length) { alert('Chọn ít nhất 1 ngày học'); return; }
+  
+  const newId = Date.now() + Math.floor(Math.random() * 10000);
+  const newStudent = { 
+    id: newId, 
+    name: name, 
+    fee: fee, 
+    days: [...selectedDays], 
+    start: start, 
+    payments: {}, 
+    absents: {}, 
+    color: getPastelColorSoft(newId),
+    monthDays: {}
+  };
+  
+  students[newId] = newStudent;
+  updateStudentsArray();
+  
+  document.getElementById('inp-name').value = '';
+  selectedDays = [];
+  document.querySelectorAll('#dayBtns .day-btn').forEach(b=>b.classList.remove('active'));
+  
+  saveToFirebase();
+  renderStudentList();
+  renderCalendar();
+  renderReport();
+  renderInvoiceStudents();
+}
+
+function deleteStudent(id) { 
+  const result = findStudentById(id);
+  if (!result) {
+    console.error('❌ Không tìm thấy học sinh với ID:', id);
+    alert('Không tìm thấy học sinh!');
+    return;
+  }
+  
+  if(!confirm(`Xóa học sinh "${result.student.name}"?`)) return; 
+  delete students[result.key];
+  updateStudentsArray();
+  saveToFirebase();
+  renderStudentList();
+  renderCalendar();
+  renderReport();
+  renderInvoiceStudents();
+}
+
+function toggleEdit(id) { 
+  const panel = document.getElementById('edit-'+id); 
+  if (!panel) return;
+  const open = panel.classList.contains('open'); 
+  document.querySelectorAll('.edit-panel.open').forEach(p=>p.classList.remove('open')); 
+  if(!open) panel.classList.add('open'); 
+}
+
+function saveEdit(id) {
+  const result = findStudentById(id);
+  if (!result) { 
+    alert('Không tìm thấy học sinh!'); 
+    return; 
+  }
+  
+  const s = result.student;
+  const name = document.getElementById('ename-'+id).value.trim();
+  const fee = parseInt(document.getElementById('efee-'+id).value) || s.fee;
+  const start = document.getElementById('estart-'+id).value;
+  const days = []; 
+  document.querySelectorAll('#edays-'+id+' .day-btn.active').forEach(b=>days.push(parseInt(b.dataset.d)));
+  
+  if(!name){ alert('Tên không được trống'); return; }
+  if(!days.length){ alert('Chọn ngày học'); return; }
+  
+  s.name = name; 
+  s.fee = fee; 
+  s.start = start; 
+  s.days = days;
+  
+  if (s.monthDays) {
+    const defaultDays = days;
+    for (const key in s.monthDays) {
+      const schedule = s.monthDays[key];
+      const scheduleDays = schedule.days || schedule;
+      if (JSON.stringify(scheduleDays.sort()) === JSON.stringify(defaultDays.sort())) {
+        delete s.monthDays[key];
+      }
+    }
+  }
+  
+  updateStudentsArray();
+  document.getElementById('edit-'+id).classList.remove('open');
+  saveToFirebase();
+  renderStudentList();
+  renderCalendar();
+  renderReport();
+  renderInvoiceStudents();
+}
+
+function toggleEditDay(btn) { 
+  btn.classList.toggle('active'); 
+}
+
+function getMonthKey(y,m){ return `${y}-${String(m+1).padStart(2,'0')}`; }
+
+function togglePaymentStatus(studentId, year, month) {
+  const result = findStudentById(studentId);
+  if (!result) { 
+    alert('Không tìm thấy học sinh!'); 
+    return; 
+  }
+  
+  const student = result.student;
+  const key = getMonthKey(year, month);
+  if(!student.payments) student.payments={};
+  student.payments[key] = !(student.payments[key]||false);
+  
+  updateStudentsArray();
+  saveToFirebase();
+  renderStudentList();
+  renderCalendar();
+  renderReport();
+  renderInvoiceStudents();
+}
+
+function getPaymentStatus(student, year, month) { 
+  const key = getMonthKey(year, month); 
+  return !!(student.payments && student.payments[key]); 
+}
+
+function toggleAbsent(studentId, year, month, dateNum) {
+  const result = findStudentById(studentId);
+  if (!result) { 
+    alert('Không tìm thấy học sinh!'); 
+    return; 
+  }
+  
+  const student = result.student;
+  const key = getMonthKey(year, month);
+  if(!student.absents) student.absents = {};
+  if(!student.absents[key]) student.absents[key] = [];
+
+  if(student.absents[key].includes(dateNum)) {
+    student.absents[key] = student.absents[key].filter(d => d !== dateNum);
+  } else {
+    if(confirm(`Xác nhận học sinh ${student.name} nghỉ ngày ${dateNum}/${month+1}? (Buổi này sẽ được gối đầu trừ tiền vào tháng tiếp theo)`)) {
+      student.absents[key].push(dateNum);
+    } else {
+      return;
+    }
+  }
+  
+  updateStudentsArray();
+  saveToFirebase();
+  renderCalendar();
+  renderReport();
+  renderInvoiceStudents();
+}
+
+function parseLocalDate(str) { 
+  if(!str) return new Date(0); 
+  const [y,m,d]=str.split('-').map(Number); 
+  return new Date(y,m-1,d); 
+}
+
+function renderStudentList() {
+  const el = document.getElementById('studentList');
+  if(!studentsArray.length){ 
+    el.innerHTML='<div class="empty-state">🍃 Chưa có học sinh</div>'; 
+    return; 
+  }
+  
+  el.innerHTML = studentsArray.map(s=>{
+    const dayStr = s.days.map(d=>DAY_SHORT[d]).join(', ');
+    const dayBtns = DAY_SHORT.map((lbl,i)=>`<button class="day-btn${s.days.includes(i)?' active':''}" data-d="${i}" onclick="toggleEditDay(this)">${lbl}</button>`).join('');
+    const isPaid = getPaymentStatus(s, curYear, curMonth);
+    const statusLabel = isPaid ? '✅ Đã nộp' : '⏳ Chưa nộp';
+    
+    const monthKey = getMonthKey(curYear, curMonth);
+    const monthSchedule = s.monthDays && s.monthDays[monthKey];
+    let monthDays = s.days || [];
+    let changeDate = 1;
+    let isSpecial = false;
+    
+    if (monthSchedule && monthSchedule.days) {
+      monthDays = monthSchedule.days;
+      changeDate = monthSchedule.changeDate || 1;
+      isSpecial = true;
+    }
+    const monthDayStr = monthDays.map(d=>DAY_SHORT[d]).join(', ');
+    
+    return `<div class="student-row">
+      <div class="student-main">
+        <div class="student-dot" style="background:${s.color.dot}"></div>
+        <div class="student-name">${s.name}</div>
+        <div class="student-schedule">${dayStr} · ${s.fee.toLocaleString('vi-VN')}đ</div>
+        <div class="payment-badge ${isPaid?'paid':''}" onclick="switchTab('report'); setTimeout(()=>{document.getElementById('repSearch').value='${s.name}';renderReport();},50)">💰 ${statusLabel}</div>
+        <div class="student-actions">
+          <button class="act-btn edit" onclick="toggleEdit(${s.id})"><i class="ti ti-edit"></i> Sửa</button>
+          <button class="act-btn del" onclick="deleteStudent(${s.id})" title="Xóa học sinh"><i class="ti ti-trash"></i></button>
+        </div>
+      </div>
+      <div class="edit-panel" id="edit-${s.id}">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <div class="field"><label>Tên</label><input id="ename-${s.id}" value="${s.name.replace(/"/g, '&quot;')}"/></div>
+          <div class="field"><label>Học phí/buổi</label><input id="efee-${s.id}" type="number" value="${s.fee}"/></div>
+        </div>
+        <div class="field">Ngày học mặc định</div><div class="days-row" id="edays-${s.id}">${dayBtns}</div>
+        <div class="field"><label>Bắt đầu từ</label><input id="estart-${s.id}" type="date" value="${s.start||''}"/></div>
+        
+        <div class="field" style="margin-top:12px;border-top:1px solid var(--border);padding-top:12px;">
+          <label>📅 Lịch học tháng ${MONTHS[curMonth]} ${curYear} ${isSpecial ? `(thay đổi từ ngày ${changeDate})` : ''}</label>
+          <div class="month-schedule-edit">
+            <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:8px;">
+              <span style="font-size:13px;font-weight:600;color:var(--text2);">Ngày thay đổi:</span>
+              <input type="number" class="change-date-input" id="change-date-${s.id}-${curYear}-${curMonth}" 
+                     value="${changeDate}" min="1" max="31" />
+              <span style="font-size:12px;color:var(--text3);">(từ ngày này trở đi dùng lịch mới)</span>
+            </div>
+            <div class="days-row" id="ms-days-${s.id}-${curYear}-${curMonth}">
+              ${DAY_SHORT.map((lbl,i)=>`<button class="day-btn${monthDays.includes(i)?' active':''}" data-d="${i}" onclick="toggleEditDay(this)">${lbl}</button>`).join('')}
+            </div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px;">
+              <button class="small-btn btn-primary" onclick="updateMonthScheduleFromUI(${s.id}, ${curYear}, ${curMonth})" style="padding:4px 16px;font-size:12px;width:auto;">
+                <i class="ti ti-check"></i> Cập nhật tháng này
+              </button>
+              <button class="small-btn" onclick="applyMonthScheduleFromUI(${s.id}, ${curYear}, ${curMonth})" style="padding:4px 16px;font-size:12px;background:var(--accent-light);color:var(--accent-dark);width:auto;">
+                <i class="ti ti-arrow-forward-up"></i> Áp dụng từ tháng này về sau
+              </button>
+            </div>
+            <div style="font-size:11px;color:var(--text3);margin-top:6px;">
+              💡 "Cập nhật tháng này" chỉ ảnh hưởng đến tháng hiện tại.<br>
+              💡 "Áp dụng từ tháng này về sau" sẽ áp dụng cho tất cả các tháng từ hiện tại trở đi.<br>
+              💡 Ví dụ: từ ngày 1-10 học 2 buổi, từ ngày 11 trở đi học 3 buổi → chọn ngày thay đổi là 11.
+            </div>
+          </div>
+        </div>
+        
+        <div class="edit-btns"><button class="btn-save" onclick="saveEdit(${s.id})"><i class="ti ti-check"></i> Lưu</button><button class="btn-cancel" onclick="toggleEdit(${s.id})"><i class="ti ti-x"></i> Huỷ</button></div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function getSelectedDaysFromUI(studentId, year, month) {
+  const container = document.getElementById(`ms-days-${studentId}-${year}-${month}`);
+  if (!container) return [];
+  const days = [];
+  container.querySelectorAll('.day-btn.active').forEach(btn => {
+    days.push(parseInt(btn.dataset.d));
+  });
+  return days.sort((a, b) => a - b);
+}
+
+function getChangeDateFromUI(studentId, year, month) {
+  const input = document.getElementById(`change-date-${studentId}-${year}-${month}`);
+  if (!input) return 1;
+  const val = parseInt(input.value);
+  return (val && val > 0) ? val : 1;
+}
+
+function updateMonthScheduleFromUI(studentId, year, month) {
+  const newDays = getSelectedDaysFromUI(studentId, year, month);
+  if (!newDays.length) {
+    alert('Vui lòng chọn ít nhất 1 ngày học');
+    return;
+  }
+  
+  const changeDate = getChangeDateFromUI(studentId, year, month);
+  
+  const result = findStudentById(studentId);
+  if (!result) return;
+  const student = result.student;
+  
+  const monthKey = getMonthKey(year, month);
+  const currentSchedule = student.monthDays && student.monthDays[monthKey];
+  const currentDays = currentSchedule && currentSchedule.days ? currentSchedule.days : (student.days || []);
+  const currentChangeDate = currentSchedule && currentSchedule.changeDate ? currentSchedule.changeDate : 1;
+  
+  if (JSON.stringify(newDays.sort()) === JSON.stringify(currentDays.sort()) && changeDate === currentChangeDate) {
+    alert('Lịch học không thay đổi so với hiện tại');
+    return;
+  }
+  
+  if (confirm(`Cập nhật lịch học cho ${student.name} tháng ${MONTHS[month]} ${year} thành ${newDays.map(d=>DAY_SHORT[d]).join(', ')} (từ ngày ${changeDate})?`)) {
+    updateMonthSchedule(studentId, year, month, newDays, changeDate);
+    alert(`✅ Đã cập nhật lịch học cho ${student.name} tháng ${MONTHS[month]} ${year}`);
+  }
+}
+
+function applyMonthScheduleFromUI(studentId, year, month) {
+  const newDays = getSelectedDaysFromUI(studentId, year, month);
+  if (!newDays.length) {
+    alert('Vui lòng chọn ít nhất 1 ngày học');
+    return;
+  }
+  
+  const changeDate = getChangeDateFromUI(studentId, year, month);
+  
+  const result = findStudentById(studentId);
+  if (!result) return;
+  const student = result.student;
+  
+  if (confirm(`Áp dụng lịch học mới (${newDays.map(d=>DAY_SHORT[d]).join(', ')} từ ngày ${changeDate}) cho ${student.name} từ tháng ${MONTHS[month]} ${year} về sau?\n\n⚠️ Lưu ý: Các tháng đã có lịch riêng sẽ được giữ nguyên.`)) {
+    applyMonthScheduleFromNow(studentId, year, month, newDays, changeDate);
+  }
+}
+
+function renderCalendar() {
+  document.getElementById('calTitle').innerText = MONTHS[curMonth]+' · '+curYear;
+  const filter = document.getElementById('calSearch')?.value || '';
+  const visible = filter ? studentsArray.filter(s=>s.name.toLowerCase().includes(filter.toLowerCase())) : studentsArray;
+  const daysInMonth = new Date(curYear, curMonth+1, 0).getDate();
+  const firstDay = new Date(curYear, curMonth, 1).getDay();
+  let offset = (firstDay + 6) % 7;
+  const today = new Date(); const isNow = (today.getFullYear()===curYear && today.getMonth()===curMonth);
+  let html = '<div class="dh">T2</div><div class="dh">T3</div><div class="dh">T4</div><div class="dh">T5</div><div class="dh">T6</div><div class="dh">T7</div><div class="dh">CN</div>';
+  for(let i=0;i<offset;i++) html+='<div class="dc empty"></div>';
+  
+  for(let d=1;d<=daysInMonth;d++){
+    const date = new Date(curYear, curMonth, d);
+    let pills = '';
+    visible.forEach(s=>{
+      const sd = parseLocalDate(s.start);
+      const sessions = getSessionsWithChangeDate(s, curYear, curMonth);
+      if(date>=sd && sessions.includes(d)){
+        const key = getMonthKey(curYear, curMonth);
+        const isAbsent = s.absents && s.absents[key] && s.absents[key].includes(d);
+        
+        if (isAbsent) {
+          pills+=`<span class="sp" style="background:#EAE6E1; color:var(--text3); text-decoration: line-through; font-weight:normal; cursor:pointer;" 
+            onclick="toggleAbsent('${s.id}', ${curYear}, ${curMonth}, ${d})" 
+            title="Nhấp để khôi phục buổi học">
+            ${s.name} (Nghỉ)
+          </span>`;
+        } else {
+          const paid = getPaymentStatus(s, curYear, curMonth);
+          const icon = paid ? ' ✓' : ' ⏳';
+          // Kiểm tra xem ngày này thuộc lịch cũ hay mới
+          const details = getSessionDetails(s, curYear, curMonth);
+          const isNewSchedule = details.totalSessions.find(item => item.day === d && item.type === 'new');
+          const bgColor = isNewSchedule ? '#D4E8D4' : s.color.bg;
+          
+          pills+=`<span class="sp" style="background:${bgColor};color:${s.color.text}; font-weight:bold; cursor:pointer;" 
+            onclick="toggleAbsent('${s.id}', ${curYear}, ${curMonth}, ${d})">
+            <span>${s.name}${icon}</span>
+            <button class="btn-absent-del" onclick="event.stopPropagation(); toggleAbsent('${s.id}', ${curYear}, ${curMonth}, ${d})" title="Đánh dấu nghỉ buổi này">✕</button>
+          </span>`;
+        }
+      }
+    });
+    const todayClass = (isNow && d===today.getDate()) ? ' today' : '';
+    html+=`<div class="dc${todayClass}"><div class="dn">${d}</div>${pills}</div>`;
+  }
+  const rem = (7-((offset+daysInMonth)%7))%7;
+  for(let i=0;i<rem;i++) html+='<div class="dc empty"></div>';
+  document.getElementById('calGrid').innerHTML = html;
+  document.getElementById('calLegend').innerHTML = visible.map(s=>`<div class="legend-item"><div style="background:${s.color.dot}; width:12px;height:12px;border-radius:50%;display:inline-block;margin-right:6px;"></div> ${s.name}</div>`).join('');
+}
+
+function renderReport() {
+  const filter = document.getElementById('repSearch')?.value || '';
+  const visible = filter ? studentsArray.filter(s=>s.name.toLowerCase().includes(filter.toLowerCase())) : studentsArray;
+  const el = document.getElementById('reportContent');
+  if(!studentsArray.length){ el.innerHTML='<div class="empty-state">Chưa có dữ liệu</div>'; return; }
+  if(!visible.length){ el.innerHTML='<div class="empty-state">🔎 Không tìm thấy học sinh</div>'; return; }
+  let totalSum = 0;
+  let html='';
+  
+  visible.forEach(s=>{
+    const details = getSessionDetails(s, curYear, curMonth);
+    const totalSessions = details.count;
+    const feePlanned = totalSessions * s.fee;
+    
+    const prev = getPreviousMonthKey(curYear, curMonth);
+    const prevAbsentDays = (s.absents && s.absents[prev.key]) ? s.absents[prev.key] : [];
+    const countPrevAbsents = prevAbsentDays.length;
+    const refundAmount = countPrevAbsents * s.fee;
+    
+    const finalFeeTotal = Math.max(0, feePlanned - refundAmount);
+    totalSum += finalFeeTotal;
+    
+    const isPaid = getPaymentStatus(s, curYear, curMonth);
+    const currentMonthKey = getMonthKey(curYear, curMonth);
+    const currentMonthAbsents = (s.absents && s.absents[currentMonthKey]) ? s.absents[currentMonthKey] : [];
+    
+    const monthSchedule = s.monthDays && s.monthDays[currentMonthKey];
+    let displayDays = s.days || [];
+    let changeDate = 1;
+    let isSpecial = false;
+    let newDaysStr = '';
+    
+    if (monthSchedule && monthSchedule.days) {
+      displayDays = monthSchedule.days;
+      changeDate = monthSchedule.changeDate || 1;
+      isSpecial = true;
+      newDaysStr = displayDays.map(d=>DAY_SHORT[d]).join(', ');
+    }
+    const monthDayStr = displayDays.map(d=>DAY_SHORT[d]).join(', ');
+    
+    // Thông tin chi tiết số buổi học
+    let sessionInfo = '';
+    if (isSpecial && changeDate > 1) {
+      const oldSessions = details.oldSessions;
+      const newSessions = details.newSessions;
+      sessionInfo = `
+        <div style="font-size:13px;color:var(--text2);margin-top:4px;">
+          📊 Chi tiết: 
+          <span style="color:var(--text);font-weight:600;">${oldSessions.length} buổi</span> 
+          theo lịch cũ (${s.days.map(d=>DAY_SHORT[d]).join(', ')})
+          <span style="color:var(--accent-dark);font-weight:600;"> + ${newSessions.length} buổi</span> 
+          theo lịch mới (${newDaysStr})
+          <span style="color:var(--text3);font-size:12px;">(từ ngày ${changeDate})</span>
+          <span style="font-weight:700;color:var(--accent-dark);"> = ${totalSessions} buổi</span>
+        </div>
+      `;
+    } else if (isSpecial && changeDate === 1) {
+      sessionInfo = `
+        <div style="font-size:13px;color:var(--text2);margin-top:4px;">
+          📊 Lịch mới: ${displayDays.map(d=>DAY_SHORT[d]).join(', ')} (áp dụng từ đầu tháng) = ${totalSessions} buổi
+        </div>
+      `;
+    }
+
+    html+=`<div class="student-report">
+      <div class="rep-header">
+        <div style="width:14px;height:14px;border-radius:50%;background:${s.color.dot}"></div>
+        <span style="font-weight:800;font-size:17px;">${s.name}</span>
+        <span style="background:var(--bg);padding:3px 14px;border-radius:30px;font-size:12px;font-weight:600;">${monthDayStr}</span>
+        ${isSpecial ? `<span style="background:var(--accent-light);padding:2px 10px;border-radius:30px;font-size:11px;font-weight:600;color:var(--accent-dark);">📌 Thay đổi từ ngày ${changeDate}</span>` : ''}
+      </div>
+      
+      ${sessionInfo}
+      
+      <div class="stat-grid">
+        <div class="stat-box">
+          <div class="stat-label">Tổng số buổi học</div>
+          <div class="stat-val" style="font-size:16px; font-weight:700;">${totalSessions} buổi<br><span style="font-size:13px; color:var(--text2); font-weight:normal;">(${feePlanned.toLocaleString('vi-VN')}đ)</span></div>
+        </div>
+        <div class="stat-box" style="border-color: var(--unpaid-text);">
+          <div class="stat-label" style="color: var(--unpaid-text); font-weight:700;">Trừ tháng trước (${MONTHS[prev.month]})</div>
+          <div class="stat-val" style="font-size:16px; color: var(--unpaid-text); font-weight:700;">-${countPrevAbsents} buổi<br><span style="font-size:13px; font-weight:normal;">(-${refundAmount.toLocaleString('vi-VN')}đ)</span></div>
+        </div>
+        <div class="stat-box" style="background:${s.color.bg};">
+          <div class="stat-label" style="color:${s.color.text}; font-weight:700;">Thực thu tháng này</div>
+          <div class="stat-val" style="color:${s.color.text}; font-weight:800; font-size:20px;">${finalFeeTotal.toLocaleString('vi-VN')}đ</div>
+        </div>
+      </div>
+      
+      <div class="rep-days">📅 Các buổi học trong tháng: ${totalSessions ? details.totalSessions.map(item => item.day).join(', ') : 'Không có lịch'}</div>
+      <div class="rep-days" style="color: #A08060;">⚠️ Số buổi nghỉ tháng trước được trừ: ${countPrevAbsents > 0 ? prevAbsentDays.sort((a,b)=>a-b).map(d=>d+'/'+(prev.month+1)).join(', ') : 'Không có'}</div>
+      <div class="rep-days" style="color: var(--text3); font-style: italic; font-size:12px;">ℹ️ Trong tháng này học sinh đã nghỉ ${currentMonthAbsents.length} buổi (ngày ${currentMonthAbsents.join(', ')}), số buổi này sẽ tự động được gối đầu trừ vào học phí của tháng sau.</div>
+      
+      <div class="pay-status-row">
+        <button class="pay-status-btn ${isPaid?'paid':''}" onclick="togglePaymentStatus('${s.id}', ${curYear}, ${curMonth})">
+          <i class="ti ti-${isPaid?'check':'circle-x'}"></i> ${isPaid?'✅ Đã nộp học phí':'⏳ Chưa nộp học phí'}
+        </button>
+        <span style="font-size:13px; font-weight: 500;">✏️ Nhấp để cập nhật trạng thái đóng đầu tháng</span>
+      </div>
+    </div>`;
+  });
+  
+  if(visible.length) html+=`<div class="total-row"><span>📊 Tổng thực thu (${MONTHS[curMonth]}) · ${visible.length} học sinh</span><span style="font-size:24px;font-weight:800;">${totalSum.toLocaleString('vi-VN')}đ</span></div>`;
+  el.innerHTML = html;
+}
+
+function changeMonth(dir) { 
+  curMonth+=dir; 
+  if(curMonth>11){curMonth=0;curYear++;} 
+  if(curMonth<0){curMonth=11;curYear--;} 
+  renderCalendar(); 
+  renderReport(); 
+  renderStudentList();
+}
+
+function switchTab(name) {
+  document.getElementById('tab-students').style.display = name === 'students' ? '' : 'none';
+  document.getElementById('tab-calendar').style.display = name === 'calendar' ? '' : 'none';
+  document.getElementById('tab-report').style.display = name === 'report' ? '' : 'none';
+  document.getElementById('tab-invoice').style.display = name === 'invoice' ? '' : 'none';
+  document.querySelectorAll('.tab').forEach((b, i) => {
+    const tabNames = ['students', 'calendar', 'report', 'invoice'];
+    b.classList.toggle('active', tabNames[i] === name);
+  });
+  if (name === 'calendar') renderCalendar();
+  if (name === 'report') renderReport();
+  if (name === 'invoice') renderInvoiceStudents();
+}
+
+// ===== TẠO PHIẾU HỌC PHÍ =====
 function generateInvoice() {
   const selectedChecks = document.querySelectorAll('.invoice-student-check:checked');
   if (!selectedChecks.length) {
@@ -803,7 +1461,6 @@ function generateInvoice() {
   }
   
   const [year, month] = monthInput.split('-').map(Number);
-  // month từ input là 1-12, chuyển về 0-11
   const monthIndex = month - 1;
   const monthName = MONTHS[monthIndex] + ' ' + year;
   
@@ -811,7 +1468,10 @@ function generateInvoice() {
   selectedChecks.forEach(cb => {
     const id = cb.value;
     const result = findStudentById(id);
-    if (result) selectedStudents.push(result.student);
+    if (result) {
+      const studentCopy = { ...result.student };
+      selectedStudents.push(studentCopy);
+    }
   });
   
   if (!selectedStudents.length) {
@@ -835,58 +1495,80 @@ function generateInvoice() {
   let totalAmount = 0;
   
   selectedStudents.forEach(s => {
-    // ===== SỬA: Lấy các buổi học từ ngày bắt đầu trở đi =====
-    const allSessions = getSessionsInMonth(s, year, monthIndex);
-    const totalSessions = allSessions.length;
+    const details = getSessionDetails(s, year, monthIndex);
+    const totalSessions = details.count;
+    const feePlanned = totalSessions * s.fee;
     
-    // Lấy số buổi vắng từ tháng trước
     const prev = getPreviousMonthKey(year, monthIndex);
     const prevAbsents = (s.absents && s.absents[prev.key]) ? s.absents[prev.key] : [];
     const countPrevAbsents = prevAbsents.length;
     const refundAmount = countPrevAbsents * s.fee;
     
-    const finalFee = Math.max(0, totalSessions * s.fee - refundAmount);
+    const finalFee = Math.max(0, feePlanned - refundAmount);
     totalAmount += finalFee;
     
     const isPaid = getPaymentStatus(s, year, monthIndex);
     const paidText = isPaid ? '✅ Đã nộp' : '⏳ Chưa nộp';
     
-    // Tạo bảng lịch học (gộp tất cả ngày trong tuần từng áp dụng trong tháng, kể cả khi đổi lịch giữa chừng)
+    const monthKey = getMonthKey(year, monthIndex);
+    const monthSchedule = s.monthDays && s.monthDays[monthKey];
+    let displayDays = s.days || [];
+    let changeDate = 1;
+    let isSpecial = false;
+    let newDaysStr = '';
+    
+    if (monthSchedule && monthSchedule.days) {
+      displayDays = monthSchedule.days;
+      changeDate = monthSchedule.changeDate || 1;
+      isSpecial = true;
+      newDaysStr = displayDays.map(d=>DAY_SHORT[d]).join(', ');
+    }
+    
+    const studentDays = displayDays.sort((a, b) => a - b);
     const daysInMonth = new Date(year, monthIndex + 1, 0).getDate();
-    const studentDays = getDaysUnionForMonth(s, year, monthIndex);
     
-    // Xác định các ngày học thực tế trong tháng (có xét ngày bắt đầu)
-    const studyDays = new Set(allSessions);
-    
-    // Tạo header
+    // Tạo bảng lịch học chi tiết
     let tableHtml = `<table class="schedule-table">
       <thead>
         <tr>`;
     studentDays.forEach(day => {
       tableHtml += `<th>${DAY_SHORT[day]}</th>`;
     });
+    if (isSpecial && changeDate > 1) {
+      tableHtml += `<th style="background:#FFE4B5;color:#8B6914;">📌 Đổi lịch</th>`;
+    }
     tableHtml += `</tr></thead><tbody>`;
     
     // Tạo các hàng theo tuần
     let weeks = [];
     let currentWeek = {};
     
+    // Lấy danh sách các ngày học đã tính toán
+    const sessionDays = details.totalSessions;
+    const sessionDaySet = new Set(sessionDays.map(item => item.day));
+    
     for (let d = 1; d <= daysInMonth; d++) {
       const date = new Date(year, monthIndex, d);
       const dayOfWeek = date.getDay();
       
       if (studentDays.includes(dayOfWeek)) {
+        const isStudy = sessionDaySet.has(d);
         const isAbsent = prevAbsents.includes(d);
-        const isStudy = studyDays.has(d);
-        // Chỉ hiển thị ngày nếu nó là ngày học (tính từ ngày bắt đầu)
+        const isOldSchedule = sessionDays.find(item => item.day === d && item.type === 'old');
+        const isNewSchedule = sessionDays.find(item => item.day === d && item.type === 'new');
+        
         if (isStudy) {
-          currentWeek[dayOfWeek] = { day: d, isAbsent: isAbsent, isStudy: true };
+          currentWeek[dayOfWeek] = { 
+            day: d, 
+            isAbsent: isAbsent, 
+            isStudy: true,
+            type: isNewSchedule ? 'new' : (isOldSchedule ? 'old' : '')
+          };
         } else {
           currentWeek[dayOfWeek] = { day: d, isAbsent: false, isStudy: false };
         }
       }
       
-      // Kiểm tra xem đã đủ các ngày trong tuần chưa
       const allDaysInWeek = studentDays.every(day => currentWeek[day] !== undefined);
       if (allDaysInWeek) {
         weeks.push({ ...currentWeek });
@@ -904,8 +1586,9 @@ function generateInvoice() {
       }
     }
     
+    // Hiển thị các tuần
     if (weeks.length > 0) {
-      weeks.forEach((week) => {
+      weeks.forEach((week, weekIndex) => {
         tableHtml += `<tr>`;
         studentDays.forEach(day => {
           const data = week[day];
@@ -914,6 +1597,8 @@ function generateInvoice() {
               tableHtml += `<td class="empty-cell">-</td>`;
             } else if (data.isAbsent) {
               tableHtml += `<td class="absent-cell">${data.day}/${month}</td>`;
+            } else if (data.type === 'new') {
+              tableHtml += `<td class="study-cell" style="background:#D4E8D4;font-weight:700;">${data.day}/${month}</td>`;
             } else {
               tableHtml += `<td class="study-cell">${data.day}/${month}</td>`;
             }
@@ -921,26 +1606,54 @@ function generateInvoice() {
             tableHtml += `<td class="empty-cell">-</td>`;
           }
         });
+        // Thêm cột đánh dấu đổi lịch
+        if (isSpecial && changeDate > 1) {
+          const isChangeWeek = weekIndex === 0 ? false : true;
+          tableHtml += `<td style="background:#FFE4B5;color:#8B6914;font-size:11px;text-align:center;">${isChangeWeek ? '🔄' : ''}</td>`;
+        }
         tableHtml += `</tr>`;
       });
     } else {
-      tableHtml += `<tr><td colspan="${studentDays.length}" style="text-align:center;color:var(--text3);padding:12px;">Không có lịch học</td></tr>`;
+      const colspan = studentDays.length + (isSpecial && changeDate > 1 ? 1 : 0);
+      tableHtml += `<tr><td colspan="${colspan}" style="text-align:center;color:var(--text3);padding:12px;">Không có lịch học</td></tr>`;
     }
     tableHtml += `</tbody></table>`;
+    
+    // Thông tin chi tiết số buổi
+    let sessionDetailHtml = '';
+    if (isSpecial && changeDate > 1) {
+      const oldCount = details.oldCount;
+      const newCount = details.newCount;
+      const oldDaysStr = (s.days || []).map(d=>DAY_SHORT[d]).join(', ');
+      sessionDetailHtml = `
+        <div style="background:rgba(255,255,255,0.3);border-radius:8px;padding:8px 12px;margin-bottom:10px;border-left:3px solid var(--accent);">
+          <div style="font-size:13px;color:var(--text2);">
+            📊 <span style="font-weight:600;">${oldCount} buổi</span> theo lịch cũ (${oldDaysStr}) 
+            + <span style="font-weight:600;color:var(--accent-dark);">${newCount} buổi</span> theo lịch mới (${newDaysStr})
+            <span style="color:var(--text3);">(từ ngày ${changeDate})</span>
+            <span style="font-weight:700;color:var(--accent-dark);"> = ${totalSessions} buổi</span>
+          </div>
+        </div>
+      `;
+    }
     
     // Tạo danh sách ngày vắng
     const absentDaysStr = prevAbsents.length > 0
       ? prevAbsents.sort((a, b) => a - b).map(d => `${d}/${prev.month+1}`).join(', ')
       : 'Không có buổi vắng';
     
+    const changeInfo = isSpecial && changeDate > 1 ? `(thay đổi từ ngày ${changeDate})` : '';
+    
     html += `
       <div style="background:${s.color.bg};border-radius:12px;padding:16px 20px;margin-bottom:14px;border:1px solid var(--border);">
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap;">
           <span style="display:inline-block;width:14px;height:14px;border-radius:50%;background:${s.color.dot};"></span>
           <strong style="font-size:17px;">${s.name}</strong>
-          <span style="font-size:12px;background:var(--bg);padding:2px 14px;border-radius:20px;font-weight:600;">${studentDays.length ? studentDays.map(d=>DAY_SHORT[d]).join(', ') : 'Chưa có lịch'}</span>
+          <span style="font-size:12px;background:var(--bg);padding:2px 14px;border-radius:20px;font-weight:600;">${displayDays.map(d=>DAY_SHORT[d]).join(', ')} ${changeInfo}</span>
           <span style="font-size:12px;background:rgba(255,255,255,0.5);padding:2px 14px;border-radius:20px;font-weight:600;">${s.fee.toLocaleString('vi-VN')}đ/buổi</span>
         </div>
+        
+        ${sessionDetailHtml}
         
         <div style="background:rgba(255,255,255,0.5);border-radius:10px;padding:12px;margin-bottom:12px;">
           <div style="font-weight:700;color:var(--accent-dark);margin-bottom:8px;">Lịch học trong tháng:</div>
@@ -1042,7 +1755,6 @@ function printInvoice() {
       <style>
         body { font-family: 'Segoe UI', system-ui, sans-serif; padding: 40px; background: white; }
         * { box-sizing: border-box; }
-        .no-print { display: none; }
         @media print {
           body { padding: 20px; }
           button { display: none !important; }
@@ -1079,6 +1791,10 @@ function printInvoice() {
           background: #F5F5F5;
           color: #ccc;
         }
+        .schedule-table .old-schedule-cell {
+          background: #FFF8E7;
+          color: #8B7A5A;
+        }
       </style>
       </head>
       <body>
@@ -1090,467 +1806,6 @@ function printInvoice() {
     </html>
   `);
   win.document.close();
-}
-
-function toggleDay(btn) { 
-  btn.classList.toggle('active'); 
-  const d = parseInt(btn.dataset.d); 
-  if (selectedDays.includes(d)) {
-    selectedDays = selectedDays.filter(x=>x!==d); 
-  } else {
-    selectedDays.push(d); 
-  }
-}
-
-function addStudent() {
-  const name = document.getElementById('inp-name').value.trim();
-  const fee = parseInt(document.getElementById('inp-fee').value) || 135000;
-  const start = document.getElementById('inp-start').value;
-  
-  if (!name) { alert('Vui lòng nhập tên'); return; }
-  if (!selectedDays.length) { alert('Chọn ít nhất 1 ngày học'); return; }
-  
-  const newId = Date.now() + Math.floor(Math.random() * 10000);
-  const newStudent = { 
-    id: newId, 
-    name: name, 
-    fee: fee, 
-    days: [...selectedDays], 
-    start: start, 
-    payments: {}, 
-    absents: {}, 
-    scheduleHistory: [{ from: start, days: [...selectedDays] }],
-    color: getPastelColorSoft(newId) 
-  };
-  
-  students[newId] = newStudent;
-  updateStudentsArray();
-  
-  document.getElementById('inp-name').value = '';
-  selectedDays = [];
-  document.querySelectorAll('#dayBtns .day-btn').forEach(b=>b.classList.remove('active'));
-  
-  saveToFirebase();
-  renderStudentList();
-  renderCalendar();
-  renderReport();
-  renderInvoiceStudents();
-}
-
-function deleteStudent(id) { 
-  const result = findStudentById(id);
-  if (!result) {
-    console.error('❌ Không tìm thấy học sinh với ID:', id);
-    alert('Không tìm thấy học sinh!');
-    return;
-  }
-  
-  if(!confirm(`Xóa học sinh "${result.student.name}"?`)) return; 
-  delete students[result.key];
-  updateStudentsArray();
-  saveToFirebase();
-  renderStudentList();
-  renderCalendar();
-  renderReport();
-  renderInvoiceStudents();
-}
-
-function toggleEdit(id) { 
-  const panel = document.getElementById('edit-'+id); 
-  if (!panel) return;
-  const open = panel.classList.contains('open'); 
-  document.querySelectorAll('.edit-panel.open').forEach(p=>p.classList.remove('open')); 
-  if(!open) { panel.classList.add('open'); openEditId = id; } else { openEditId = null; }
-}
-
-function saveEdit(id) {
-  const result = findStudentById(id);
-  if (!result) { 
-    alert('Không tìm thấy học sinh!'); 
-    return; 
-  }
-  
-  const s = result.student;
-  const name = document.getElementById('ename-'+id).value.trim();
-  const fee = parseInt(document.getElementById('efee-'+id).value) || s.fee;
-  const start = document.getElementById('estart-'+id).value;
-  const days = []; 
-  document.querySelectorAll('#edays-'+id+' .day-btn.active').forEach(b=>days.push(parseInt(b.dataset.d)));
-  
-  if(!name){ alert('Tên không được trống'); return; }
-  if(!days.length){ alert('Chọn ngày học'); return; }
-  
-  s.name = name; 
-  s.fee = fee; 
-  s.start = start; 
-  s.days = days;
-
-  // Đồng bộ lịch gốc (mốc đầu tiên) trong lịch sử thay đổi lịch học
-  if (!Array.isArray(s.scheduleHistory) || !s.scheduleHistory.length) {
-    s.scheduleHistory = [{ from: start, days: days }];
-  } else {
-    const sorted = [...s.scheduleHistory].sort((a,b)=>parseLocalDate(a.from)-parseLocalDate(b.from));
-    sorted[0] = { from: start, days: days };
-    s.scheduleHistory = sorted;
-  }
-  
-  updateStudentsArray();
-  document.getElementById('edit-'+id).classList.remove('open');
-  openEditId = null;
-  saveToFirebase();
-  renderStudentList();
-  renderCalendar();
-  renderReport();
-  renderInvoiceStudents();
-}
-
-// ===== ĐỔI LỊCH HỌC GIỮA CHỪNG: áp dụng từ 1 ngày trở về sau, không ảnh hưởng các tháng trước =====
-function addScheduleChange(id) {
-  const result = findStudentById(id);
-  if (!result) { alert('Không tìm thấy học sinh!'); return; }
-  const s = result.student;
-
-  const fromDate = document.getElementById('newSchedFrom-'+id).value;
-  if (!fromDate) { alert('Vui lòng chọn ngày áp dụng lịch mới'); return; }
-
-  const days = [];
-  document.querySelectorAll('#newSchedDays-'+id+' .day-btn.active').forEach(b=>days.push(parseInt(b.dataset.d)));
-  if (!days.length) { alert('Chọn ít nhất 1 ngày học cho lịch mới'); return; }
-
-  if (!Array.isArray(s.scheduleHistory) || !s.scheduleHistory.length) {
-    s.scheduleHistory = [{ from: s.start, days: Array.isArray(s.days) ? s.days : [] }];
-  }
-  // Nếu đã có thay đổi áp dụng đúng ngày này thì ghi đè, tránh trùng lặp
-  s.scheduleHistory = s.scheduleHistory.filter(seg => seg.from !== fromDate);
-  s.scheduleHistory.push({ from: fromDate, days: days });
-  s.scheduleHistory.sort((a,b)=>parseLocalDate(a.from)-parseLocalDate(b.from));
-
-  updateStudentsArray();
-  saveToFirebase();
-  renderStudentList();
-  renderCalendar();
-  renderReport();
-  renderInvoiceStudents();
-
-  alert(`✅ Đã áp dụng lịch học mới (${days.map(d=>DAY_SHORT[d]).join(', ')}) từ ngày ${formatDMY(fromDate)} trở về sau. Các tháng tiếp theo sẽ tự động tính theo lịch này, không cần chỉnh tay từng tháng.`);
-}
-
-function deleteScheduleChange(id, fromDate) {
-  const result = findStudentById(id);
-  if (!result) { alert('Không tìm thấy học sinh!'); return; }
-  const s = result.student;
-
-  if (!Array.isArray(s.scheduleHistory) || s.scheduleHistory.length <= 1) {
-    alert('Không thể xoá lịch học duy nhất. Hãy sửa "Ngày học ban đầu" nếu muốn thay đổi.');
-    return;
-  }
-  if (!confirm(`Xoá thay đổi lịch học áp dụng từ ${formatDMY(fromDate)}?`)) return;
-
-  s.scheduleHistory = s.scheduleHistory.filter(seg => seg.from !== fromDate);
-  updateStudentsArray();
-  saveToFirebase();
-  renderStudentList();
-  renderCalendar();
-  renderReport();
-  renderInvoiceStudents();
-}
-
-function toggleEditDay(btn) { 
-  btn.classList.toggle('active'); 
-}
-
-function getMonthKey(y,m){ return `${y}-${String(m+1).padStart(2,'0')}`; }
-
-function togglePaymentStatus(studentId, year, month) {
-  console.log('💰 Toggle payment status - ID:', studentId);
-  
-  const result = findStudentById(studentId);
-  if (!result) { 
-    console.error('❌ Không tìm thấy học sinh với ID:', studentId);
-    alert('Không tìm thấy học sinh!'); 
-    return; 
-  }
-  
-  const student = result.student;
-  const key = getMonthKey(year, month);
-  if(!student.payments) student.payments={};
-  student.payments[key] = !(student.payments[key]||false);
-  
-  console.log('💰 Trạng thái mới của', student.name, ':', student.payments[key]);
-  
-  updateStudentsArray();
-  saveToFirebase();
-  renderStudentList();
-  renderCalendar();
-  renderReport();
-  renderInvoiceStudents();
-}
-
-function getPaymentStatus(student, year, month) { 
-  const key = getMonthKey(year, month); 
-  return !!(student.payments && student.payments[key]); 
-}
-
-function toggleAbsent(studentId, year, month, dateNum) {
-  console.log('📅 Toggle absent - ID:', studentId);
-  
-  const result = findStudentById(studentId);
-  if (!result) { 
-    console.error('❌ Không tìm thấy học sinh với ID:', studentId);
-    alert('Không tìm thấy học sinh!'); 
-    return; 
-  }
-  
-  const student = result.student;
-  const key = getMonthKey(year, month);
-  if(!student.absents) student.absents = {};
-  if(!student.absents[key]) student.absents[key] = [];
-
-  if(student.absents[key].includes(dateNum)) {
-    student.absents[key] = student.absents[key].filter(d => d !== dateNum);
-    console.log('📅 Đã bỏ nghỉ cho', student.name, 'ngày', dateNum);
-  } else {
-    if(confirm(`Xác nhận học sinh ${student.name} nghỉ ngày ${dateNum}/${month+1}? (Buổi này sẽ được gối đầu trừ tiền vào tháng tiếp theo)`)) {
-      student.absents[key].push(dateNum);
-      console.log('📅 Đã đánh dấu nghỉ cho', student.name, 'ngày', dateNum);
-    } else {
-      return;
-    }
-  }
-  
-  updateStudentsArray();
-  saveToFirebase();
-  renderCalendar();
-  renderReport();
-  renderInvoiceStudents();
-}
-
-function parseLocalDate(str) { 
-  if(!str) return new Date(0); 
-  const [y,m,d]=str.split('-').map(Number); 
-  return new Date(y,m-1,d); 
-}
-
-function getPlannedSessionsInMonth(student, year, month) {
-  // Sử dụng hàm getSessionsInMonth để đảm bảo tính nhất quán
-  return getSessionsInMonth(student, year, month);
-}
-
-function renderStudentList() {
-  const el = document.getElementById('studentList');
-  if(!studentsArray.length){ 
-    el.innerHTML='<div class="empty-state">🍃 Chưa có học sinh</div>'; 
-    return; 
-  }
-
-  // Lưu lại giá trị đang nhập dở ở form "Đổi lịch học" (nếu panel đang mở) để không bị mất khi render lại
-  let pendingNewSched = null;
-  if (openEditId !== null) {
-    const fromInput = document.getElementById('newSchedFrom-'+openEditId);
-    const daysContainer = document.getElementById('newSchedDays-'+openEditId);
-    if (fromInput || daysContainer) {
-      pendingNewSched = {
-        from: fromInput ? fromInput.value : '',
-        days: daysContainer ? Array.from(daysContainer.querySelectorAll('.day-btn.active')).map(b=>b.dataset.d) : []
-      };
-    }
-  }
-  
-  el.innerHTML = studentsArray.map(s=>{
-    const activeDaysNow = getScheduleForDate(s, new Date());
-    const dayStr = activeDaysNow.length ? activeDaysNow.map(d=>DAY_SHORT[d]).join(', ') : 'Chưa có lịch';
-    const dayBtns = DAY_SHORT.map((lbl,i)=>`<button class="day-btn${s.days.includes(i)?' active':''}" data-d="${i}" onclick="toggleEditDay(this)">${lbl}</button>`).join('');
-    const history = [...getScheduleHistoryOf(s)].sort((a,b)=>parseLocalDate(a.from)-parseLocalDate(b.from));
-    const scheduleHistoryHtml = history.map((seg, idx) => `
-      <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;background:var(--bg);padding:7px 12px;border-radius:14px;margin-bottom:6px;font-size:13px;border:1px solid var(--border);">
-        <span><strong>Từ ${formatDMY(seg.from)}:</strong> ${seg.days.length ? seg.days.map(d=>DAY_SHORT[d]).join(', ') : 'Không học'}</span>
-        ${idx > 0
-          ? `<button class="act-btn del" style="width:22px;height:22px;" onclick="deleteScheduleChange(${s.id}, '${seg.from}')" title="Xoá thay đổi này"><i class="ti ti-x"></i></button>`
-          : `<span style="font-size:11px;color:var(--text3);white-space:nowrap;">(lịch gốc)</span>`}
-      </div>`).join('');
-    const newSchedDayBtns = DAY_SHORT.map((lbl,i)=>`<button class="day-btn" data-d="${i}" onclick="toggleEditDay(this)">${lbl}</button>`).join('');
-    const isPaid = getPaymentStatus(s, curYear, curMonth);
-    const statusLabel = isPaid ? '✅ Đã nộp' : '⏳ Chưa nộp';
-    
-    return `<div class="student-row">
-      <div class="student-main">
-        <div class="student-dot" style="background:${s.color.dot}"></div>
-        <div class="student-name">${s.name}</div>
-        <div class="student-schedule">${dayStr} · ${s.fee.toLocaleString('vi-VN')}đ</div>
-        <div class="payment-badge ${isPaid?'paid':''}" onclick="switchTab('report'); setTimeout(()=>{document.getElementById('repSearch').value='${s.name}';renderReport();},50)">💰 ${statusLabel}</div>
-        <div class="student-actions">
-          <button class="act-btn edit" onclick="toggleEdit(${s.id})"><i class="ti ti-edit"></i> Sửa</button>
-          <button class="act-btn del" onclick="deleteStudent(${s.id})" title="Xóa học sinh"><i class="ti ti-trash"></i></button>
-        </div>
-      </div>
-      <div class="edit-panel" id="edit-${s.id}">
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-          <div class="field"><label>Tên</label><input id="ename-${s.id}" value="${s.name.replace(/"/g, '&quot;')}"/></div>
-          <div class="field"><label>Học phí/buổi</label><input id="efee-${s.id}" type="number" value="${s.fee}"/></div>
-        </div>
-        <div class="field">Ngày học ban đầu</div><div class="days-row" id="edays-${s.id}">${dayBtns}</div>
-        <div class="field"><label>Bắt đầu từ</label><input id="estart-${s.id}" type="date" value="${s.start||''}"/></div>
-        <div class="edit-btns"><button class="btn-save" onclick="saveEdit(${s.id})"><i class="ti ti-check"></i> Lưu</button><button class="btn-cancel" onclick="toggleEdit(${s.id})"><i class="ti ti-x"></i> Huỷ</button></div>
-
-        <div style="margin-top:18px;padding-top:14px;border-top:1.5px dashed var(--border);">
-          <div class="field" style="margin-bottom:8px;"><label>🔁 Lịch sử thay đổi lịch học</label></div>
-          ${scheduleHistoryHtml}
-          <div class="field" style="margin-top:12px;margin-bottom:4px;"><label>➕ Đổi lịch học, áp dụng từ ngày:</label><input type="date" id="newSchedFrom-${s.id}"/></div>
-          <div class="days-row" id="newSchedDays-${s.id}">${newSchedDayBtns}</div>
-          <button class="btn-save" style="margin-top:6px;" onclick="addScheduleChange(${s.id})"><i class="ti ti-refresh"></i> Áp dụng từ đây về sau với lịch học này</button>
-          <div style="font-size:12px;color:var(--text3);margin-top:6px;">ℹ️ Lịch mới sẽ tự động áp dụng cho ngày đã chọn trở về sau (kể cả các tháng tiếp theo), không ảnh hưởng các buổi học trước ngày đó.</div>
-        </div>
-      </div>
-    </div>`;
-  }).join('');
-
-  if (openEditId !== null) {
-    const panel = document.getElementById('edit-'+openEditId);
-    if (panel) panel.classList.add('open');
-    if (pendingNewSched) {
-      const fromInput = document.getElementById('newSchedFrom-'+openEditId);
-      if (fromInput && pendingNewSched.from) fromInput.value = pendingNewSched.from;
-      const daysContainer = document.getElementById('newSchedDays-'+openEditId);
-      if (daysContainer && pendingNewSched.days.length) {
-        daysContainer.querySelectorAll('.day-btn').forEach(b=>{
-          if (pendingNewSched.days.includes(b.dataset.d)) b.classList.add('active');
-        });
-      }
-    }
-  }
-}
-
-function renderCalendar() {
-  document.getElementById('calTitle').innerText = MONTHS[curMonth]+' · '+curYear;
-  const filter = document.getElementById('calSearch')?.value || '';
-  const visible = filter ? studentsArray.filter(s=>s.name.toLowerCase().includes(filter.toLowerCase())) : studentsArray;
-  const daysInMonth = new Date(curYear, curMonth+1, 0).getDate();
-  const firstDay = new Date(curYear, curMonth, 1).getDay();
-  let offset = (firstDay + 6) % 7;
-  const today = new Date(); const isNow = (today.getFullYear()===curYear && today.getMonth()===curMonth);
-  let html = '<div class="dh">T2</div><div class="dh">T3</div><div class="dh">T4</div><div class="dh">T5</div><div class="dh">T6</div><div class="dh">T7</div><div class="dh">CN</div>';
-  for(let i=0;i<offset;i++) html+='<div class="dc empty"></div>';
-  
-  for(let d=1;d<=daysInMonth;d++){
-    const date = new Date(curYear, curMonth, d);
-    let pills = '';
-    visible.forEach(s=>{
-      const activeDaysToday = getScheduleForDate(s, date);
-      if(activeDaysToday.includes(date.getDay())){
-        const key = getMonthKey(curYear, curMonth);
-        const isAbsent = s.absents && s.absents[key] && s.absents[key].includes(d);
-        
-        if (isAbsent) {
-          pills+=`<span class="sp" style="background:#EAE6E1; color:var(--text3); text-decoration: line-through; font-weight:normal; cursor:pointer;" 
-            onclick="toggleAbsent('${s.id}', ${curYear}, ${curMonth}, ${d})" 
-            title="Nhấp để khôi phục buổi học">
-            ${s.name} (Nghỉ)
-          </span>`;
-        } else {
-          const paid = getPaymentStatus(s, curYear, curMonth);
-          const icon = paid ? ' ✓' : ' ⏳';
-          pills+=`<span class="sp" style="background:${s.color.bg};color:${s.color.text}; font-weight:bold; cursor:pointer;" 
-            onclick="toggleAbsent('${s.id}', ${curYear}, ${curMonth}, ${d})">
-            <span>${s.name}${icon}</span>
-            <button class="btn-absent-del" onclick="event.stopPropagation(); toggleAbsent('${s.id}', ${curYear}, ${curMonth}, ${d})" title="Đánh dấu nghỉ buổi này">✕</button>
-          </span>`;
-        }
-      }
-    });
-    const todayClass = (isNow && d===today.getDate()) ? ' today' : '';
-    html+=`<div class="dc${todayClass}"><div class="dn">${d}</div>${pills}</div>`;
-  }
-  const rem = (7-((offset+daysInMonth)%7))%7;
-  for(let i=0;i<rem;i++) html+='<div class="dc empty"></div>';
-  document.getElementById('calGrid').innerHTML = html;
-  document.getElementById('calLegend').innerHTML = visible.map(s=>`<div class="legend-item"><div style="background:${s.color.dot}; width:12px;height:12px;border-radius:50%;display:inline-block;margin-right:6px;"></div> ${s.name}</div>`).join('');
-}
-
-function renderReport() {
-  const filter = document.getElementById('repSearch')?.value || '';
-  const visible = filter ? studentsArray.filter(s=>s.name.toLowerCase().includes(filter.toLowerCase())) : studentsArray;
-  const el = document.getElementById('reportContent');
-  if(!studentsArray.length){ el.innerHTML='<div class="empty-state">Chưa có dữ liệu</div>'; return; }
-  if(!visible.length){ el.innerHTML='<div class="empty-state">🔎 Không tìm thấy học sinh</div>'; return; }
-  let totalSum = 0;
-  let html='';
-  
-  visible.forEach(s=>{
-    const currentPlannedSessions = getSessionsInMonth(s, curYear, curMonth);
-    const feePlanned = currentPlannedSessions.length * s.fee;
-    const scheduleDaysThisMonth = getDaysUnionForMonth(s, curYear, curMonth);
-    
-    const prev = getPreviousMonthKey(curYear, curMonth);
-    const prevAbsentDays = (s.absents && s.absents[prev.key]) ? s.absents[prev.key] : [];
-    const countPrevAbsents = prevAbsentDays.length;
-    const refundAmount = countPrevAbsents * s.fee;
-    
-    const finalFeeTotal = Math.max(0, feePlanned - refundAmount);
-    totalSum += finalFeeTotal;
-    
-    const isPaid = getPaymentStatus(s, curYear, curMonth);
-    const currentMonthKey = getMonthKey(curYear, curMonth);
-    const currentMonthAbsents = (s.absents && s.absents[currentMonthKey]) ? s.absents[currentMonthKey] : [];
-
-    html+=`<div class="student-report">
-      <div class="rep-header">
-        <div style="width:14px;height:14px;border-radius:50%;background:${s.color.dot}"></div>
-        <span style="font-weight:800;font-size:17px;">${s.name}</span>
-        <span style="background:var(--bg);padding:3px 14px;border-radius:30px;font-size:12px;font-weight:600;">${scheduleDaysThisMonth.length ? scheduleDaysThisMonth.map(d=>DAY_SHORT[d]).join(', ') : 'Chưa có lịch'}</span>
-      </div>
-      
-      <div class="stat-grid">
-        <div class="stat-box">
-          <div class="stat-label">Dự tính tháng này</div>
-          <div class="stat-val" style="font-size:16px; font-weight:700;">${currentPlannedSessions.length} buổi<br><span style="font-size:13px; color:var(--text2); font-weight:normal;">(${feePlanned.toLocaleString('vi-VN')}đ)</span></div>
-        </div>
-        <div class="stat-box" style="border-color: var(--unpaid-text);">
-          <div class="stat-label" style="color: var(--unpaid-text); font-weight:700;">Trừ tháng trước (${MONTHS[prev.month]})</div>
-          <div class="stat-val" style="font-size:16px; color: var(--unpaid-text); font-weight:700;">-${countPrevAbsents} buổi<br><span style="font-size:13px; font-weight:normal;">(-${refundAmount.toLocaleString('vi-VN')}đ)</span></div>
-        </div>
-        <div class="stat-box" style="background:${s.color.bg};">
-          <div class="stat-label" style="color:${s.color.text}; font-weight:700;">Thực thu tháng này</div>
-          <div class="stat-val" style="color:${s.color.text}; font-weight:800; font-size:20px;">${finalFeeTotal.toLocaleString('vi-VN')}đ</div>
-        </div>
-      </div>
-      
-      <div class="rep-days">📅 Lịch học tháng này: ${currentPlannedSessions.length ? currentPlannedSessions.join(', ') : 'Không có lịch'}</div>
-      <div class="rep-days" style="color: #A08060;">⚠️ Số buổi nghỉ tháng trước được trừ: ${countPrevAbsents > 0 ? prevAbsentDays.sort((a,b)=>a-b).map(d=>d+'/'+(prev.month+1)).join(', ') : 'Không có'}</div>
-      <div class="rep-days" style="color: var(--text3); font-style: italic; font-size:12px;">ℹ️ Trong tháng này học sinh đã nghỉ ${currentMonthAbsents.length} buổi (ngày ${currentMonthAbsents.join(', ')}), số buổi này sẽ tự động được gối đầu trừ vào học phí của tháng sau.</div>
-      
-      <div class="pay-status-row">
-        <button class="pay-status-btn ${isPaid?'paid':''}" onclick="togglePaymentStatus('${s.id}', ${curYear}, ${curMonth})">
-          <i class="ti ti-${isPaid?'check':'circle-x'}"></i> ${isPaid?'✅ Đã nộp học phí':'⏳ Chưa nộp học phí'}
-        </button>
-        <span style="font-size:13px; font-weight: 500;">✏️ Nhấp để cập nhật trạng thái đóng đầu tháng</span>
-      </div>
-    </div>`;
-  });
-  
-  if(visible.length) html+=`<div class="total-row"><span>📊 Tổng thực thu (${MONTHS[curMonth]}) · ${visible.length} học sinh</span><span style="font-size:24px;font-weight:800;">${totalSum.toLocaleString('vi-VN')}đ</span></div>`;
-  el.innerHTML = html;
-}
-
-function changeMonth(dir) { 
-  curMonth+=dir; 
-  if(curMonth>11){curMonth=0;curYear++;} 
-  if(curMonth<0){curMonth=11;curYear--;} 
-  renderCalendar(); 
-  renderReport(); 
-}
-
-function switchTab(name) {
-  document.getElementById('tab-students').style.display = name === 'students' ? '' : 'none';
-  document.getElementById('tab-calendar').style.display = name === 'calendar' ? '' : 'none';
-  document.getElementById('tab-report').style.display = name === 'report' ? '' : 'none';
-  document.getElementById('tab-invoice').style.display = name === 'invoice' ? '' : 'none';
-  document.querySelectorAll('.tab').forEach((b, i) => {
-    const tabNames = ['students', 'calendar', 'report', 'invoice'];
-    b.classList.toggle('active', tabNames[i] === name);
-  });
-  if (name === 'calendar') renderCalendar();
-  if (name === 'report') renderReport();
-  if (name === 'invoice') renderInvoiceStudents();
 }
 
 console.log('🚀 App đã khởi động!');
