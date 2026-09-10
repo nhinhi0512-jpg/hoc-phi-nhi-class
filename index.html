@@ -1236,6 +1236,11 @@ function generateInvoice() {
     const countPrevAbsents = prevAbsents.length;
     const refundAmount = countPrevAbsents * s.fee;
     
+    // Lấy số buổi nghỉ trong tháng hiện tại (để trừ gối đầu tháng sau)
+    const currentMonthKey = getMonthKey(year, monthIndex);
+    const currentMonthAbsents = (s.absents && s.absents[currentMonthKey]) ? s.absents[currentMonthKey] : [];
+    const countCurrentAbsents = currentMonthAbsents.length;
+    
     const finalFee = Math.max(0, feePlanned - refundAmount);
     totalAmount += finalFee;
     
@@ -1277,7 +1282,7 @@ function generateInvoice() {
     });
     
     // Tạo bảng lịch học - hiển thị TẤT CẢ các ngày đã học trong tháng
-    let tableHtml = `<table class="schedule-table">
+    let tableHtml = `<table class="schedule-table" style="margin-top:4px;">
       <thead>
         <tr>`;
     sortedDaysOfWeek.forEach(day => {
@@ -1365,30 +1370,28 @@ function generateInvoice() {
       const oldCount = details.oldCount;
       const newCount = details.newCount;
       sessionDetailHtml = `
-        <div style="background:rgba(255,255,255,0.3);border-radius:8px;padding:8px 12px;margin-bottom:10px;border-left:3px solid var(--accent);">
-          <div style="font-size:13px;color:var(--text2);">
-            📊 <span style="font-weight:600;">${oldCount} buổi</span> theo lịch cũ (${oldDaysStr}) 
-            + <span style="font-weight:600;color:var(--accent-dark);">${newCount} buổi</span> theo lịch mới (${newDaysStr})
-            <span style="color:var(--text3);">(từ ngày ${changeDate})</span>
-            <span style="font-weight:700;color:var(--accent-dark);"> = ${totalSessions} buổi</span>
-          </div>
+        <div style="background:rgba(255,255,255,0.4);border-radius:6px;padding:6px 10px;margin-bottom:8px;border-left:3px solid var(--accent);font-size:12px;">
+          📊 <span style="font-weight:600;">${oldCount} buổi</span> lịch cũ (${oldDaysStr}) 
+          + <span style="font-weight:600;color:var(--accent-dark);">${newCount} buổi</span> lịch mới (${newDaysStr})
+          <span style="color:var(--text3);">(từ ngày ${changeDate})</span>
+          <span style="font-weight:700;color:var(--accent-dark);"> = ${totalSessions} buổi</span>
         </div>
       `;
     }
     
-    // Tạo danh sách ngày vắng
+    // Tạo danh sách ngày vắng tháng trước
     const absentDaysStr = prevAbsents.length > 0
       ? prevAbsents.sort((a, b) => a - b).map(d => `${d}/${prev.month+1}`).join(', ')
-      : 'Không có buổi vắng';
+      : 'Không có';
     
-    const changeInfo = isSpecial && changeDate > 1 ? `(thay đổi từ ngày ${changeDate})` : '';
-    
-    // Tạo chuỗi hiển thị các ngày đã học
-    const studyDaysStr = allStudyDays.sort((a,b) => a-b).join(', ');
-    
+    // Tạo danh sách ngày vắng tháng này
+    const currentAbsentDaysStr = currentMonthAbsents.length > 0
+      ? currentMonthAbsents.sort((a, b) => a - b).map(d => `${d}/${month}`).join(', ')
+      : 'Không có';
+      
     html += `
-      <div style="background:${s.color.bg};border-radius:12px;padding:16px 20px;margin-bottom:14px;border:1px solid var(--border);">
-        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap;">
+      <div style="background:${s.color.bg};border-radius:12px;padding:14px 16px;margin-bottom:12px;border:1px solid var(--border);">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap;">
           <span style="display:inline-block;width:14px;height:14px;border-radius:50%;background:${s.color.dot};"></span>
           <strong style="font-size:17px;">${s.name}</strong>
           <span style="font-size:12px;background:var(--bg);padding:2px 14px;border-radius:20px;font-weight:600;">${s.fee.toLocaleString('vi-VN')}đ/buổi</span>
@@ -1396,38 +1399,39 @@ function generateInvoice() {
         
         ${sessionDetailHtml}
         
-        <div style="background:rgba(255,255,255,0.5);border-radius:10px;padding:12px;margin-bottom:12px;">
-          <div style="font-weight:700;color:var(--accent-dark);margin-bottom:8px;">Lịch học trong tháng:</div>
+        <div style="background:rgba(255,255,255,0.5);border-radius:8px;padding:10px;margin-bottom:10px;">
+          <div style="font-weight:700;color:var(--accent-dark);margin-bottom:6px;font-size:13px;">Lịch học trong tháng:</div>
           ${tableHtml}
-          <div style="margin-top:8px;font-size:12px;color:var(--text3);">
-            📌 Các ngày đã học: ${studyDaysStr}
-            ${isSpecial && changeDate > 1 ? ` (${details.oldCount} buổi theo lịch cũ trước ngày ${changeDate}, ${details.newCount} buổi theo lịch mới từ ngày ${changeDate})` : ''}
+        </div>
+        
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:13px;margin-bottom:10px;">
+          <div style="background:rgba(255,255,255,0.4);border-radius:8px;padding:8px;border-left:3px solid var(--unpaid-text);">
+            <div style="font-weight:600;color:var(--unpaid-text);font-size:12px;">Vắng tháng trước (đã trừ)</div>
+            <div style="font-weight:700;font-size:14px;color:var(--unpaid-text);">${countPrevAbsents} buổi (${absentDaysStr})</div>
+            <div style="font-size:11px;color:var(--text3);">-${refundAmount.toLocaleString('vi-VN')}đ</div>
+          </div>
+          <div style="background:rgba(255,255,255,0.4);border-radius:8px;padding:8px;border-left:3px solid #FFB800;">
+            <div style="font-weight:600;color:#8B6F00;font-size:12px;">Vắng tháng này (gối đầu)</div>
+            <div style="font-weight:700;font-size:14px;color:#8B6F00;">${countCurrentAbsents} buổi (${currentAbsentDaysStr})</div>
+            <div style="font-size:11px;color:var(--text3);">Sẽ trừ vào tháng sau</div>
           </div>
         </div>
         
-        <div style="background:rgba(255,255,255,0.3);border-radius:10px;padding:10px;margin-bottom:12px;border-left:3px solid var(--unpaid-text);">
-          <div style="font-weight:700;color:var(--unpaid-text);margin-bottom:4px;">Ngày vắng (trừ tháng trước):</div>
-          <div style="font-size:14px;color:var(--unpaid-text);">
-            ${absentDaysStr}
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;font-size:13px;margin-top:4px;">
+          <div style="background:rgba(255,255,255,0.4);border-radius:8px;padding:6px;text-align:center;">
+            <div style="font-weight:600;color:var(--text2);font-size:12px;">Số buổi học</div>
+            <div style="font-weight:800;font-size:16px;">${totalSessions} buổi</div>
+            <div style="font-size:11px;color:var(--text3);">× ${s.fee.toLocaleString('vi-VN')}đ</div>
           </div>
-          <div style="font-size:12px;color:var(--text3);margin-top:4px;">Số buổi vắng: ${countPrevAbsents} buổi</div>
-        </div>
-        
-        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;font-size:14px;margin-top:6px;">
-          <div style="background:rgba(255,255,255,0.4);border-radius:8px;padding:8px;text-align:center;">
-            <div style="font-weight:600;color:var(--text2);">Số buổi học</div>
-            <div style="font-weight:800;font-size:18px;">${totalSessions} buổi</div>
-            <div style="font-size:12px;color:var(--text3);">× ${s.fee.toLocaleString('vi-VN')}đ</div>
+          <div style="background:rgba(255,255,255,0.4);border-radius:8px;padding:6px;text-align:center;">
+            <div style="font-weight:600;color:var(--unpaid-text);font-size:12px;">Trừ buổi vắng</div>
+            <div style="font-weight:800;font-size:16px;color:var(--unpaid-text);">-${countPrevAbsents} buổi</div>
+            <div style="font-size:11px;color:var(--text3);">-${refundAmount.toLocaleString('vi-VN')}đ</div>
           </div>
-          <div style="background:rgba(255,255,255,0.4);border-radius:8px;padding:8px;text-align:center;">
-            <div style="font-weight:600;color:var(--unpaid-text);">Trừ buổi vắng</div>
-            <div style="font-weight:800;font-size:18px;color:var(--unpaid-text);">-${countPrevAbsents} buổi</div>
-            <div style="font-size:12px;color:var(--text3);">-${refundAmount.toLocaleString('vi-VN')}đ</div>
-          </div>
-          <div style="background:${s.color.dot}20;border-radius:8px;padding:8px;text-align:center;border:2px solid ${s.color.dot};">
-            <div style="font-weight:600;color:var(--accent-dark);">Thành tiền</div>
-            <div style="font-weight:800;font-size:22px;color:var(--accent-dark);">${finalFee.toLocaleString('vi-VN')}đ</div>
-            <div style="font-size:12px;font-weight:700;color:${isPaid ? 'var(--paid-text)' : 'var(--unpaid-text)'};">${paidText}</div>
+          <div style="background:${s.color.dot}20;border-radius:8px;padding:6px;text-align:center;border:2px solid ${s.color.dot};">
+            <div style="font-weight:600;color:var(--accent-dark);font-size:12px;">Thành tiền</div>
+            <div style="font-weight:800;font-size:18px;color:var(--accent-dark);">${finalFee.toLocaleString('vi-VN')}đ</div>
+            <div style="font-size:11px;font-weight:700;color:${isPaid ? 'var(--paid-text)' : 'var(--unpaid-text)'};">${paidText}</div>
           </div>
         </div>
       </div>
@@ -1437,7 +1441,7 @@ function generateInvoice() {
   html += `
       </div>
       
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:20px;padding-top:16px;border-top:2px solid var(--border);margin-top:8px;">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:16px;padding-top:12px;border-top:2px solid var(--border);margin-top:4px;">
         <div>
           <div style="font-weight:800;font-size:20px;color:var(--accent-dark);">
             Tổng cộng: ${totalAmount.toLocaleString('vi-VN')}đ
@@ -1446,19 +1450,19 @@ function generateInvoice() {
         </div>
         
         ${qrImageData ? `
-          <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;background:var(--bg2);padding:12px 20px;border-radius:12px;">
+          <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:var(--bg2);padding:10px 16px;border-radius:12px;">
             <div style="text-align:center;">
-              <div style="font-size:12px;font-weight:600;color:var(--accent-dark);margin-bottom:6px;">Quét mã QR</div>
-              <img src="${qrImageData}" alt="Mã QR" style="width:80px;height:80px;border-radius:8px;border:2px solid var(--accent-light);background:white;padding:4px;" />
+              <div style="font-size:11px;font-weight:600;color:var(--accent-dark);margin-bottom:4px;">Quét mã QR</div>
+              <img src="${qrImageData}" alt="Mã QR" style="width:70px;height:70px;border-radius:6px;border:2px solid var(--accent-light);background:white;padding:2px;" />
             </div>
-            <div style="font-size:12px;color:var(--text2);line-height:1.8;">
+            <div style="font-size:11px;color:var(--text2);line-height:1.6;">
               <div><strong>Ngân hàng:</strong> ${bankName}</div>
               <div><strong>Số tài khoản:</strong> ${accountNumber}</div>
               <div><strong>Chủ tài khoản:</strong> ${accountHolder}</div>
             </div>
           </div>
         ` : `
-          <div style="font-size:13px;color:var(--text2);text-align:right;line-height:1.8;background:var(--bg2);padding:12px 20px;border-radius:12px;">
+          <div style="font-size:11px;color:var(--text2);text-align:right;line-height:1.6;background:var(--bg2);padding:10px 16px;border-radius:12px;">
             <div><strong>Ngân hàng:</strong> ${bankName}</div>
             <div><strong>Số tài khoản:</strong> ${accountNumber}</div>
             <div><strong>Chủ tài khoản:</strong> ${accountHolder}</div>
@@ -1466,15 +1470,15 @@ function generateInvoice() {
         `}
       </div>
       
-      <div style="margin-top:16px;padding-top:16px;border-top:1px dashed var(--border);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
-        <div style="font-size:12px;color:var(--text3);">
+      <div style="margin-top:12px;padding-top:12px;border-top:1px dashed var(--border);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
+        <div style="font-size:11px;color:var(--text3);">
           <i class="ti ti-info-circle"></i> Vui lòng kiểm tra kĩ thông tin trước khi chuyển khoản
         </div>
-        <div style="display:flex;gap:12px;">
-          <button onclick="printInvoice()" class="btn-primary" style="padding:8px 24px;font-size:13px;width:auto;">
+        <div style="display:flex;gap:10px;">
+          <button onclick="printInvoice()" class="btn-primary" style="padding:6px 20px;font-size:12px;width:auto;">
             <i class="ti ti-printer"></i> In phiếu
           </button>
-          <button onclick="document.getElementById('invoicePreview').innerHTML=''" class="btn-secondary" style="padding:8px 24px;font-size:13px;width:auto;">
+          <button onclick="document.getElementById('invoicePreview').innerHTML=''" class="btn-secondary" style="padding:6px 20px;font-size:12px;width:auto;">
             <i class="ti ti-x"></i> Đóng
           </button>
         </div>
