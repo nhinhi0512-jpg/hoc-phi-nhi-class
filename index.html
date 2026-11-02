@@ -341,6 +341,7 @@ function updateStudentsArray() {
     if (!s.monthDays) s.monthDays = {};
     if (!s.customDays) s.customDays = {}; 
     if (!s.scheduleHistory) s.scheduleHistory = {};
+    normalizeHistoryKeys(s);
     return s;
   });
 }
@@ -522,12 +523,28 @@ try {
 /* ============================================================
    LOGIC LẤY NGÀY HỌC CỦA THÁNG (CustomDays > MonthDays > Days gốc)
    ============================================================ */
-// Lịch cố định áp dụng cho 1 tháng: lấy mốc "đổi lịch từ tháng X" gần nhất <= tháng đó, nếu không có thì dùng lịch gốc
-function getBaseDays(student, monthKey) {
+// Mốc đổi lịch cố định theo NGÀY: scheduleHistory = { 'YYYY-MM-DD': [thứ...] } (áp dụng từ ngày đó trở đi)
+function normalizeHistoryKeys(student) {
+  const h = student.scheduleHistory;
+  if (!h) return;
+  Object.keys(h).forEach(k => {
+    if (k.length === 7) { if (!h[k + '-01']) h[k + '-01'] = h[k]; delete h[k]; } // tương thích mốc cũ theo tháng
+  });
+}
+
+function getBaseDaysForDate(student, year, month, d) {
+  const dateKey = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
   const hist = student.scheduleHistory || {};
-  const keys = Object.keys(hist).filter(k => k <= monthKey && Array.isArray(hist[k]) && hist[k].length).sort();
+  const keys = Object.keys(hist).filter(k => k.length === 10 && k <= dateKey && Array.isArray(hist[k]) && hist[k].length).sort();
   if (keys.length) return hist[keys[keys.length - 1]];
   return student.days || [];
+}
+
+// Lịch cố định của 1 tháng: atEnd=false -> tại ngày 1; atEnd=true -> tại ngày cuối tháng
+function getBaseDays(student, monthKey, atEnd) {
+  const [y, m] = monthKey.split('-').map(Number);
+  const d = atEnd ? new Date(y, m, 0).getDate() : 1;
+  return getBaseDaysForDate(student, y, m - 1, d);
 }
 
 function getSessionDetails(student, year, month) {
@@ -546,6 +563,8 @@ function getSessionDetails(student, year, month) {
   let hasChange = false;
   let newDays = defaultDays;
   let isCustom = false;
+  const baseAt = (d) => getBaseDaysForDate(student, year, month, d);
+  const sameDays = (x, y) => JSON.stringify(x.slice().sort()) === JSON.stringify(y.slice().sort());
   
   // Nếu có sửa tay từng ngày -> Áp dụng ngay
   if (custom) {
@@ -569,7 +588,7 @@ function getSessionDetails(student, year, month) {
       if (date >= startDate) {
         const dow = date.getDay();
         if (d < changeDate) {
-          if (defaultDays.includes(dow)) {
+          if (baseAt(d).includes(dow)) {
             oldScheduleSessions.push(d);
             totalSessions.push({ day: d, type: 'old' });
           }
@@ -584,11 +603,22 @@ function getSessionDetails(student, year, month) {
   }
   // Lịch mặc định
   else {
+    // Lịch cố định có thể đổi giữa tháng (mốc theo ngày)
+    let firstChangeDay = 0;
+    for (let d = 2; d <= daysInMonth; d++) {
+      if (!sameDays(baseAt(d), baseAt(d - 1))) { firstChangeDay = d; break; }
+    }
+    if (firstChangeDay) {
+      hasChange = true;
+      changeDate = firstChangeDay;
+      newDays = baseAt(daysInMonth);
+    }
     for (let d = 1; d <= daysInMonth; d++) {
       const date = new Date(year, month, d);
-      if (date >= startDate && defaultDays.includes(date.getDay())) {
-        oldScheduleSessions.push(d);
-        totalSessions.push({ day: d, type: 'old' });
+      if (date >= startDate && baseAt(d).includes(date.getDay())) {
+        const isNew = firstChangeDay && d >= firstChangeDay;
+        if (isNew) newScheduleSessions.push(d); else oldScheduleSessions.push(d);
+        totalSessions.push({ day: d, type: isNew ? 'new' : 'old' });
       }
     }
   }
@@ -750,25 +780,27 @@ function saveEdit(id) {
 function toggleEditDay(btn) { btn.classList.toggle('active'); }
 
 function fmtMonthKey(k) { const [y,m] = k.split('-'); return `${parseInt(m)}/${y}`; }
+function fmtDateKey(k) { const [y,m,d] = k.split('-'); return `${d}/${m}/${y}`; }
 
 function addScheduleHistory(id) {
   const result = findStudentById(id);
   if (!result) { alert('Không tìm thấy học sinh!'); return; }
   const s = result.student;
-  const monthKey = document.getElementById('hmonth-'+id).value; // YYYY-MM
+  const dateKey = document.getElementById('hmonth-'+id).value; // YYYY-MM-DD
+  const monthKey = dateKey ? dateKey.slice(0,7) : '';
   const days = [];
   document.querySelectorAll('#hdays-'+id+' .day-btn.active').forEach(b=>days.push(parseInt(b.dataset.d)));
-  if (!monthKey) { alert('Chọn tháng bắt đầu áp dụng lịch mới'); return; }
+  if (!dateKey) { alert('Chọn ngày bắt đầu áp dụng lịch mới'); return; }
   if (!days.length) { alert('Chọn ít nhất 1 ngày học trong tuần'); return; }
 
   const hasOverride = (s.monthDays && s.monthDays[monthKey]) || (s.customDays && s.customDays[monthKey]);
   if (hasOverride) {
-    if (!confirm(`Tháng ${fmtMonthKey(monthKey)} đang có lịch đổi riêng/sửa tay. Xóa chúng để áp dụng lịch mới?`)) return;
+    if (!confirm(`Tháng ${fmtMonthKey(monthKey)} đang có lịch đổi riêng/sửa tay (sẽ đè lên lịch cố định). Xóa chúng để áp dụng lịch mới?`)) return;
     if (s.monthDays) delete s.monthDays[monthKey];
     if (s.customDays) delete s.customDays[monthKey];
   }
   if (!s.scheduleHistory) s.scheduleHistory = {};
-  s.scheduleHistory[monthKey] = days;
+  s.scheduleHistory[dateKey] = days;
 
   updateStudentsArray();
   saveToFirebase();
@@ -776,11 +808,11 @@ function addScheduleHistory(id) {
   toggleEdit(id);
 }
 
-function removeScheduleHistory(id, monthKey) {
+function removeScheduleHistory(id, dateKey) {
   const result = findStudentById(id);
   if (!result) return;
-  if (!confirm(`Xóa mốc đổi lịch từ tháng ${fmtMonthKey(monthKey)}?`)) return;
-  if (result.student.scheduleHistory) delete result.student.scheduleHistory[monthKey];
+  if (!confirm(`Xóa mốc đổi lịch từ ngày ${fmtDateKey(dateKey)}?`)) return;
+  if (result.student.scheduleHistory) delete result.student.scheduleHistory[dateKey];
   updateStudentsArray();
   saveToFirebase();
   renderStudentList(); renderCalendar(); renderReport(); renderInvoiceStudents();
@@ -934,13 +966,13 @@ function renderStudentList() {
   
   el.innerHTML = studentsArray.map(s=>{
     const viewKey = getMonthKey(curYear, curMonth);
-    const baseDays = getBaseDays(s, viewKey);
+    const baseDays = getBaseDays(s, viewKey, true);
     const dayStr = baseDays.map(d=>DAY_SHORT[d]).join(', ');
     const histKeys = Object.keys(s.scheduleHistory || {}).sort();
     const histBadge = histKeys.length ? `<span class="weekly-badge" style="background:#7B9E8730;color:var(--accent-dark);">🔁 Có đổi lịch cố định</span>` : '';
     const histList = histKeys.length ? histKeys.map(k => `
       <div style="display:flex;align-items:center;gap:10px;font-size:13px;margin-top:6px;">
-        <span>🔁 Từ <strong>tháng ${fmtMonthKey(k)}</strong> trở đi: <strong>${s.scheduleHistory[k].map(d=>DAY_SHORT[d]).join(', ')}</strong></span>
+        <span>🔁 Từ <strong>ngày ${fmtDateKey(k)}</strong> trở đi: <strong>${s.scheduleHistory[k].map(d=>DAY_SHORT[d]).join(', ')}</strong></span>
         <button class="btn-secondary" onclick="removeScheduleHistory(${s.id}, '${k}')" style="padding:2px 12px;font-size:12px;">Xóa</button>
       </div>`).join('') : '<div style="font-size:12px;color:var(--text3);margin-top:6px;">Chưa có mốc đổi lịch nào.</div>';
     const histBtns = DAY_SHORT.map((lbl,i)=>`<button class="day-btn" data-d="${i}" onclick="toggleEditDay(this)">${lbl}</button>`).join('');
@@ -982,10 +1014,10 @@ function renderStudentList() {
         <div class="field"><label>Bắt đầu từ</label><input id="estart-${s.id}" type="date" value="${s.start||''}"/></div>
         
         <div class="field" style="margin-top:12px;border-top:1px solid var(--border);padding-top:12px;">
-          <label>🔁 Đổi lịch cố định từ tháng nào trở đi</label>
-          <div style="font-size:12px;color:var(--text3);">VD: học T2, T4 đến hết tháng 10, từ tháng 11 trở đi học T3, T5 → chọn tháng 11 + T3, T5 rồi bấm Áp dụng.</div>
+          <label>🔁 Đổi lịch cố định từ ngày nào trở đi</label>
+          <div style="font-size:12px;color:var(--text3);">VD: học T2, T4 đến hết 14/11, từ 15/11 trở đi học T3, T5 → chọn ngày 15/11 + T3, T5 rồi bấm Áp dụng. Chọn ngày 01 của tháng nếu đổi từ đầu tháng.</div>
           <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:8px;">
-            <input type="month" id="hmonth-${s.id}" value="${viewKey}" style="width:auto;"/>
+            <input type="date" id="hmonth-${s.id}" value="${viewKey}-01" style="width:auto;"/>
             <div class="days-row" id="hdays-${s.id}" style="margin:0;">${histBtns}</div>
             <button class="btn-primary" onclick="addScheduleHistory(${s.id})" style="padding:8px 18px;font-size:13px;"><i class="ti ti-plus"></i> Áp dụng</button>
           </div>
@@ -1129,7 +1161,7 @@ function renderReport() {
     const custom = s.customDays && s.customDays[currentMonthKey];
     const monthSchedule = s.monthDays && s.monthDays[currentMonthKey];
     
-    let displayDays = getBaseDays(s, currentMonthKey);
+    let displayDays = getBaseDays(s, currentMonthKey, true);
     let isCustomMode = false;
     let isSpecial = false;
     let changeDate = 1;
@@ -1143,7 +1175,10 @@ function renderReport() {
       isSpecial = true;
     }
     
-    const monthDayStr = displayDays.map(d=>DAY_SHORT[d]).join(', ');
+    const histChange = !isCustomMode && !isSpecial && details.hasChange;
+    const monthDayStr = histChange
+      ? details.oldDays.map(d=>DAY_SHORT[d]).join(', ') + ' → ' + details.newDays.map(d=>DAY_SHORT[d]).join(', ')
+      : displayDays.map(d=>DAY_SHORT[d]).join(', ');
     
     let sessionInfo = '';
     if (isCustomMode) {
@@ -1167,6 +1202,7 @@ function renderReport() {
         <span style="background:var(--bg);padding:3px 14px;border-radius:30px;font-size:12px;font-weight:600;">${monthDayStr}</span>
         ${isCustomMode ? `<span class="weekly-badge" style="background:#4A90B820;color:#4A90B8;">✏️ Sửa tay</span>` : ''}
         ${isSpecial ? `<span class="weekly-badge">📌 Thay đổi từ ngày ${changeDate}</span>` : ''}
+        ${histChange ? `<span class="weekly-badge" style="background:#7B9E8730;color:var(--accent-dark);">🔁 Đổi lịch cố định từ ngày ${details.changeDate}/${curMonth+1}</span>` : ''}
       </div>
       
       ${sessionInfo}
@@ -1295,7 +1331,7 @@ function generateInvoice() {
     
     const monthKey = getMonthKey(year, monthIndex);
     const custom = s.customDays && s.customDays[monthKey];
-    let displayDays = getBaseDays(s, monthKey);
+    let displayDays = getBaseDays(s, monthKey, true);
     
     if (custom) {
       displayDays = custom;
