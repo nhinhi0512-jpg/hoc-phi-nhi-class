@@ -88,6 +88,17 @@ button:active { transform: scale(0.97); }
 .sp:hover .btn-del { display: inline-flex; }
 .sp .btn-del:hover { background: #C28B77; color: white; }
 
+/* Menu khi bấm ✕: Nghỉ (trừ tiền tháng sau) hay Không học ngày này */
+.session-menu { display: none; position: fixed; z-index: 1200; width: 250px; background: var(--bg); border: 1px solid var(--border2); border-radius: 14px; box-shadow: 0 8px 22px rgba(0,0,0,0.2); padding: 8px; }
+.session-menu.open { display: block; }
+.sm-title { font-size: 12px; font-weight: 700; color: var(--text2); padding: 4px 8px 8px; border-bottom: 1px solid var(--border); margin-bottom: 6px; }
+.sm-item { width: 100%; display: flex; flex-direction: column; align-items: flex-start; gap: 2px; text-align: left; padding: 8px 10px; border: none; border-radius: 10px; background: transparent; font-size: 13px; margin-bottom: 2px; }
+.sm-item small { font-size: 11px; font-weight: 500; color: var(--text3); }
+.sm-item:hover { transform: none; }
+.sm-item.absent:hover { background: var(--unpaid-bg); color: var(--unpaid-text); }
+.sm-item.remove:hover { background: var(--bg2); color: var(--text); }
+.sm-item:hover small { color: inherit; opacity: 0.8; }
+
 /* Nút thêm học sinh vào ngày */
 .btn-add-student { display: none; width: 100%; padding: 4px; font-size: 11px; border-radius: 8px; border: 1px dashed var(--border2); color: var(--text2); justify-content: center; margin-top: 4px; cursor: pointer; background: transparent; }
 .btn-add-student:hover { background: var(--bg2); border-color: var(--accent); color: var(--accent-dark); }
@@ -246,7 +257,7 @@ button:active { transform: scale(0.97); }
         </div>
       </div>
       <div style="font-size:13px; color:var(--text3); margin-bottom:10px;">
-        💡 <strong>Mẹo:</strong> <strong>Kéo thả</strong> tên học sinh sang buổi Sáng/Chiều hoặc sang ngày khác (trên điện thoại: nhấn giữ tên rồi kéo). Đưa chuột vào một buổi và bấm <strong>+ Thêm</strong> để xếp lịch học bù / học thêm. Bấm dấu <strong>✕</strong> cạnh tên để xóa buổi đó.
+        💡 <strong>Mẹo:</strong> <strong>Kéo thả</strong> tên học sinh sang buổi Sáng/Chiều hoặc sang ngày khác (trên điện thoại: nhấn giữ tên rồi kéo). Đưa chuột vào một buổi và bấm <strong>+ Thêm</strong> để xếp lịch học bù / học thêm. Bấm dấu <strong>✕</strong> cạnh tên rồi chọn <strong>Nghỉ</strong> (vẫn hiện trên lịch, trừ tiền tháng sau) hoặc <strong>Không học ngày này</strong> (bỏ khỏi lịch, không tính tiền). Bấm vào buổi đang “Nghỉ” để khôi phục.
       </div>
       <div class="cal-grid" id="calGrid"></div>
       <div class="legend" id="calLegend"></div>
@@ -968,6 +979,58 @@ function removeSessionFromDate(studentId, year, month, dateNum) {
   renderInvoiceStudents();
 }
 
+// Bấm ✕ trên lịch -> chọn: Nghỉ (vẫn giữ trên lịch, trừ tiền tháng sau) hay Không học ngày này (bỏ khỏi lịch)
+function openSessionMenu(btn, studentId, year, month, dateNum) {
+  const result = findStudentById(studentId);
+  if (!result) return;
+  let menu = document.getElementById('sessionMenu');
+  if (!menu) {
+    menu = document.createElement('div');
+    menu.id = 'sessionMenu';
+    menu.className = 'session-menu';
+    document.body.appendChild(menu);
+  }
+  menu.innerHTML = `
+    <div class="sm-title">${result.student.name} · ngày ${dateNum}/${month + 1}</div>
+    <button class="sm-item absent" onclick="markAbsent('${studentId}', ${year}, ${month}, ${dateNum})">
+      <span>🤒 Học sinh nghỉ</span>
+      <small>Vẫn hiện trên lịch, trừ tiền vào tháng sau</small>
+    </button>
+    <button class="sm-item remove" onclick="closeSessionMenu(); removeSessionFromDate('${studentId}', ${year}, ${month}, ${dateNum})">
+      <span>🗓 Không học ngày này</span>
+      <small>Bỏ khỏi lịch, không tính tiền (học buổi khác)</small>
+    </button>`;
+  menu.classList.add('open');
+  const r = btn.getBoundingClientRect();
+  const w = menu.offsetWidth, h = menu.offsetHeight;
+  const left = Math.max(8, Math.min(r.left, window.innerWidth - w - 8));
+  const top = (r.bottom + 6 + h > window.innerHeight) ? Math.max(8, r.top - h - 6) : r.bottom + 6;
+  menu.style.left = left + 'px';
+  menu.style.top = top + 'px';
+}
+
+function closeSessionMenu() {
+  const menu = document.getElementById('sessionMenu');
+  if (menu) menu.classList.remove('open');
+}
+
+function markAbsent(studentId, year, month, dateNum) {
+  closeSessionMenu();
+  const result = findStudentById(studentId);
+  if (!result) return;
+  const student = result.student;
+  const key = getMonthKey(year, month);
+  if (!student.absents) student.absents = {};
+  if (!student.absents[key]) student.absents[key] = [];
+  if (!student.absents[key].includes(dateNum)) student.absents[key].push(dateNum);
+  refreshAfterScheduleChange();
+}
+
+document.addEventListener('click', e => {
+  if (!e.target.closest('.session-menu') && !e.target.closest('.btn-del')) closeSessionMenu();
+});
+window.addEventListener('scroll', closeSessionMenu, true);
+
 function resetCustomDays(studentId, year, month) {
   const result = findStudentById(studentId);
   if (!result) return;
@@ -1115,9 +1178,9 @@ function renderCalendar() {
           const paid = getPaymentStatus(s, curYear, curMonth);
           const icon = paid ? ' ✓' : ' ⏳';
           slotPills[slot]+=`<span class="sp" data-sid="${s.id}" data-day="${d}" style="background:${s.color.bg};color:${s.color.text}; font-weight:bold;"
-            title="Kéo thả để đổi buổi / đổi ngày · Bấm ✕ để xóa buổi này">
+            title="Kéo thả để đổi buổi / đổi ngày · Bấm ✕ để báo nghỉ hoặc bỏ buổi này">
             <span>${s.name}${icon}</span>
-            <button class="btn-del" onclick="event.stopPropagation(); removeSessionFromDate('${s.id}', ${curYear}, ${curMonth}, ${d})" title="Xóa buổi này">✕</button>
+            <button class="btn-del" onclick="event.stopPropagation(); openSessionMenu(this, '${s.id}', ${curYear}, ${curMonth}, ${d})" title="Nghỉ / Không học ngày này">✕</button>
           </span>`;
         }
       }
