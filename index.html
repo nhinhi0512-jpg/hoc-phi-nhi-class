@@ -1299,17 +1299,33 @@ function generateInvoice() {
   const accountHolder = document.getElementById('accountHolderDisplay').textContent || 'Phan Thị Quỳnh Nhi';
   
   let html = `
-    <div style="background:white;border-radius:20px;padding:24px;border:2px solid var(--accent-light);max-width:950px;margin:0 auto;">
-      <div style="text-align:center;border-bottom:2px dashed var(--border);padding-bottom:16px;margin-bottom:16px;">
-        <h2 style="color:var(--accent-dark);"><i class="ti ti-leaf"></i> PHIẾU HỌC PHÍ</h2>
-        <p style="color:var(--text2);font-weight:500;">${monthName}</p>
-        <p style="color:var(--text3);font-size:13px;">Ms. Nhi's English class</p>
+    <style>
+      .schedule-compact { font-size: 12px; margin-top: 0; table-layout: fixed; }
+      .schedule-compact th { width: 38px; padding: 3px 4px; }
+      .schedule-compact td { padding: 3px 4px; }
+      .fee-lines { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 14px; }
+      .fee-lines td { padding: 4px 2px; border-bottom: 1px dashed rgba(120,100,85,0.25); vertical-align: top; }
+      .fee-lines td:nth-child(2) { color: #928B82; font-size: 11px; }
+      .fee-lines td:last-child { text-align: right; font-weight: 700; white-space: nowrap; }
+      .fee-lines .fee-total td { border-bottom: none; padding-top: 6px; font-size: 15px; font-weight: 800; color: #5E7D68; }
+      .student-divider { display: flex; align-items: center; gap: 8px; margin: 8px 0; color: #928B82; font-size: 12px; }
+      .student-divider::before, .student-divider::after { content: ''; flex: 1; border-top: 1.5px dashed rgba(100,80,65,0.4); }
+      .invoice-student, .invoice-footer { break-inside: avoid; page-break-inside: avoid; }
+      @media (max-width: 600px) { .invoice-student-body { grid-template-columns: 1fr !important; } .fee-lines { margin-top: 4px; } }
+    </style>
+    <div class="invoice-sheet" style="background:white;color:#2C2A29;border-radius:16px;padding:18px 20px;border:2px solid var(--accent-light);max-width:950px;margin:0 auto;">
+      <div style="display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:6px;border-bottom:2px solid var(--accent-dark);padding-bottom:8px;margin-bottom:12px;">
+        <div>
+          <h2 style="color:var(--accent-dark);font-size:20px;margin:0;"><i class="ti ti-leaf"></i> PHIẾU HỌC PHÍ</h2>
+          <div style="color:var(--text3);font-size:12px;">Ms. Nhi's English class</div>
+        </div>
+        <div style="color:var(--text2);font-weight:700;font-size:15px;">${monthName}</div>
       </div>
   `;
-  
+
   let totalAmount = 0;
-  
-  selectedStudents.forEach(s => {
+
+  selectedStudents.forEach((s, idx) => {
     const details = getSessionDetails(s, year, monthIndex);
     const totalSessions = details.count;
     const feePlanned = totalSessions * s.fee;
@@ -1354,13 +1370,7 @@ function generateInvoice() {
       return a - b;
     });
     
-    let tableHtml = `<table class="schedule-table" style="margin-top:4px;">
-      <thead>
-        <tr>`;
-    sortedDaysOfWeek.forEach(day => {
-      tableHtml += `<th>${DAY_SHORT[day]}</th>`;
-    });
-    tableHtml += `</tr></thead><tbody>`;
+    let tableHtml = `<table class="schedule-table schedule-compact"><tbody>`;
     
     let weeks = [];
     let currentWeek = {};
@@ -1397,9 +1407,10 @@ function generateInvoice() {
     }
     
     if (weeks.length > 0) {
-      weeks.forEach((week) => {
-        tableHtml += `<tr>`;
-        sortedDaysOfWeek.forEach(day => {
+      // Mỗi thứ trong tuần là một dòng, các tuần xếp theo cột cho gọn chiều dọc
+      sortedDaysOfWeek.forEach(day => {
+        tableHtml += `<tr><th>${DAY_SHORT[day]}</th>`;
+        weeks.forEach(week => {
           const data = week[day];
           if (data) {
             if (!data.isStudy) tableHtml += `<td class="empty-cell">-</td>`;
@@ -1413,7 +1424,7 @@ function generateInvoice() {
         tableHtml += `</tr>`;
       });
     } else {
-      tableHtml += `<tr><td colspan="${sortedDaysOfWeek.length || 1}" style="text-align:center;color:var(--text3);padding:12px;">Không có lịch học</td></tr>`;
+      tableHtml += `<tr><td style="text-align:center;color:var(--text3);padding:8px;">Không có lịch học</td></tr>`;
     }
     tableHtml += `</tbody></table>`;
     
@@ -1422,56 +1433,47 @@ function generateInvoice() {
       : 'Không có';
       
     html += `
-      <div style="background:${s.color.bg};border-radius:12px;padding:14px 16px;margin-bottom:12px;border:1px solid var(--border);">
-        <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap;">
-          <span style="display:inline-block;width:14px;height:14px;border-radius:50%;background:${s.color.dot};"></span>
-          <strong style="font-size:17px;">${s.name}</strong>
-          <span style="font-size:12px;background:var(--bg);padding:2px 14px;border-radius:20px;font-weight:600;">${s.fee.toLocaleString('vi-VN')}đ/buổi</span>
+      ${idx > 0 ? `<div class="student-divider"><span>✂</span></div>` : ''}
+      <div class="invoice-student" style="border:1.5px solid ${s.color.dot};border-left:6px solid ${s.color.dot};border-radius:10px;overflow:hidden;">
+        <div style="display:flex;align-items:center;gap:8px;padding:6px 12px;background:${s.color.bg};border-bottom:1px solid ${s.color.dot}55;flex-wrap:wrap;">
+          <span style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:${s.color.dot};color:white;font-size:12px;font-weight:800;">${idx + 1}</span>
+          <strong style="font-size:16px;">${s.name}</strong>
+          <span style="font-size:11px;background:white;padding:1px 10px;border-radius:20px;font-weight:600;">${s.fee.toLocaleString('vi-VN')}đ/buổi</span>
+                    ${isPaid ? `<span style="margin-left:auto;font-size:11px;font-weight:700;color:var(--paid-text);">${paidText}</span>` : ''}
         </div>
-        
-        <div style="background:rgba(255,255,255,0.5);border-radius:8px;padding:10px;margin-bottom:10px;">
-          <div style="font-weight:700;color:var(--accent-dark);margin-bottom:6px;font-size:13px;">Lịch học trong tháng:</div>
-          ${tableHtml}
-        </div>
-        
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:13px;margin-bottom:10px;">
-          <div style="background:rgba(255,255,255,0.4);border-radius:8px;padding:8px;border-left:3px solid var(--unpaid-text);">
-            <div style="font-weight:600;color:var(--unpaid-text);font-size:12px;">Vắng tháng trước (đã trừ)</div>
-            <div style="font-weight:700;font-size:14px;color:var(--unpaid-text);">${countPrevAbsents} buổi (${absentDaysStr})</div>
-            <div style="font-size:11px;color:var(--text3);">-${refundAmount.toLocaleString('vi-VN')}đ</div>
+
+        <div class="invoice-student-body" style="display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:12px;padding:8px 12px;align-items:start;">
+          <div>
+            <div style="font-weight:700;color:var(--accent-dark);margin-bottom:3px;font-size:11px;text-transform:uppercase;letter-spacing:0.03em;">Lịch học trong tháng</div>
+            ${tableHtml}
+            <div style="font-size:11px;color:#8B6F00;margin-top:4px;">
+              Vắng tháng này (gối đầu): <strong>${countCurrentAbsents} buổi</strong> — sẽ trừ vào tháng sau
+            </div>
           </div>
-          <div style="background:rgba(255,255,255,0.4);border-radius:8px;padding:8px;border-left:3px solid #FFB800;">
-            <div style="font-weight:600;color:#8B6F00;font-size:12px;">Vắng tháng này (gối đầu)</div>
-            <div style="font-weight:700;font-size:14px;color:#8B6F00;">${countCurrentAbsents} buổi</div>
-            <div style="font-size:11px;color:var(--text3);">Sẽ trừ vào tháng sau</div>
-          </div>
-        </div>
-        
-        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;font-size:13px;margin-top:4px;">
-          <div style="background:rgba(255,255,255,0.4);border-radius:8px;padding:6px;text-align:center;">
-            <div style="font-weight:600;color:var(--text2);font-size:12px;">Số buổi học</div>
-            <div style="font-weight:800;font-size:16px;">${totalSessions} buổi</div>
-            <div style="font-size:11px;color:var(--text3);">× ${s.fee.toLocaleString('vi-VN')}đ</div>
-          </div>
-          <div style="background:rgba(255,255,255,0.4);border-radius:8px;padding:6px;text-align:center;">
-            <div style="font-weight:600;color:var(--unpaid-text);font-size:12px;">Trừ buổi vắng</div>
-            <div style="font-weight:800;font-size:16px;color:var(--unpaid-text);">-${countPrevAbsents} buổi</div>
-            <div style="font-size:11px;color:var(--text3);">-${refundAmount.toLocaleString('vi-VN')}đ</div>
-          </div>
-          <div style="background:${s.color.dot}20;border-radius:8px;padding:6px;text-align:center;border:2px solid ${s.color.dot};">
-            <div style="font-weight:600;color:var(--accent-dark);font-size:12px;">Thành tiền</div>
-            <div style="font-weight:800;font-size:18px;color:var(--accent-dark);">${finalFee.toLocaleString('vi-VN')}đ</div>
-            <div style="font-size:11px;font-weight:700;color:${isPaid ? 'var(--paid-text)' : 'var(--unpaid-text)'};">${paidText}</div>
-          </div>
+
+          <table class="fee-lines">
+            <tr>
+              <td>Số buổi học</td>
+              <td>${totalSessions} × ${s.fee.toLocaleString('vi-VN')}đ</td>
+              <td>${feePlanned.toLocaleString('vi-VN')}đ</td>
+            </tr>
+            <tr style="color:var(--unpaid-text);">
+              <td>Trừ vắng tháng trước</td>
+              <td>${countPrevAbsents} buổi${countPrevAbsents ? ` (${absentDaysStr})` : ''}</td>
+              <td>-${refundAmount.toLocaleString('vi-VN')}đ</td>
+            </tr>
+            <tr class="fee-total" style="border-top:1.5px solid ${s.color.dot};">
+              <td colspan="2">Thành tiền</td>
+              <td>${finalFee.toLocaleString('vi-VN')}đ</td>
+            </tr>
+          </table>
         </div>
       </div>
     `;
   });
-  
+
   html += `
-      </div>
-      
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:16px;padding-top:12px;border-top:2px solid var(--border);margin-top:4px;">
+      <div class="invoice-footer" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;padding-top:10px;border-top:2px solid var(--accent-dark);margin-top:12px;">
         <div>
           <div style="font-weight:800;font-size:20px;color:var(--accent-dark);">
             Tổng cộng: ${totalAmount.toLocaleString('vi-VN')}đ
@@ -1500,7 +1502,7 @@ function generateInvoice() {
         `}
       </div>
       
-      <div style="margin-top:12px;padding-top:12px;border-top:1px dashed var(--border);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
+      <div class="invoice-actions" style="margin-top:10px;padding-top:10px;border-top:1px dashed var(--border);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
         <div style="font-size:11px;color:var(--text3);">
           <i class="ti ti-info-circle"></i> Vui lòng kiểm tra kĩ thông tin trước khi chuyển khoản
         </div>
@@ -1532,16 +1534,25 @@ function printInvoice() {
       <head><title>Phiếu học phí - Nhi's Class</title>
       <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.0.0/tabler-icons.min.css" />
       <style>
-        body { font-family: 'Segoe UI', system-ui, sans-serif; padding: 40px; background: white; }
-        * { box-sizing: border-box; }
-        @media print {
-          body { padding: 20px; }
-          button { display: none !important; }
-          .btn-primary, .btn-secondary { display: none !important; }
+        :root {
+          --bg: #F4F2EF; --bg2: #EAE6E1; --bg3: #DDD8D1;
+          --text: #2C2A29; --text2: #6F6A64; --text3: #928B82;
+          --border: rgba(120,100,85,0.25); --border2: rgba(100,80,65,0.4);
+          --accent: #7B9E87; --accent-dark: #5E7D68; --accent-light: #C2D5C8;
+          --paid-bg: #BED3C3; --paid-text: #2C5A3E;
+          --unpaid-bg: #F0D9CF; --unpaid-text: #B16148;
         }
-        .schedule-table { width: 100%; border-collapse: collapse; font-size: 14px; margin-top: 8px; }
-        .schedule-table th { background: #C2D5C8; color: #5E7D68; padding: 6px 10px; border: 1px solid #ccc; text-align: center; font-weight: 700; }
-        .schedule-table td { padding: 6px 10px; border: 1px solid #ccc; text-align: center; }
+        body { font-family: 'Segoe UI', system-ui, sans-serif; padding: 20px; margin: 0; background: white; color: #2C2A29; }
+        * { box-sizing: border-box; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        @page { size: A4; margin: 10mm; }
+        @media print {
+          body { padding: 0; }
+          .invoice-sheet { border: none !important; padding: 0 !important; max-width: none !important; }
+          .invoice-actions, button { display: none !important; }
+        }
+        .schedule-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+        .schedule-table th { background: #C2D5C8; color: #5E7D68; padding: 3px 4px; border: 1px solid #ccc; text-align: center; font-weight: 700; }
+        .schedule-table td { padding: 3px 4px; border: 1px solid #ccc; text-align: center; }
         .schedule-table .absent-cell { background: #F0D9CF; color: #B16148; }
         .schedule-table .study-cell { background: #E8F0E8; color: #2C5A3E; }
         .schedule-table .new-schedule-cell { background: #D4E8D4; color: #2C5A3E; font-weight: 700; }
