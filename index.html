@@ -101,6 +101,31 @@ button:active { transform: scale(0.97); }
 .dd-item.disabled { opacity: 0.5; cursor: not-allowed; background: #f0f0f0; }
 .dd-dot { width: 10px; height: 10px; border-radius: 50%; }
 
+/* Chia buổi Sáng / Chiều trong mỗi ngày + kéo thả */
+.dc { min-height: 0; }
+.dc .dn { margin-bottom: 4px; }
+.slot { border-radius: 10px; padding: 4px; min-height: 44px; margin-bottom: 4px; transition: background 0.15s, outline-color 0.15s; outline: 2px dashed transparent; outline-offset: -2px; }
+.slot-am { background: rgba(232, 190, 110, 0.13); }
+.slot-pm { background: rgba(112, 140, 163, 0.12); }
+.slot-label { font-size: 10px; font-weight: 800; color: var(--text3); text-transform: uppercase; letter-spacing: 0.04em; margin: 0 0 3px 2px; display: flex; align-items: center; gap: 3px; }
+.slot-label i { font-size: 12px; }
+.slot .sp { margin-bottom: 3px; }
+.slot.drop-target { outline-color: var(--accent); background: var(--accent-light); }
+.sp[data-sid] { cursor: grab; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; touch-action: manipulation; }
+.sp.dragging { opacity: 0.35; }
+.drag-ghost { position: fixed; pointer-events: none; z-index: 1000; transform: translate(-50%, -60%) rotate(-3deg); box-shadow: 0 6px 18px rgba(0,0,0,0.25); opacity: 0.95; margin: 0; }
+.slot .btn-add-student { margin-top: 2px; padding: 2px; }
+.dc:hover .btn-add-student { display: none; }
+.slot:hover .btn-add-student { display: flex; }
+.slot-toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); background: #2C2A29; color: white; padding: 10px 14px; border-radius: 14px; font-size: 13px; display: none; align-items: center; gap: 12px; z-index: 1100; box-shadow: 0 6px 20px rgba(0,0,0,0.25); max-width: 92vw; flex-wrap: wrap; }
+.slot-toast.show { display: flex; }
+.slot-toast button { background: var(--accent); color: white; border: none; border-radius: 20px; padding: 5px 12px; font-size: 12px; font-weight: 700; cursor: pointer; width: auto; }
+.slot-toast button.ghost { background: transparent; color: #ccc; padding: 5px 6px; }
+@media (max-width: 768px) {
+  .slot { padding: 2px; min-height: 34px; }
+  .slot-label { font-size: 8px; }
+}
+
 .legend { display: flex; gap: 22px; flex-wrap: wrap; padding: 12px 5px; }
 .legend-item { font-weight: 600; font-size: 13px; }
 .student-report { background: var(--bg2); border-radius: 24px; padding: 18px; margin-bottom: 20px; border: 1px solid var(--border); }
@@ -221,7 +246,7 @@ button:active { transform: scale(0.97); }
         </div>
       </div>
       <div style="font-size:13px; color:var(--text3); margin-bottom:10px;">
-        💡 <strong>Mẹo:</strong> Đưa chuột vào một ngày bất kỳ và bấm <strong>+ Thêm</strong> để xếp lịch học bù / học thêm. Bấm dấu <strong>✕</strong> cạnh tên để báo nghỉ (trừ tiền).
+        💡 <strong>Mẹo:</strong> <strong>Kéo thả</strong> tên học sinh sang buổi Sáng/Chiều hoặc sang ngày khác (trên điện thoại: nhấn giữ tên rồi kéo). Đưa chuột vào một buổi và bấm <strong>+ Thêm</strong> để xếp lịch học bù / học thêm. Bấm dấu <strong>✕</strong> cạnh tên để xóa buổi đó.
       </div>
       <div class="cal-grid" id="calGrid"></div>
       <div class="legend" id="calLegend"></div>
@@ -303,6 +328,7 @@ const database = firebase.database();
 const studentsRef = database.ref('students');
 
 const DAY_SHORT = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
+const SLOTS = { am: 'Sáng', pm: 'Chiều' };
 const MONTHS = ['Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5', 'Tháng 6', 'Tháng 7', 'Tháng 8', 'Tháng 9', 'Tháng 10', 'Tháng 11', 'Tháng 12'];
 let students = {};
 let studentsArray = [];
@@ -341,6 +367,8 @@ function updateStudentsArray() {
     if (!s.monthDays) s.monthDays = {};
     if (!s.customDays) s.customDays = {}; 
     if (!s.scheduleHistory) s.scheduleHistory = {};
+    if (!s.sessionSlots) s.sessionSlots = {};
+    if (!s.slotDefaults) s.slotDefaults = {};
     normalizeHistoryKeys(s);
     return s;
   });
@@ -382,7 +410,9 @@ function saveToFirebase() {
       color: s.color || getPastelColorSoft(s.id || Date.now()),
       monthDays: s.monthDays || {},
       customDays: s.customDays || {},
-      scheduleHistory: s.scheduleHistory || {}
+      scheduleHistory: s.scheduleHistory || {},
+      sessionSlots: s.sessionSlots || {},
+      slotDefaults: s.slotDefaults || {}
     };
   });
   
@@ -873,38 +903,39 @@ function toggleAbsent(studentId, year, month, dateNum) {
 /* ============================================================
    THÊM / XÓA BUỔI HỌC TRỰC TIẾP TỪ LỊCH (TAB CALENDAR)
    ============================================================ */
-function openAddStudentDropdown(year, month, dateNum) {
+function openAddStudentDropdown(year, month, dateNum, slot) {
   // Đóng tất cả dropdown đang mở
   document.querySelectorAll('.student-dropdown').forEach(el => el.classList.remove('open'));
-  
-  const dropdown = document.getElementById(`dd-${year}-${month}-${dateNum}`);
+
+  const dropdown = document.getElementById(`dd-${year}-${month}-${dateNum}-${slot}`);
   if (dropdown) {
     dropdown.classList.toggle('open');
   }
 }
 
-function addSessionToDate(studentId, year, month, dateNum) {
+function addSessionToDate(studentId, year, month, dateNum, slot) {
   const result = findStudentById(studentId);
   if (!result) return;
   const student = result.student;
   const monthKey = getMonthKey(year, month);
-  
+
   // 1. Lấy danh sách ngày hiện tại (đang áp dụng)
   const details = getSessionDetails(student, year, month);
   let currentDays = details.totalSessions.map(s => s.day);
-  
+
   // 2. Thêm ngày mới
   if (!currentDays.includes(dateNum)) {
     currentDays.push(dateNum);
   }
-  
-  // 3. Lưu vào customDays
+
+  // 3. Lưu vào customDays + buổi sáng/chiều
   if (!student.customDays) student.customDays = {};
   student.customDays[monthKey] = currentDays.sort((a,b)=>a-b);
-  
+  if (slot) setSlot(student, year, month, dateNum, slot);
+
   // Đóng dropdown
   document.querySelectorAll('.student-dropdown').forEach(el => el.classList.remove('open'));
-  
+
   updateStudentsArray();
   saveToFirebase();
   renderCalendar();
@@ -917,18 +948,19 @@ function removeSessionFromDate(studentId, year, month, dateNum) {
   if (!result) return;
   const student = result.student;
   const monthKey = getMonthKey(year, month);
-  
+
   // 1. Lấy danh sách ngày hiện tại (đang áp dụng)
   const details = getSessionDetails(student, year, month);
   let currentDays = details.totalSessions.map(s => s.day);
-  
+
   // 2. Xóa ngày đi
   currentDays = currentDays.filter(d => d !== dateNum);
-  
+
   // 3. Lưu vào customDays
   if (!student.customDays) student.customDays = {};
   student.customDays[monthKey] = currentDays.sort((a,b)=>a-b);
-  
+  if (student.sessionSlots && student.sessionSlots[monthKey]) delete student.sessionSlots[monthKey]['d' + dateNum];
+
   updateStudentsArray();
   saveToFirebase();
   renderCalendar();
@@ -1056,66 +1088,72 @@ function renderCalendar() {
   
   let html = '<div class="dh">T2</div><div class="dh">T3</div><div class="dh">T4</div><div class="dh">T5</div><div class="dh">T6</div><div class="dh">T7</div><div class="dh">CN</div>';
   for(let i=0;i<offset;i++) html+='<div class="dc empty"></div>';
-  
+
+  const key = getMonthKey(curYear, curMonth);
+  const detailsMap = {};
+  visible.forEach(s => { detailsMap[s.id] = getSessionDetails(s, curYear, curMonth); });
+
   for(let d=1;d<=daysInMonth;d++){
     const date = new Date(curYear, curMonth, d);
-    let pills = '';
-    
-    // 1. Render các buổi học hiện có
+    const slotPills = { am: '', pm: '' };
+
+    // 1. Render các buổi học hiện có, xếp vào buổi sáng / chiều
     visible.forEach(s=>{
       const sd = parseLocalDate(s.start);
-      const details = getSessionDetails(s, curYear, curMonth);
-      const isStudy = details.totalSessions.some(item => item.day === d);
+      const isStudy = detailsMap[s.id].totalSessions.some(item => item.day === d);
       if(date>=sd && isStudy){
-        const key = getMonthKey(curYear, curMonth);
+        const slot = getSlot(s, curYear, curMonth, d);
         const isAbsent = s.absents && s.absents[key] && s.absents[key].includes(d);
-        
+
         if (isAbsent) {
-          pills+=`<span class="sp" style="background:#EAE6E1; color:var(--text3); text-decoration: line-through; font-weight:normal; cursor:pointer;" 
-            onclick="toggleAbsent('${s.id}', ${curYear}, ${curMonth}, ${d})" 
+          slotPills[slot]+=`<span class="sp" style="background:#EAE6E1; color:var(--text3); text-decoration: line-through; font-weight:normal; cursor:pointer;"
+            onclick="toggleAbsent('${s.id}', ${curYear}, ${curMonth}, ${d})"
             title="Nhấp để khôi phục buổi học">
             ${s.name} (Nghỉ)
           </span>`;
         } else {
           const paid = getPaymentStatus(s, curYear, curMonth);
           const icon = paid ? ' ✓' : ' ⏳';
-          pills+=`<span class="sp" style="background:${s.color.bg};color:${s.color.text}; font-weight:bold;" 
-            title="Bấm nút ✕ để đánh dấu nghỉ (xóa khỏi lịch)">
+          slotPills[slot]+=`<span class="sp" data-sid="${s.id}" data-day="${d}" style="background:${s.color.bg};color:${s.color.text}; font-weight:bold;"
+            title="Kéo thả để đổi buổi / đổi ngày · Bấm ✕ để xóa buổi này">
             <span>${s.name}${icon}</span>
             <button class="btn-del" onclick="event.stopPropagation(); removeSessionFromDate('${s.id}', ${curYear}, ${curMonth}, ${d})" title="Xóa buổi này">✕</button>
           </span>`;
         }
       }
     });
-    
-    // 2. Render danh sách học sinh có thể thêm (dropdown)
-    let availableStudents = visible.filter(s => {
-      const details = getSessionDetails(s, curYear, curMonth);
-      const isStudy = details.totalSessions.some(item => item.day === d);
-      return !isStudy;
-    });
-    
-    let ddHtml = `<div class="student-dropdown" id="dd-${curYear}-${curMonth}-${d}">`;
-    if (availableStudents.length === 0) {
-      ddHtml += `<div class="dd-item disabled" style="justify-content:center;">Tất cả đã có lịch</div>`;
-    } else {
-      availableStudents.forEach(s => {
-        ddHtml += `<div class="dd-item" onclick="addSessionToDate('${s.id}', ${curYear}, ${curMonth}, ${d})">
-          <div class="dd-dot" style="background:${s.color.dot}"></div>
-          <span>${s.name}</span>
-        </div>`;
-      });
-    }
-    ddHtml += `</div>`;
+
+    // 2. Danh sách học sinh có thể thêm (dropdown) cho từng buổi
+    const availableStudents = visible.filter(s => !detailsMap[s.id].totalSessions.some(item => item.day === d));
+
+    const slotHtml = ['am', 'pm'].map(slot => {
+      let ddHtml = `<div class="student-dropdown" id="dd-${curYear}-${curMonth}-${d}-${slot}">`;
+      if (availableStudents.length === 0) {
+        ddHtml += `<div class="dd-item disabled" style="justify-content:center;">Tất cả đã có lịch</div>`;
+      } else {
+        availableStudents.forEach(s => {
+          ddHtml += `<div class="dd-item" onclick="addSessionToDate('${s.id}', ${curYear}, ${curMonth}, ${d}, '${slot}')">
+            <div class="dd-dot" style="background:${s.color.dot}"></div>
+            <span>${s.name}</span>
+          </div>`;
+        });
+      }
+      ddHtml += `</div>`;
+
+      return `<div class="slot slot-${slot}" data-day="${d}" data-slot="${slot}">
+        <div class="slot-label"><i class="ti ${slot === 'am' ? 'ti-sun' : 'ti-sunset'}"></i>${SLOTS[slot]}</div>
+        ${slotPills[slot]}
+        <div style="position:relative;">
+          <button class="btn-add-student" onclick="openAddStudentDropdown(${curYear}, ${curMonth}, ${d}, '${slot}')">+ Thêm</button>
+          ${ddHtml}
+        </div>
+      </div>`;
+    }).join('');
 
     const todayClass = (isNow && d===today.getDate()) ? ' today' : '';
     html+=`<div class="dc${todayClass}">
       <div class="dn">${d}</div>
-      ${pills}
-      <div style="position:relative;">
-        <button class="btn-add-student" onclick="openAddStudentDropdown(${curYear}, ${curMonth}, ${d})">+ Thêm</button>
-        ${ddHtml}
-      </div>
+      ${slotHtml}
     </div>`;
   }
   const rem = (7-((offset+daysInMonth)%7))%7;
@@ -1571,6 +1609,210 @@ function printInvoice() {
   `);
   win.document.close();
 }
+
+/* ============================================================
+   BUỔI SÁNG / CHIỀU + KÉO THẢ
+   sessionSlots = { 'YYYY-MM': { d5: 'am' } }  -> buổi của 1 ngày cụ thể
+   slotDefaults = { w3: 'am' }                 -> buổi mặc định theo thứ
+   (dùng key 'd5', 'w3' để Firebase không tự đổi thành mảng)
+   ============================================================ */
+
+function getSlot(student, year, month, d) {
+  const mk = getMonthKey(year, month);
+  const o = student.sessionSlots && student.sessionSlots[mk] && student.sessionSlots[mk]['d' + d];
+  if (o) return o;
+  const dow = new Date(year, month, d).getDay();
+  return (student.slotDefaults && student.slotDefaults['w' + dow]) || 'pm';
+}
+
+function setSlot(student, year, month, d, slot) {
+  const mk = getMonthKey(year, month);
+  if (!student.sessionSlots) student.sessionSlots = {};
+  if (!student.sessionSlots[mk]) student.sessionSlots[mk] = {};
+  student.sessionSlots[mk]['d' + d] = slot;
+}
+
+function refreshAfterScheduleChange() {
+  updateStudentsArray();
+  saveToFirebase();
+  renderCalendar();
+  renderReport();
+  renderInvoiceStudents();
+}
+
+// Chuyển 1 buổi học: đổi sáng/chiều trong cùng ngày, hoặc dời sang ngày khác
+function moveSession(studentId, fromDay, toDay, slot) {
+  const result = findStudentById(studentId);
+  if (!result) return;
+  const s = result.student;
+  const mk = getMonthKey(curYear, curMonth);
+
+  if (fromDay === toDay) {
+    if (getSlot(s, curYear, curMonth, toDay) === slot) return;
+    setSlot(s, curYear, curMonth, toDay, slot);
+    refreshAfterScheduleChange();
+    showSlotToast(s, toDay, slot);
+    return;
+  }
+
+  const details = getSessionDetails(s, curYear, curMonth);
+  let days = details.totalSessions.map(x => x.day);
+  if (days.includes(toDay)) {
+    alert(`${s.name} đã có lịch ngày ${toDay}/${curMonth + 1} rồi`);
+    return;
+  }
+  if (new Date(curYear, curMonth, toDay) < parseLocalDate(s.start)) {
+    alert(`Ngày ${toDay}/${curMonth + 1} trước ngày bắt đầu học của ${s.name}`);
+    return;
+  }
+  days = days.filter(x => x !== fromDay);
+  days.push(toDay);
+  if (!s.customDays) s.customDays = {};
+  s.customDays[mk] = days.sort((a, b) => a - b);
+  if (s.sessionSlots && s.sessionSlots[mk]) delete s.sessionSlots[mk]['d' + fromDay];
+  setSlot(s, curYear, curMonth, toDay, slot);
+  refreshAfterScheduleChange();
+}
+
+// Đặt buổi mặc định cho mọi [thứ] từ ngày d trở đi (các ngày trước đó giữ nguyên)
+function applySlotToWeekday(studentId, year, month, d, slot) {
+  const result = findStudentById(studentId);
+  if (!result) return;
+  const s = result.student;
+  const dow = new Date(year, month, d).getDay();
+  const fromKey = getMonthKey(year, month);
+
+  for (let x = 1; x < d; x++) {
+    if (new Date(year, month, x).getDay() === dow && !(s.sessionSlots[fromKey] && s.sessionSlots[fromKey]['d' + x])) {
+      setSlot(s, year, month, x, getSlot(s, year, month, x));
+    }
+  }
+  s.slotDefaults['w' + dow] = slot;
+  Object.keys(s.sessionSlots).forEach(mk => {
+    if (mk < fromKey) return;
+    const [yy, mm] = mk.split('-').map(Number);
+    Object.keys(s.sessionSlots[mk]).forEach(k => {
+      const dd = parseInt(k.slice(1));
+      if (new Date(yy, mm - 1, dd).getDay() === dow && (mk > fromKey || dd >= d)) delete s.sessionSlots[mk][k];
+    });
+  });
+
+  hideSlotToast();
+  refreshAfterScheduleChange();
+}
+
+let slotToastTimer = null;
+function showSlotToast(student, d, slot) {
+  let toast = document.getElementById('slotToast');
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.id = 'slotToast';
+    toast.className = 'slot-toast';
+    document.body.appendChild(toast);
+  }
+  const dow = new Date(curYear, curMonth, d).getDay();
+  toast.innerHTML = `
+    <span>Đã chuyển <strong>${student.name}</strong> ngày ${d}/${curMonth + 1} sang buổi ${SLOTS[slot].toLowerCase()}.</span>
+    <button onclick="applySlotToWeekday('${student.id}', ${curYear}, ${curMonth}, ${d}, '${slot}')">Áp dụng cho mọi ${DAY_SHORT[dow]}</button>
+    <button class="ghost" onclick="hideSlotToast()">✕</button>`;
+  toast.classList.add('show');
+  clearTimeout(slotToastTimer);
+  slotToastTimer = setTimeout(hideSlotToast, 7000);
+}
+
+function hideSlotToast() {
+  const toast = document.getElementById('slotToast');
+  if (toast) toast.classList.remove('show');
+}
+
+/* ---------- Kéo thả (chuột + cảm ứng: nhấn giữ rồi kéo) ---------- */
+let dragState = null;
+
+function initCalendarDrag() {
+  const grid = document.getElementById('calGrid');
+  grid.addEventListener('pointerdown', onPillPointerDown);
+  document.addEventListener('pointermove', onDragMove);
+  document.addEventListener('pointerup', onDragEnd);
+  document.addEventListener('pointercancel', cancelDrag);
+  // Khi đang kéo trên điện thoại thì chặn cuộn trang
+  document.addEventListener('touchmove', e => { if (dragState && dragState.active) e.preventDefault(); }, { passive: false });
+  grid.addEventListener('contextmenu', e => { if (e.target.closest('.sp[data-sid]')) e.preventDefault(); });
+}
+
+function onPillPointerDown(e) {
+  const pill = e.target.closest('.sp[data-sid]');
+  if (!pill || e.target.closest('button') || e.button > 0) return;
+  dragState = {
+    pill, sid: pill.dataset.sid, day: parseInt(pill.dataset.day),
+    x0: e.clientX, y0: e.clientY, x: e.clientX, y: e.clientY,
+    active: false, isTouch: e.pointerType !== 'mouse'
+  };
+  if (dragState.isTouch) {
+    dragState.timer = setTimeout(startDrag, 350);
+  } else {
+    e.preventDefault();
+  }
+}
+
+function startDrag() {
+  if (!dragState) return;
+  dragState.active = true;
+  const ghost = dragState.pill.cloneNode(true);
+  ghost.classList.add('drag-ghost');
+  ghost.style.width = dragState.pill.offsetWidth + 'px';
+  document.body.appendChild(ghost);
+  dragState.ghost = ghost;
+  dragState.pill.classList.add('dragging');
+  positionGhost(dragState.x, dragState.y);
+  if (navigator.vibrate) navigator.vibrate(15);
+}
+
+function positionGhost(x, y) {
+  dragState.ghost.style.left = x + 'px';
+  dragState.ghost.style.top = y + 'px';
+  document.querySelectorAll('.slot.drop-target').forEach(el => el.classList.remove('drop-target'));
+  const el = document.elementFromPoint(x, y);
+  const slot = el && el.closest('.slot');
+  if (slot) slot.classList.add('drop-target');
+}
+
+function onDragMove(e) {
+  if (!dragState) return;
+  dragState.x = e.clientX;
+  dragState.y = e.clientY;
+  const dist = Math.hypot(e.clientX - dragState.x0, e.clientY - dragState.y0);
+  if (!dragState.active) {
+    if (dragState.isTouch) { if (dist > 10) cancelDrag(); }
+    else if (dist > 5) startDrag();
+    return;
+  }
+  positionGhost(e.clientX, e.clientY);
+}
+
+function onDragEnd(e) {
+  if (!dragState) return;
+  const state = dragState;
+  cancelDrag();
+  if (!state.active) return;
+  // Chặn cú click ngay sau khi thả (tránh bấm nhầm nút "+ Thêm")
+  const stopClick = ev => { ev.stopPropagation(); ev.preventDefault(); };
+  window.addEventListener('click', stopClick, true);
+  setTimeout(() => window.removeEventListener('click', stopClick, true), 50);
+  const el = document.elementFromPoint(e.clientX, e.clientY);
+  const slot = el && el.closest('.slot');
+  if (slot) moveSession(state.sid, state.day, parseInt(slot.dataset.day), slot.dataset.slot);
+}
+
+function cancelDrag() {
+  if (!dragState) return;
+  clearTimeout(dragState.timer);
+  if (dragState.ghost) dragState.ghost.remove();
+  dragState.pill.classList.remove('dragging');
+  document.querySelectorAll('.slot.drop-target').forEach(el => el.classList.remove('drop-target'));
+  dragState = null;
+}
+
+initCalendarDrag();
 
 console.log('🚀 App đã khởi động! Thêm/xóa học sinh trực tiếp trên Tab Lịch học.');
 </script>
