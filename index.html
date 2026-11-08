@@ -3,6 +3,12 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta name="theme-color" content="#FAF8FC" media="(prefers-color-scheme: light)" />
+<meta name="theme-color" content="#221F29" media="(prefers-color-scheme: dark)" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="default" />
+<meta name="apple-mobile-web-app-title" content="Nhi's Class" />
 <title>Quản lý học phí - Nhi's Class (Firebase)</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.0.0/tabler-icons.min.css" />
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
@@ -10,22 +16,25 @@
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
-  --bg: #F4F2EF; --bg2: #EAE6E1; --bg3: #DDD8D1;
-  --text: #2C2A29; --text2: #6F6A64; --text3: #928B82;
-  --border: rgba(120,100,85,0.25); --border2: rgba(100,80,65,0.4);
+  --bg: #FAF8FC; --bg2: #F0ECF6; --bg3: #E7E1F0;
+  --text: #2A2633; --text2: #625C6E; --text3: #8C8697;
+  --border: rgba(90,70,130,0.14); --border2: rgba(90,70,130,0.28);
   --radius: 12px; --radius-lg: 20px;
-  --accent: #7B9E87; --accent-dark: #5E7D68; --accent-light: #C2D5C8;
-  --paid-bg: #BED3C3; --paid-text: #2C5A3E;
-  --unpaid-bg: #F0D9CF; --unpaid-text: #B16148;
+  --accent: #8B7BC4; --accent-dark: #5E4F99; --accent-light: #E3DDF5;
+  --today: #F1EDFA;
+  --paid-bg: #D7EBDD; --paid-text: #2F6B47;
+  --unpaid-bg: #F8E0DC; --unpaid-text: #B0524A;
+  --danger: #D07A70;
 }
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: #2B2A28; --bg2: #3B3936; --bg3: #201F1D;
-    --text: #EFECE8; --text2: #B6ADA3; --text3: #938A80;
-    --border: rgba(160,140,120,0.3); --border2: rgba(180,160,140,0.5);
-    --accent: #6C8F7A; --accent-dark: #537561; --accent-light: #8FAD9B;
-    --paid-bg: #2C5940; --paid-text: #C6F0DF;
-    --unpaid-bg: #6E4D3F; --unpaid-text: #F3C5B4;
+    --bg: #221F29; --bg2: #2D2936; --bg3: #1A1820;
+    --text: #EEEBF3; --text2: #B5AEC2; --text3: #8E879C;
+    --border: rgba(180,165,215,0.18); --border2: rgba(180,165,215,0.35);
+    --accent: #8574C0; --accent-dark: #B8AAE6; --accent-light: #3E3657;
+    --today: #2F2A42;
+    --paid-bg: #23503A; --paid-text: #BFE8CF;
+    --unpaid-bg: #5A3438; --unpaid-text: #F4C3BE;
   }
 }
 body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg3); color: var(--text); min-height: 100vh; font-size: 16px; }
@@ -36,12 +45,12 @@ h1 { font-size: 28px; font-weight: 600; margin-bottom: 1.5rem; display: flex; al
 .field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 18px; }
 .field label { font-size: 14px; font-weight: 600; color: var(--text2); }
 input, select { width: 100%; padding: 10px 14px; font-size: 15px; font-weight: 500; border: 1.5px solid var(--border2); border-radius: var(--radius); background: var(--bg); color: var(--text); outline: none; transition: all 0.2s; }
-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(107,142,115,0.25); }
+input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(139,123,196,0.3); }
 button { padding: 10px 20px; font-size: 14px; font-weight: 600; border: 1.5px solid var(--border2); border-radius: 40px; background: var(--bg2); color: var(--text); cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; gap: 8px; }
 button:hover { background: var(--accent); border-color: var(--accent); color: white; transform: translateY(-2px); }
 button:active { transform: scale(0.97); }
 .btn-primary { background: var(--accent); color: white; border-color: transparent; width: 100%; justify-content: center; font-weight: 700; }
-.btn-primary:hover { background: var(--accent-dark); opacity: 0.95; }
+.btn-primary:hover { background: var(--accent); filter: brightness(0.88); }
 .days-row { display: flex; gap: 10px; flex-wrap: wrap; margin: 8px 0 12px; }
 .day-btn { padding: 7px 20px; font-size: 14px; font-weight: 600; border-radius: 40px; border: 1.5px solid var(--border2); background: var(--bg); color: var(--text2); transition: 0.2s; cursor: pointer; }
 .day-btn.active { background: var(--accent); color: white; border-color: var(--accent); box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
@@ -62,7 +71,7 @@ button:active { transform: scale(0.97); }
 .act-btn.edit:hover { background: var(--accent); color: white; border-color: var(--accent); }
 .act-btn.del { background: var(--unpaid-bg); border-color: var(--unpaid-text); color: var(--unpaid-text); width: 28px; height: 28px; padding: 0; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 14px; transition: all 0.2s; border: 1.5px solid rgba(0,0,0,0.15); }
 .act-btn.del i { font-size: 14px; margin: 0; }
-.act-btn.del:hover { background: #C28B77; border-color: #C28B77; color: white; transform: scale(1.1); }
+.act-btn.del:hover { background: var(--danger); border-color: var(--danger); color: white; transform: scale(1.1); }
 .edit-panel { border-top: 1.5px solid var(--border); padding: 16px 18px; background: var(--bg); display: none; }
 .edit-panel.open { display: block; }
 .edit-btns { display: flex; gap: 14px; margin-top: 18px; }
@@ -70,7 +79,7 @@ button:active { transform: scale(0.97); }
 .btn-cancel { background: var(--bg2); }
 .tab-row { display: flex; gap: 16px; margin-bottom: 2rem; flex-wrap: wrap; border-bottom: 2px solid var(--border); padding-bottom: 8px; }
 .tab { background: transparent; border: none; padding: 10px 24px; font-size: 16px; font-weight: 700; color: var(--text2); border-radius: 40px; transition: all 0.2s; cursor: pointer; }
-.tab.active { background: var(--accent); color: white; box-shadow: 0 2px 8px rgba(91,121,99,0.3); }
+.tab.active { background: var(--accent); color: white; box-shadow: 0 2px 8px rgba(94,79,153,0.3); }
 .cal-nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; flex-wrap: wrap; gap: 16px; }
 .cal-nav-center { display: flex; align-items: center; gap: 12px; }
 .month-title { font-size: 22px; font-weight: 800; color: var(--accent-dark); }
@@ -80,13 +89,13 @@ button:active { transform: scale(0.97); }
 .dh { text-align: center; font-weight: 800; font-size: 14px; color: var(--accent-dark); padding: 14px 4px; background: var(--bg2); border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); }
 .dc { min-height: 120px; border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); padding: 8px; background: var(--bg); position: relative; }
 .dc.empty { background: var(--bg3); }
-.dc.today { background: #E8EFE9; }
+.dc.today { background: var(--today); }
 .dn { font-size: 15px; font-weight: 800; color: var(--text); margin-bottom: 8px; display: inline-block; width: 30px; height: 30px; line-height: 30px; text-align: center; border-radius: 50%; }
 .dc.today .dn { background: var(--accent); color: white; }
 .sp { font-size: 11px; font-weight: 700; border-radius: 24px; padding: 3px 8px; margin-bottom: 5px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; transition: 0.15s; position: relative; }
 .sp .btn-del { display: none; align-items: center; justify-content: center; width: 16px; height: 16px; border-radius: 50%; background: rgba(0,0,0,0.15); color: inherit; font-size: 10px; margin-left: 4px; cursor: pointer; border: none; }
 .sp:hover .btn-del { display: inline-flex; }
-.sp .btn-del:hover { background: #C28B77; color: white; }
+.sp .btn-del:hover { background: var(--danger); color: white; }
 
 /* Menu khi bấm ✕: Nghỉ (trừ tiền tháng sau) hay Không học ngày này */
 .session-menu { display: none; position: fixed; z-index: 1200; width: 250px; background: var(--bg); border: 1px solid var(--border2); border-radius: 14px; box-shadow: 0 8px 22px rgba(0,0,0,0.2); padding: 8px; }
@@ -105,11 +114,11 @@ button:active { transform: scale(0.97); }
 .dc:hover .btn-add-student { display: flex; }
 
 /* Menu chọn học sinh */
-.student-dropdown { display: none; position: absolute; top: 100%; left: 0; width: 200px; background: white; border: 1px solid var(--border); border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 100; max-height: 250px; overflow-y: auto; padding: 8px; }
+.student-dropdown { display: none; position: absolute; top: 100%; left: 0; width: 200px; background: var(--bg); border: 1px solid var(--border); border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 100; max-height: 250px; overflow-y: auto; padding: 8px; }
 .student-dropdown.open { display: block; }
 .dd-item { padding: 8px 12px; font-size: 13px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: 0.1s; }
 .dd-item:hover { background: var(--bg2); }
-.dd-item.disabled { opacity: 0.5; cursor: not-allowed; background: #f0f0f0; }
+.dd-item.disabled { opacity: 0.5; cursor: not-allowed; background: var(--bg3); }
 .dd-dot { width: 10px; height: 10px; border-radius: 50%; }
 
 /* Chia buổi Sáng / Chiều trong mỗi ngày + kéo thả */
@@ -128,7 +137,7 @@ button:active { transform: scale(0.97); }
 .slot .btn-add-student { margin-top: 2px; padding: 2px; }
 .dc:hover .btn-add-student { display: none; }
 .slot:hover .btn-add-student { display: flex; }
-.slot-toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); background: #2C2A29; color: white; padding: 10px 14px; border-radius: 14px; font-size: 13px; display: none; align-items: center; gap: 12px; z-index: 1100; box-shadow: 0 6px 20px rgba(0,0,0,0.25); max-width: 92vw; flex-wrap: wrap; }
+.slot-toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); background: #2A2633; color: white; padding: 10px 14px; border-radius: 14px; font-size: 13px; display: none; align-items: center; gap: 12px; z-index: 1100; box-shadow: 0 6px 20px rgba(0,0,0,0.25); max-width: 92vw; flex-wrap: wrap; }
 .slot-toast.show { display: flex; }
 .slot-toast button { background: var(--accent); color: white; border: none; border-radius: 20px; padding: 5px 12px; font-size: 12px; font-weight: 700; cursor: pointer; width: auto; }
 .slot-toast button.ghost { background: transparent; color: #ccc; padding: 5px 6px; }
@@ -174,12 +183,12 @@ button:active { transform: scale(0.97); }
 .schedule-table { width: 100%; border-collapse: collapse; font-size: 14px; margin-top: 8px; }
 .schedule-table th { background: var(--accent-light); color: var(--accent-dark); padding: 6px 10px; border: 1px solid var(--border); text-align: center; font-weight: 700; }
 .schedule-table td { padding: 6px 10px; border: 1px solid var(--border); text-align: center; }
-.schedule-table .absent-cell { background: #F0D9CF; color: #B16148; }
-.schedule-table .study-cell { background: #E8F0E8; color: #2C5A3E; }
-.schedule-table .new-schedule-cell { background: #D4E8D4; color: #2C5A3E; font-weight: 700; }
+.schedule-table .absent-cell { background: #F8E0DC; color: #B0524A; }
+.schedule-table .study-cell { background: #F1EDFA; color: #5E4F99; }
+.schedule-table .new-schedule-cell { background: #D7EBDD; color: #2F6B47; font-weight: 700; }
 .schedule-table .empty-cell { background: #F5F5F5; color: #ccc; }
-.schedule-table .old-schedule-cell { background: #FFF8E7; color: #8B7A5A; }
-.weekly-badge { font-size: 11px; font-weight: 700; padding: 2px 10px; border-radius: 30px; background: #FFB80020; color: #8B6F00; }
+.schedule-table .old-schedule-cell { background: #FAF1DE; color: #7F6431; }
+.weekly-badge { font-size: 11px; font-weight: 700; padding: 2px 10px; border-radius: 30px; background: #CDA64026; color: #75591A; }
 @media (max-width: 768px) {
   .container { width: 98%; padding: 0.8rem; }
   .section { padding: 1rem; }
@@ -201,6 +210,103 @@ button:active { transform: scale(0.97); }
   .invoice-right .qr-placeholder { width: 140px; height: 140px; }
   .student-dropdown { width: 160px; }
 }
+
+/* ============================================================
+   GIAO DIỆN ĐIỆN THOẠI (iPhone 17 Pro Max ~ 440px)
+   ============================================================ */
+.dw { display: none; }
+
+/* Màn hình cảm ứng: không có rê chuột nên luôn hiện nút ✕ và + Thêm */
+@media (hover: none) {
+  button:hover { transform: none; }
+  .tab:not(.active):hover { background: transparent; color: var(--text2); }
+  .sp .btn-del { display: inline-flex; }
+  .slot .btn-add-student { display: flex !important; }
+}
+
+@media (max-width: 600px) {
+  body { -webkit-tap-highlight-color: transparent; }
+  .container {
+    width: 100%;
+    padding: calc(env(safe-area-inset-top) + 12px) 12px calc(env(safe-area-inset-bottom) + 100px);
+  }
+  h1 { font-size: 20px; gap: 8px; margin-bottom: 14px; }
+  .sync-status { margin-left: 0; }
+
+  /* Thanh tab cố định ở đáy màn hình */
+  .tab-row {
+    position: fixed; left: 10px; right: 10px; bottom: calc(env(safe-area-inset-bottom) + 8px);
+    z-index: 900; margin: 0; padding: 6px; gap: 4px; flex-wrap: nowrap;
+    border: 1px solid var(--border); border-radius: 26px;
+    background: color-mix(in srgb, var(--bg) 86%, transparent);
+    -webkit-backdrop-filter: blur(18px); backdrop-filter: blur(18px);
+    box-shadow: 0 8px 24px rgba(60,40,110,0.16);
+  }
+  .tab { flex: 1; min-width: 0; flex-direction: column; justify-content: center; gap: 2px; padding: 7px 2px; font-size: 11px; border-radius: 20px; }
+  .tab i { font-size: 22px; }
+  .tab-long { display: none; }
+
+  .section { padding: 14px; border-radius: 18px; margin-bottom: 14px; }
+  .sec-title { font-size: 13px; margin-bottom: 14px; }
+  input, select { font-size: 16px; padding: 12px 14px; } /* 16px để iPhone không tự phóng to khi nhập */
+  button { min-height: 40px; }
+  .days-row { gap: 6px; }
+  .day-btn { flex: 1; min-width: 0; padding: 10px 0; text-align: center; }
+
+  /* Danh sách học sinh */
+  .student-main { padding: 12px; }
+  .student-name { flex-basis: calc(100% - 30px); font-size: 16px; }
+  .student-actions { margin-left: auto; }
+  .act-btn { min-height: 32px; padding: 4px 14px; }
+  .act-btn.del { width: 32px; height: 32px; min-height: 32px; }
+  .edit-panel { padding: 14px 12px; }
+  .edit-panel > div[style*="grid-template-columns"] { grid-template-columns: 1fr !important; }
+  .edit-btns button { flex: 1; justify-content: center; }
+
+  /* Lịch: chuyển thành danh sách từng ngày, Sáng / Chiều nằm cạnh nhau */
+  .cal-nav { gap: 10px; margin-bottom: 14px; }
+  .cal-nav-center { width: 100%; justify-content: space-between; }
+  .month-title { font-size: 19px; }
+  .search-wrap, .search-wrap input { width: 100%; }
+  .search-wrap input { flex: 1; }
+  .cal-grid { display: flex; flex-direction: column; gap: 8px; border: none; border-radius: 0; overflow: visible; background: transparent; }
+  .dh, .dc.empty { display: none; }
+  .dc { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; padding: 10px; border: 1px solid var(--border); border-radius: 16px; }
+  .dc-head { grid-column: 1 / -1; display: flex; align-items: center; gap: 8px; }
+  .dc .dn { margin: 0; width: 32px; height: 32px; line-height: 32px; font-size: 15px; }
+  .dw { display: inline; font-size: 13px; font-weight: 700; color: var(--text2); }
+  .dc.today { border-color: var(--accent); }
+  .dc.today .dw { color: var(--accent-dark); }
+  .dc.no-session { padding: 8px 10px; }
+  .dc.no-session .slot { min-height: 36px; }
+  .slot { margin: 0; padding: 6px; min-height: 52px; }
+  .slot-label { font-size: 10px; }
+  .sp { font-size: 13px; padding: 6px 8px 6px 10px; border-radius: 14px; margin-bottom: 4px; }
+  .sp > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .sp .btn-del { width: 22px; height: 22px; min-height: 22px; font-size: 11px; flex-shrink: 0; }
+  .slot .btn-add-student { padding: 6px; font-size: 12px; min-height: 30px; }
+  .student-dropdown { width: min(240px, 78vw); }
+  .slot-pm .student-dropdown { left: auto; right: 0; }
+  .dd-item { padding: 12px; font-size: 15px; }
+  .legend { gap: 8px 16px; }
+  .slot-toast { bottom: calc(env(safe-area-inset-bottom) + 92px); }
+
+  /* Học phí */
+  .student-report { padding: 14px; border-radius: 18px; }
+  .rep-header { gap: 8px; }
+  .stat-grid { gap: 8px; }
+  .stat-box { padding: 10px; display: flex; justify-content: space-between; align-items: center; text-align: left; gap: 10px; }
+  .stat-val { margin-top: 0; text-align: right; }
+  .pay-status-btn { width: 100%; padding: 12px; }
+  .total-row { padding: 14px 16px; border-radius: 18px; }
+
+  /* Phiếu học phí */
+  .invoice-section { padding: 14px; }
+  .invoice-actions .btn-primary { width: 100%; }
+  .invoice-actions .btn-secondary { flex: 1; justify-content: center; }
+  .invoice-sheet { padding: 12px !important; }
+  .invoice-student-body > div { overflow-x: auto; }
+}
 </style>
 </head>
 <body>
@@ -212,8 +318,8 @@ button:active { transform: scale(0.97); }
   <div class="tab-row">
     <button class="tab active" onclick="switchTab('students')"><i class="ti ti-users"></i> Học sinh</button>
     <button class="tab" onclick="switchTab('calendar')"><i class="ti ti-calendar"></i> Lịch học</button>
-    <button class="tab" onclick="switchTab('report')"><i class="ti ti-report-money"></i> Học phí & Nộp tiền</button>
-    <button class="tab" onclick="switchTab('invoice')"><i class="ti ti-receipt"></i> Gửi phiếu học phí</button>
+    <button class="tab" onclick="switchTab('report')"><i class="ti ti-report-money"></i> Học phí<span class="tab-long"> & Nộp tiền</span></button>
+    <button class="tab" onclick="switchTab('invoice')"><i class="ti ti-receipt"></i> Gửi phiếu<span class="tab-long"> học phí</span></button>
   </div>
 
   <div id="tab-students">
@@ -374,7 +480,7 @@ function updateStudentsArray() {
     if (!s.payments) s.payments = {};
     if (!s.absents) s.absents = {};
     if (!s.days) s.days = [];
-    if (!s.color) s.color = getPastelColorSoft(s.id);
+    s.color = getPastelColorSoft(s.id); // luôn lấy theo bảng màu hiện tại
     if (!s.monthDays) s.monthDays = {};
     if (!s.customDays) s.customDays = {}; 
     if (!s.scheduleHistory) s.scheduleHistory = {};
@@ -387,14 +493,14 @@ function updateStudentsArray() {
 
 function getPastelColorSoft(seed) {
   const palette = [
-    {bg:'#DDE5DF', text:'#3A5C4F', dot:'#6A8E7C'},
-    {bg:'#E2E0DA', text:'#5C534A', dot:'#8B7E70'},
-    {bg:'#D8E0E6', text:'#3F5C6F', dot:'#708CA3'},
-    {bg:'#E6DFD6', text:'#886B57', dot:'#B3917A'},
-    {bg:'#DAE2D4', text:'#45765F', dot:'#6D9A81'},
-    {bg:'#E3E0D9', text:'#6C5C52', dot:'#9C8778'}
+    {bg:'#E6E0F7', text:'#4F3F8F', dot:'#8B7BC4'}, // oải hương
+    {bg:'#F7DFE8', text:'#8A3A5C', dot:'#D47A9C'}, // hồng
+    {bg:'#DDE6F7', text:'#334F8A', dot:'#6E8FD0'}, // xanh dừa cạn
+    {bg:'#D9EEE6', text:'#2D6A55', dot:'#5FAE92'}, // bạc hà
+    {bg:'#FAE3D6', text:'#8E4A2A', dot:'#E0936A'}, // đào
+    {bg:'#F6ECCB', text:'#75591A', dot:'#CDA640'}  // vàng bơ
   ];
-  return palette[Math.abs(seed % palette.length)];
+  return palette[Math.floor(Math.abs(Number(seed) || 0)) % palette.length];
 }
 
 function updateSyncStatus(status) {
@@ -1064,7 +1170,7 @@ function renderStudentList() {
     const baseDays = getBaseDays(s, viewKey, true);
     const dayStr = baseDays.map(d=>DAY_SHORT[d]).join(', ');
     const histKeys = Object.keys(s.scheduleHistory || {}).sort();
-    const histBadge = histKeys.length ? `<span class="weekly-badge" style="background:#7B9E8730;color:var(--accent-dark);">🔁 Có đổi lịch cố định</span>` : '';
+    const histBadge = histKeys.length ? `<span class="weekly-badge" style="background:var(--accent-light);color:var(--accent-dark);">🔁 Có đổi lịch cố định</span>` : '';
     const histList = histKeys.length ? histKeys.map(k => `
       <div style="display:flex;align-items:center;gap:10px;font-size:13px;margin-top:6px;">
         <span>🔁 Từ <strong>ngày ${fmtDateKey(k)}</strong> trở đi: <strong>${s.scheduleHistory[k].map(d=>DAY_SHORT[d]).join(', ')}</strong></span>
@@ -1081,7 +1187,7 @@ function renderStudentList() {
     
     let modeBadge = '';
     if (custom) {
-      modeBadge = `<span class="weekly-badge" style="background:#4A90B820;color:#4A90B8;">✏️ Có sửa tay tháng này</span>`;
+      modeBadge = `<span class="weekly-badge" style="background:#3D8C9A22;color:#2F7380;">✏️ Có sửa tay tháng này</span>`;
     } else if (monthSchedule && monthSchedule.days) {
       modeBadge = `<span class="weekly-badge">📌 Tháng này đổi lịch</span>`;
     }
@@ -1169,7 +1275,7 @@ function renderCalendar() {
         const isAbsent = s.absents && s.absents[key] && s.absents[key].includes(d);
 
         if (isAbsent) {
-          slotPills[slot]+=`<span class="sp" style="background:#EAE6E1; color:var(--text3); text-decoration: line-through; font-weight:normal; cursor:pointer;"
+          slotPills[slot]+=`<span class="sp" style="background:var(--bg2); color:var(--text3); text-decoration: line-through; font-weight:normal; cursor:pointer;"
             onclick="toggleAbsent('${s.id}', ${curYear}, ${curMonth}, ${d})"
             title="Nhấp để khôi phục buổi học">
             ${s.name} (Nghỉ)
@@ -1214,8 +1320,9 @@ function renderCalendar() {
     }).join('');
 
     const todayClass = (isNow && d===today.getDate()) ? ' today' : '';
-    html+=`<div class="dc${todayClass}">
-      <div class="dn">${d}</div>
+    const emptyClass = (slotPills.am || slotPills.pm) ? '' : ' no-session';
+    html+=`<div class="dc${todayClass}${emptyClass}">
+      <div class="dc-head"><div class="dn">${d}</div><span class="dw">${DAY_SHORT[date.getDay()]}</span></div>
       ${slotHtml}
     </div>`;
   }
@@ -1284,13 +1391,13 @@ function renderReport() {
     let sessionInfo = '';
     if (isCustomMode) {
       sessionInfo = `
-        <div style="font-size:13px;color:var(--text2);margin-top:4px;background:rgba(74,144,184,0.12);padding:6px 12px;border-radius:8px;border-left:3px solid #4A90B8;">
+        <div style="font-size:13px;color:var(--text2);margin-top:4px;background:rgba(61,140,154,0.12);padding:6px 12px;border-radius:8px;border-left:3px solid #3D8C9A;">
           ✏️ Lịch tháng này được <strong>chỉnh sửa thủ công</strong> trên tab Lịch (${totalSessions} buổi)
         </div>
       `;
     } else if (isSpecial) {
       sessionInfo = `
-        <div style="font-size:13px;color:var(--text2);margin-top:4px;background:rgba(255,200,100,0.15);padding:6px 12px;border-radius:8px;border-left:3px solid #FFB800;">
+        <div style="font-size:13px;color:var(--text2);margin-top:4px;background:rgba(205,166,64,0.14);padding:6px 12px;border-radius:8px;border-left:3px solid #CDA640;">
           📌 Lịch tháng này đổi mới (từ ngày ${changeDate})
         </div>
       `;
@@ -1301,9 +1408,9 @@ function renderReport() {
         <div style="width:14px;height:14px;border-radius:50%;background:${s.color.dot}"></div>
         <span style="font-weight:800;font-size:17px;">${s.name}</span>
         <span style="background:var(--bg);padding:3px 14px;border-radius:30px;font-size:12px;font-weight:600;">${monthDayStr}</span>
-        ${isCustomMode ? `<span class="weekly-badge" style="background:#4A90B820;color:#4A90B8;">✏️ Sửa tay</span>` : ''}
+        ${isCustomMode ? `<span class="weekly-badge" style="background:#3D8C9A22;color:#2F7380;">✏️ Sửa tay</span>` : ''}
         ${isSpecial ? `<span class="weekly-badge">📌 Thay đổi từ ngày ${changeDate}</span>` : ''}
-        ${histChange ? `<span class="weekly-badge" style="background:#7B9E8730;color:var(--accent-dark);">🔁 Đổi lịch cố định từ ngày ${details.changeDate}/${curMonth+1}</span>` : ''}
+        ${histChange ? `<span class="weekly-badge" style="background:var(--accent-light);color:var(--accent-dark);">🔁 Đổi lịch cố định từ ngày ${details.changeDate}/${curMonth+1}</span>` : ''}
       </div>
       
       ${sessionInfo}
@@ -1324,7 +1431,7 @@ function renderReport() {
       </div>
       
       <div class="rep-days">📅 Các buổi học trong tháng: ${totalSessions ? details.totalSessions.map(item => item.day).join(', ') : 'Không có lịch'}</div>
-      <div class="rep-days" style="color: #A08060;">⚠️ Số buổi nghỉ tháng trước được trừ: ${countPrevAbsents > 0 ? prevAbsentDays.slice().sort((a,b)=>a-b).map(d=>d+'/'+(prev.month+1)).join(', ') : 'Không có'}</div>
+      <div class="rep-days" style="color: #9A6B3F;">⚠️ Số buổi nghỉ tháng trước được trừ: ${countPrevAbsents > 0 ? prevAbsentDays.slice().sort((a,b)=>a-b).map(d=>d+'/'+(prev.month+1)).join(', ') : 'Không có'}</div>
       <div class="rep-days" style="color: var(--text3); font-style: italic; font-size:12px;">ℹ️ Trong tháng này học sinh đã nghỉ ${currentMonthAbsents.length} buổi (ngày ${currentMonthAbsents.slice().sort((a,b)=>a-b).join(', ') || 'Không có'})</div>
       
       <div class="pay-status-row">
@@ -1358,7 +1465,12 @@ function switchTab(name) {
     const tabNames = ['students', 'calendar', 'report', 'invoice'];
     b.classList.toggle('active', tabNames[i] === name);
   });
-  if (name === 'calendar') renderCalendar();
+  if (name === 'calendar') {
+    renderCalendar();
+    // Trên điện thoại: cuộn tới ngày hôm nay
+    const todayCell = document.querySelector('.dc.today');
+    if (todayCell && window.matchMedia('(max-width: 600px)').matches) todayCell.scrollIntoView({ block: 'center' });
+  }
   if (name === 'report') renderReport();
   if (name === 'invoice') renderInvoiceStudents();
 }
@@ -1405,16 +1517,16 @@ function generateInvoice() {
       .schedule-compact th { width: 38px; padding: 3px 4px; }
       .schedule-compact td { padding: 3px 4px; }
       .fee-lines { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 14px; }
-      .fee-lines td { padding: 4px 2px; border-bottom: 1px dashed rgba(120,100,85,0.25); vertical-align: top; }
-      .fee-lines td:nth-child(2) { color: #928B82; font-size: 11px; }
+      .fee-lines td { padding: 4px 2px; border-bottom: 1px dashed rgba(90,70,130,0.14); vertical-align: top; }
+      .fee-lines td:nth-child(2) { color: #8C8697; font-size: 11px; }
       .fee-lines td:last-child { text-align: right; font-weight: 700; white-space: nowrap; }
-      .fee-lines .fee-total td { border-bottom: none; padding-top: 6px; font-size: 15px; font-weight: 800; color: #5E7D68; }
-      .student-divider { display: flex; align-items: center; gap: 8px; margin: 8px 0; color: #928B82; font-size: 12px; }
-      .student-divider::before, .student-divider::after { content: ''; flex: 1; border-top: 1.5px dashed rgba(100,80,65,0.4); }
+      .fee-lines .fee-total td { border-bottom: none; padding-top: 6px; font-size: 15px; font-weight: 800; color: #5E4F99; }
+      .student-divider { display: flex; align-items: center; gap: 8px; margin: 8px 0; color: #8C8697; font-size: 12px; }
+      .student-divider::before, .student-divider::after { content: ''; flex: 1; border-top: 1.5px dashed rgba(90,70,130,0.28); }
       .invoice-student, .invoice-footer { break-inside: avoid; page-break-inside: avoid; }
       @media (max-width: 600px) { .invoice-student-body { grid-template-columns: 1fr !important; } .fee-lines { margin-top: 4px; } }
     </style>
-    <div class="invoice-sheet" style="background:white;color:#2C2A29;border-radius:16px;padding:18px 20px;border:2px solid var(--accent-light);max-width:950px;margin:0 auto;">
+    <div class="invoice-sheet" style="background:white;color:#2A2633;border-radius:16px;padding:18px 20px;border:2px solid var(--accent-light);max-width:950px;margin:0 auto;">
       <div style="display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:6px;border-bottom:2px solid var(--accent-dark);padding-bottom:8px;margin-bottom:12px;">
         <div>
           <h2 style="color:var(--accent-dark);font-size:20px;margin:0;"><i class="ti ti-leaf"></i> PHIẾU HỌC PHÍ</h2>
@@ -1547,7 +1659,7 @@ function generateInvoice() {
           <div>
             <div style="font-weight:700;color:var(--accent-dark);margin-bottom:3px;font-size:11px;text-transform:uppercase;letter-spacing:0.03em;">Lịch học trong tháng</div>
             ${tableHtml}
-            <div style="font-size:11px;color:#8B6F00;margin-top:4px;">
+            <div style="font-size:11px;color:#75591A;margin-top:4px;">
               Vắng tháng này (gối đầu): <strong>${countCurrentAbsents} buổi</strong> — sẽ trừ vào tháng sau
             </div>
           </div>
@@ -1636,14 +1748,14 @@ function printInvoice() {
       <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.0.0/tabler-icons.min.css" />
       <style>
         :root {
-          --bg: #F4F2EF; --bg2: #EAE6E1; --bg3: #DDD8D1;
-          --text: #2C2A29; --text2: #6F6A64; --text3: #928B82;
-          --border: rgba(120,100,85,0.25); --border2: rgba(100,80,65,0.4);
-          --accent: #7B9E87; --accent-dark: #5E7D68; --accent-light: #C2D5C8;
-          --paid-bg: #BED3C3; --paid-text: #2C5A3E;
-          --unpaid-bg: #F0D9CF; --unpaid-text: #B16148;
+          --bg: #FAF8FC; --bg2: #F0ECF6; --bg3: #E7E1F0;
+          --text: #2A2633; --text2: #625C6E; --text3: #8C8697;
+          --border: rgba(90,70,130,0.14); --border2: rgba(90,70,130,0.28);
+          --accent: #8B7BC4; --accent-dark: #5E4F99; --accent-light: #E3DDF5;
+          --paid-bg: #D7EBDD; --paid-text: #2F6B47;
+          --unpaid-bg: #F8E0DC; --unpaid-text: #B0524A;
         }
-        body { font-family: 'Segoe UI', system-ui, sans-serif; padding: 20px; margin: 0; background: white; color: #2C2A29; }
+        body { font-family: 'Segoe UI', system-ui, sans-serif; padding: 20px; margin: 0; background: white; color: #2A2633; }
         * { box-sizing: border-box; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
         @page { size: A4; margin: 10mm; }
         @media print {
@@ -1652,14 +1764,14 @@ function printInvoice() {
           .invoice-actions, button { display: none !important; }
         }
         .schedule-table { width: 100%; border-collapse: collapse; font-size: 12px; }
-        .schedule-table th { background: #C2D5C8; color: #5E7D68; padding: 3px 4px; border: 1px solid #ccc; text-align: center; font-weight: 700; }
+        .schedule-table th { background: #E3DDF5; color: #5E4F99; padding: 3px 4px; border: 1px solid #ccc; text-align: center; font-weight: 700; }
         .schedule-table td { padding: 3px 4px; border: 1px solid #ccc; text-align: center; }
-        .schedule-table .absent-cell { background: #F0D9CF; color: #B16148; }
-        .schedule-table .study-cell { background: #E8F0E8; color: #2C5A3E; }
-        .schedule-table .new-schedule-cell { background: #D4E8D4; color: #2C5A3E; font-weight: 700; }
-        .schedule-table .old-schedule-cell { background: #FFF8E7; color: #8B7A5A; }
+        .schedule-table .absent-cell { background: #F8E0DC; color: #B0524A; }
+        .schedule-table .study-cell { background: #F1EDFA; color: #5E4F99; }
+        .schedule-table .new-schedule-cell { background: #D7EBDD; color: #2F6B47; font-weight: 700; }
+        .schedule-table .old-schedule-cell { background: #FAF1DE; color: #7F6431; }
         .schedule-table .empty-cell { background: #F5F5F5; color: #ccc; }
-        .weekly-badge { font-size: 11px; font-weight: 700; padding: 2px 10px; border-radius: 30px; background: #FFB80020; color: #8B6F00; }
+        .weekly-badge { font-size: 11px; font-weight: 700; padding: 2px 10px; border-radius: 30px; background: #CDA64026; color: #75591A; }
       </style>
       </head>
       <body>
@@ -1849,6 +1961,9 @@ function onDragMove(e) {
     else if (dist > 5) startDrag();
     return;
   }
+  // Kéo gần mép trên / dưới màn hình thì tự cuộn trang (để kéo sang ngày xa trên điện thoại)
+  if (e.clientY < 80) window.scrollBy(0, -14);
+  else if (e.clientY > window.innerHeight - 140) window.scrollBy(0, 14);
   positionGhost(e.clientX, e.clientY);
 }
 
